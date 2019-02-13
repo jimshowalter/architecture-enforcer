@@ -73,7 +73,7 @@ Notes:
 
 * Teams that wish to avoid the tedium of specifying N low-level simple components can just define a single component that contains all shared types, utilities, etc. However, depending on the codebase, this can create a single component containing a million lines (or more) of code.
 
-* Incremental compilation is a nice side effect of this approach. So long as a programmer only changes the code in the implementation of a paired component,  recompilation is limited to just that implementation. This can reduce cycle type from minutes to seconds (not counting time to redeploy).
+* Incremental compilation is a nice side effect of this approach. So long as a programmer only changes the code in the implementation of a paired component,  recompilation is limited to just that implementation. Once Mavenized (or moved into modules) this can reduce cycle time from minutes to seconds (not counting time to redeploy).
 
 ### Kinds Of References ###
 
