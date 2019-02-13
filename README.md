@@ -83,7 +83,7 @@ Code can refer to other code by strings, either directly via Class.forName, or i
 
 Code can also be coupled to other code by messages (weak coupling, but that's still a dependency), and in the database (foreign keys), etc.
 
-This tool (currently) analyzes direct references, and supports listing known reflection-based references.
+This tool only analyzes direct references, and supports manually listing known reflection-based references.
 
 Contributions of support for parsing Class.forName calls and JSP pages, "looking through" Spring references, etc. are welcomed.
 
