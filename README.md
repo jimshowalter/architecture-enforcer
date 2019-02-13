@@ -114,6 +114,8 @@ Only concepts have been reused. The proprietary tool used a completely different
 Regarding the off-the-shelf parser, this tool depends on the output from pf-CDA (http:www.dependency-analyzer.org) as a starting point. pf-CDA is free to use in binary form, but the source code is not available.
 It's possible we could use https:innig.net/macker instead (which is open-source), but we'd have to start over on format, etc. Or perhaps we could use javaparser.org.
 
+The tool supports a file of packages to ignore in the analysis. A default file is provided.
+
 ## Caveats ##
 
 It's possible this tool can miss some dependencies.
