@@ -43,7 +43,7 @@ Individual source files cannot be split out from packages and assigned to differ
 
 All source files must wind up in a component, or the tool fails with an error (the target state must be completely specified).
 
-Layers, domains, and packages that are listed in a component must exist, or the tool fails with an error.
+Layers, domains, and packages referred to by a component must exist, or the tool fails with an error.
 
 #### Kinds Of Components ####
 
