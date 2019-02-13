@@ -116,7 +116,9 @@ It's possible we could use https:innig.net/macker instead (which is open-source)
 
 ## Caveats ##
 
-It's possible this tool can miss some dependencies. For example, pf-CDA determines dependencies from bytecode, and static constants are known to be inlined without any "backpointer" to the defining class.
+It's possible this tool can miss some dependencies.
+
+For example, pf-CDA determines dependencies from bytecode, and static constants are inlined in bytecode without any "backpointer" to the defining class.
 
 In addition, the reflection-based references, being entered manually, are only as good as your team's ability to find them all.
 
