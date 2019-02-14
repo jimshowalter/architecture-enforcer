@@ -32,10 +32,18 @@ public class EnforcerUtils {
 			String line = null;
 			while ((line = reader.readLine()) != null) {
 				String ignore = line.trim();
-				if (!ignore.endsWith(".")) {
-					ignore = ignore + ".";
+				if (ignore.startsWith("#")) {
+					continue;
 				}
-				ignores.add(ignore);
+				if (ignore.endsWith("!")) {
+					ignores.add(ignore.replaceAll("[!]$", ""));
+					continue;
+				}
+				if (ignore.endsWith(".")) {
+					ignores.add(ignore.replaceAll("[.]+$", "."));
+					continue;
+				}
+				ignores.add(ignore + ".");
 			}
 		}
 		return ignores;
@@ -101,10 +109,11 @@ public class EnforcerUtils {
 	private static final boolean DEBUG = true;
 
 	public static void enforce(Inputs inputs) throws Exception {
+		System.out.println("Analyzing/enforcing architecture with " + inputs.toString());
 		Set<String> unresolveds = new HashSet<>();
 		Map<String, Type> types = resolve(inputs, unresolveds);
 		if (DEBUG) {
-			System.out.println("Total outermost types: " + types.size());
+			System.out.println("Total outermost types: " + types.size() + ", unresolved: " + unresolveds.size());
 			for (String fullName : CollectionUtils.sort(new ArrayList<>(types.keySet()))) {
 				System.out.println(fullName);
 				for (String referenceName : CollectionUtils.sort(new ArrayList<>(types.get(fullName).referenceNames()))) {
@@ -112,7 +121,7 @@ public class EnforcerUtils {
 				}
 			}
 			if (!unresolveds.isEmpty()) {
-				System.out.println("UNRESOLVED REFERENCES:");
+				System.out.println("UNRESOLVED!:");
 				for (String unresolved : CollectionUtils.sort(new ArrayList<>(unresolveds))) {
 					System.out.println("\t" + unresolved);
 				}

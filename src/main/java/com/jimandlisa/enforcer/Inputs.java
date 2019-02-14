@@ -39,4 +39,9 @@ public class Inputs {
 	public final File reflections() {
 		return reflections;
 	}
+	
+	@Override
+	public String toString() {
+		return "ODEM: " + odem() + ", ignores: " + ignores() + ", reflections: " + reflections();
+	}
 }
