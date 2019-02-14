@@ -14,6 +14,10 @@
 package com.jimandlisa.enforcer;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class Enforcer {
 	
@@ -40,6 +44,8 @@ public class Enforcer {
 			throw new RuntimeException("error validating file " + name);
 		}
 	}
+	
+	private static final boolean DEBUG = true;
 
 	public static void main(String[] args) {
 		if (args.length < 1) {
@@ -51,7 +57,25 @@ public class Enforcer {
 			return;
 		}
 		try {
-			EnforcerUtils.enforce(new Inputs(validate(args, 0), validate(args, 1), validate(args, 2)));
+			Inputs inputs = new Inputs(validate(args, 0), validate(args, 1), validate(args, 2));
+			System.out.println("Analyzing/enforcing architecture with " + inputs.toString());
+			Set<String> unresolveds = new HashSet<>();
+			Map<String, Type> types = EnforcerUtils.resolve(inputs, unresolveds);
+			if (DEBUG) {
+				System.out.println("Total outermost types: " + types.size() + ", unresolved: " + unresolveds.size());
+				for (String fullName : CollectionUtils.sort(new ArrayList<>(types.keySet()))) {
+					System.out.println(fullName);
+					for (String referenceName : CollectionUtils.sort(new ArrayList<>(types.get(fullName).referenceNames()))) {
+						System.out.println("\t" + referenceName);
+					}
+				}
+				if (!unresolveds.isEmpty()) {
+					System.out.println("UNRESOLVED!:");
+					for (String unresolved : CollectionUtils.sort(new ArrayList<>(unresolveds))) {
+						System.out.println("\t" + unresolved);
+					}
+				}
+			}
 		} catch (Throwable t) {
 			System.out.println(t.getMessage());
 		}

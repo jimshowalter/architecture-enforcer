@@ -15,7 +15,6 @@ package com.jimandlisa.enforcer;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -104,28 +103,5 @@ public class EnforcerUtils {
 			}
 		}
 		return types;
-	}
-	
-	private static final boolean DEBUG = true;
-
-	public static void enforce(Inputs inputs) throws Exception {
-		System.out.println("Analyzing/enforcing architecture with " + inputs.toString());
-		Set<String> unresolveds = new HashSet<>();
-		Map<String, Type> types = resolve(inputs, unresolveds);
-		if (DEBUG) {
-			System.out.println("Total outermost types: " + types.size() + ", unresolved: " + unresolveds.size());
-			for (String fullName : CollectionUtils.sort(new ArrayList<>(types.keySet()))) {
-				System.out.println(fullName);
-				for (String referenceName : CollectionUtils.sort(new ArrayList<>(types.get(fullName).referenceNames()))) {
-					System.out.println("\t" + referenceName);
-				}
-			}
-			if (!unresolveds.isEmpty()) {
-				System.out.println("UNRESOLVED!:");
-				for (String unresolved : CollectionUtils.sort(new ArrayList<>(unresolveds))) {
-					System.out.println("\t" + unresolved);
-				}
-			}
-		}
 	}
 }
