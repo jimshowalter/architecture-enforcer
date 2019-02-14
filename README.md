@@ -116,6 +116,8 @@ It's possible we could use https:innig.net/macker instead (which is open-source)
 
 The tool supports a file of packages to ignore in the analysis. A default file is provided.
 
+Nested classes are rolled up to their enclosing classes, and references to nested classes are similarly rolled up.
+
 ## Caveats ##
 
 It's possible this tool can miss some dependencies.
