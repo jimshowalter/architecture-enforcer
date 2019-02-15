@@ -1,0 +1,22 @@
+# comment
+layers:
+  - name: My First Layer
+    depth: -3
+    description: >
+      Some descriptive text
+      more description
+  - name: Another Layer
+    depth: 4
+    description: >
+      This description
+      and that description
+domains:
+  - name: Domain A
+    description: abcd efgh foo bar baz
+components:
+  - name: My Component
+    layer: My First Layer
+    domain: Domain A
+    packages:
+      - com.foo.bar
+      - org.baz

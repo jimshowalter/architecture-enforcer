@@ -109,7 +109,7 @@ Contributions of burndown-chart displaying code and CI/CD pipeline configuration
 
 This tool is a cleanroom reimplementation of a proprietary tool used for a massive decomposition project.
 
-Only concepts have been reused. The proprietary tool used a completely different approach for identifying dependencies, based on parsing source files, while this tool uses an off-the-shelf parser. Also, the proprietary tool had a number of things specific to that particular codebase that aren't in this reimplementation. And the proprietary tool was a custom Maven mojo, whereas this is just a simple jar with a main (because not all Java projects use Maven).
+Only concepts have been reused. The proprietary tool used a completely different approach for identifying dependencies, based on parsing source files, while this tool uses an off-the-shelf bytecode analyzer. Also, the proprietary tool had a number of things specific to that particular codebase that aren't in this reimplementation. And the proprietary tool was a custom Maven mojo, whereas this is just a simple jar with a main (because not all Java projects use Maven). And the proprietary tool was based on directories and files instead of a war.
 
 Regarding the off-the-shelf parser, this tool depends on the output from pf-CDA (http:www.dependency-analyzer.org) as a starting point. pf-CDA is free to use in binary form, but the source code is not available.
 It's possible we could use https:innig.net/macker instead (which is open-source), but we'd have to start over on format, etc. Or perhaps we could use javaparser.org.
