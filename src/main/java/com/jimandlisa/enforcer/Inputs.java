@@ -17,15 +17,21 @@ import java.io.File;
 
 public class Inputs {
 
+	private final File target;
 	private final File odem;
 	private final File ignores;
 	private final File reflections;
 
-	public Inputs(final File odem, final File ignores, final File reflections) {
+	public Inputs(final File target, final File odem, final File ignores, final File reflections) {
 		super();
+		this.target = target;
 		this.odem = odem;
 		this.ignores = ignores;
 		this.reflections = reflections;
+	}
+	
+	public final File target() {
+		return target;
 	}
 
 	public final File odem() {
@@ -42,6 +48,6 @@ public class Inputs {
 	
 	@Override
 	public String toString() {
-		return "ODEM: " + odem() + ", ignores: " + ignores() + ", reflections: " + reflections();
+		return "target: " + target() + ", ODEM: " + odem() + ", ignores: " + ignores() + ", reflections: " + reflections();
 	}
 }

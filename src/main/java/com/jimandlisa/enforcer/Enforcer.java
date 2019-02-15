@@ -23,7 +23,7 @@ public class Enforcer {
 	
 	private static void usage(String error) {
 		System.out.println(error);
-		System.out.println(Enforcer.class.getSimpleName() + ": usage: /full/path/to/pf-CDA/.odem, /full/path/to/packages/to/ignore, /full/path/to/reflection/references");
+		System.out.println(Enforcer.class.getSimpleName() + ": usage: /full/path/to/target/architecture/spec /full/path/to/pf-CDA/.odem, /full/path/to/packages/to/ignore, /full/path/to/reflection/references");
 	}
 	
 	private static File validate(String[] inputs, int i) {
@@ -48,17 +48,18 @@ public class Enforcer {
 	private static final boolean DEBUG = true;
 
 	public static void main(String[] args) {
-		if (args.length < 1) {
+		if (args.length < 2) {
 			usage("not enough args");
 			return;
 		}
-		if (args.length > 3) {
+		if (args.length > 4) {
 			usage("too many args");
 			return;
 		}
 		try {
-			Inputs inputs = new Inputs(validate(args, 0), validate(args, 1), validate(args, 2));
+			Inputs inputs = new Inputs(validate(args, 0), validate(args, 1), validate(args, 2), validate(args, 3));
 			System.out.println("Analyzing/enforcing architecture with " + inputs.toString());
+			Target target = TargetUtils.parse(inputs.target());
 			Set<String> unresolveds = new HashSet<>();
 			Map<String, Type> types = EnforcerUtils.resolve(inputs, unresolveds);
 			if (DEBUG) {

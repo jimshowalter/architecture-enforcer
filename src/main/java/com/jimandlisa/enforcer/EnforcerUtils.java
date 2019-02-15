@@ -104,4 +104,8 @@ public class EnforcerUtils {
 		}
 		return types;
 	}
+	
+	public static void correlate(Map<String, Type> types, Target target) {
+		
+	}
 }
