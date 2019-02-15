@@ -33,7 +33,7 @@ public class TargetUtils {
 
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 	
-	private static String yaml(File file) throws Exception {
+	static String yaml(File file) throws Exception {
 		StringBuilder builder = new StringBuilder();
 		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 			String line = null;
@@ -45,17 +45,17 @@ public class TargetUtils {
 		return builder.toString();
 	}
 	
-	private static JSONObject json(String yaml) {
+	static JSONObject json(String yaml) {
 		Map<String, Object> map = new Yaml().load(yaml);
 		return new JSONObject(map);
 	}
 	
 	@SuppressWarnings("unchecked") // Weak.
-	private static Map<String, Object> cast(Object obj) {
+	static Map<String, Object> cast(Object obj) {
 		return (Map<String, Object>)obj;
 	}
 	
-	private static void validate(Map<String, Object> map, Set<String> allowed, String kind) {
+	static void validate(Map<String, Object> map, Set<String> allowed, String kind) {
 		Set<String> set = new HashSet<>(map.keySet());
 		set.removeAll(allowed);
 		if (!set.isEmpty()) {
@@ -76,16 +76,16 @@ public class TargetUtils {
 		}
 	}
 	
-	private static String get(Map<String, Object> map, String key) {
+	static String get(Map<String, Object> map, String key) {
 		return (String)map.get(key);
 	}
 	
-	private static Integer getInteger(Map<String, Object> map, String key) {
+	static Integer getInteger(Map<String, Object> map, String key) {
 		return (Integer)map.get(key);
 	}
 	
 	@SuppressWarnings("unchecked") // Weak.
-	private static List<String> getList(Map<String, Object> map, String key) {
+	static List<String> getList(Map<String, Object> map, String key) {
 		return (List<String>)map.get(key);
 	}
 	
@@ -93,11 +93,11 @@ public class TargetUtils {
 	private static final Set<String> ALLOWED_DOMAIN_KEYS = new HashSet<>(Arrays.asList(new String[] {"name", "description"}));
 	private static final Set<String> ALLOWED_COMPONENT_KEYS = new HashSet<>(Arrays.asList(new String[] {"name", "layer", "domain", "description", "packages"}));
 	
-	private static Layer layer(Map<String, Layer> layers, String name) {
+	static Layer layer(Map<String, Layer> layers, String name) {
 		return layers.get(ArgUtils.check(name, "layer name"));
 	}
 	
-	private static Domain domain(Map<String, Domain> domains, String name) {
+	static Domain domain(Map<String, Domain> domains, String name) {
 		return domains.get(ArgUtils.check(name, "domain name"));
 	}
 
