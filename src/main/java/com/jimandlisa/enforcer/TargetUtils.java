@@ -16,8 +16,11 @@ package com.jimandlisa.enforcer;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -142,5 +145,44 @@ public class TargetUtils {
 			target.add(component);
 		}
 		return target;
+	}
+	
+	public static void dump(Target target, PrintStream ps) throws Exception {
+		List<Layer> layers = new ArrayList<Layer>(target.layers().values());
+		Collections.sort(layers, new Comparator<Layer>(){
+			@Override
+			public int compare(Layer l1, Layer l2) {
+				return Integer.valueOf(l1.depth()).compareTo(Integer.valueOf(l2.depth()));
+			}});
+		List<Domain> domains = new ArrayList<Domain>(target.domains().values());
+		Collections.sort(domains, new Comparator<Domain>(){
+			@Override
+			public int compare(Domain d1, Domain d2) {
+				return d1.name().compareTo(d2.name());
+			}});
+		List<Component> components = new ArrayList<Component>(target.components().values());
+		Collections.sort(components, new Comparator<Component>(){
+			@Override
+			public int compare(Component d1, Component d2) {
+				return d1.name().compareTo(d2.name());
+			}});
+		ps.println("LAYERS:");
+		for (Layer layer : layers) {
+			ps.println(layer);
+			ps.println(layer.description());
+		}
+		ps.println("DOMAINS:");
+		for (Domain domain : domains) {
+			ps.println(domain);
+			ps.println(domain.description());
+		}
+		ps.println("COMPONENTS:");
+		for (Component component : components) {
+			ps.println(component);
+			ps.println(component.description());
+			for (String pkg : component.packages()) {
+				ps.println(pkg);
+			}
+		}
 	}
 }

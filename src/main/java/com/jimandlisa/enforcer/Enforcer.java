@@ -63,6 +63,8 @@ public class Enforcer {
 			Set<String> unresolveds = new HashSet<>();
 			Map<String, Type> types = EnforcerUtils.resolve(inputs, unresolveds);
 			if (DEBUG) {
+				System.out.println("Target specification:");
+				TargetUtils.dump(target, System.out);
 				System.out.println("Total outermost types: " + types.size() + ", unresolved: " + unresolveds.size());
 				for (String fullName : CollectionUtils.sort(new ArrayList<>(types.keySet()))) {
 					System.out.println(fullName);
