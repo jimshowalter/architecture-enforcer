@@ -60,6 +60,10 @@ public class EnforcerUtils {
 		return false;
 	}
 	
+	static String denest(String typeName) {
+		return typeName.replaceAll("[$].*$", ""); // To preserve class nesting, remove calls to this method, or make it just return the unmodified type name.
+	}
+	
 	public static Map<String, Type> resolve(Inputs inputs, Set<String> unresolveds) throws Exception {
 		Set<String> ignores = ignores(inputs);
 		Map<String, Type> types = new HashMap<>();
@@ -68,7 +72,7 @@ public class EnforcerUtils {
 			Type type = null;
 			while ((line = reader.readLine()) != null) {
 				if (line.trim().startsWith("<type name=\"")) {
-					String fullName = line.trim().replace("<type name=\"", "").replaceAll("\".*$", "").replaceAll("[$].*$", "");
+					String fullName = denest(line.trim().replace("<type name=\"", "").replaceAll("\".*$", ""));
 					if (skip(fullName, ignores)) {
 						type = null;
 						continue;
@@ -84,7 +88,7 @@ public class EnforcerUtils {
 					if (type == null) {
 						continue;
 					}
-					String reference = line.trim().replace("<depends-on name=\"", "").replaceAll("\".*$", "").replaceAll("[$].*$", "");
+					String reference = denest(line.trim().replace("<depends-on name=\"", "").replaceAll("\".*$", ""));
 					if (skip(reference, ignores) || reference.equals(type.fullName())) {
 						continue;
 					}

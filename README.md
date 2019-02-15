@@ -7,7 +7,7 @@ Compares a codebase's current state to a desired target state, identifying and r
 
 ## Defining Target State ##
 
-The target state is defined in a file. The file defines layers, domains, and components, all of which are logical groupings that exist "virtually" on top of whatever snarl constitutes the current codebase.
+The target state is defined in a yaml file. The file defines layers, domains, and components, all of which are logical groupings that exist "virtually" on top of whatever snarl constitutes the current codebase.
 
 ### Layers ###
 
@@ -15,7 +15,7 @@ Layers provide a way to stratify the code, so calls only go in the desired direc
 
 Layers consist of a unique name and depth, plus a description.
 
-Depth can be any integer (positive, negative, or zero) that has not already been used for another layer.
+Depth can be any integer (positive, negative, or zero) that has not already been used for another layer. The larger the depth, the higher the layer.
 
 ### Domains ###
 
@@ -27,7 +27,7 @@ Domains are entirely optional.
 
 If domains are used, every component must belong to exactly one domain.
 
-### Components, Packages, And Files ###
+### Components, Packages, And Classes ###
 
 Components provide a way to group packages.
 
@@ -39,9 +39,11 @@ Packages not listed in the target-state file are rolled up to the nearest enclos
 
 Different subpackages can be assigned to different components. For example, com.foo.utils.math could be assigned to a Math component, com.foo.utils.strings could be assigned to a Strings component, and com.foo.utils could be assigned to a Utils component.
 
-Individual source files cannot be split out from packages and assigned to different components. The finest granularity is the individual package name. But this can be easily remedied by simply moving files to new subpackages.
+Individual classes cannot be split out from packages and assigned to different components. The finest granularity is the fully-qualified package name. But this can be easily remedied by simply moving classes to new subpackages.
 
-All source files must wind up in a component, or the tool fails with an error (the target state must be completely specified).
+Nested classes are rolled up to the outermost enclosing class.
+
+All classes must wind up in a component, or the tool fails with an error (the target state must be completely specified).
 
 Layers, domains, and packages referred to by a component must exist, or the tool fails with an error.
 
@@ -60,12 +62,15 @@ Components are somewhat analogous to Java 9 modules. We chose not to make them b
 The rules for references are:
 
 1. All APIs for paired components are in a single layer.
-2. All implementations of paired components are in a single layer.
-3. The implementations layer is above the APIs layer.
-4. All simple components are in one or more layers below the APIs layer.
-5. Code in a component can only refer to code in the same component, or to code in components in lower layers.
+1. All implementations of paired components are in a single layer.
+1. The implementations layer is above the APIs layer.
+1. All simple components are in one or more layers below the APIs layer.
+1. Code in a component can only refer to code in the same component, or to code in components in lower layers.
 
-To summarize: implementations can depend on their APIs and on the APIs of other implementations, and can depend on simple components, but APIs can't depend on other APIs, and implementations can't depend on other implementations (other than by dependency injection); and simple components can depend on other simple components below them, but never on APIs or implementations for paired components.
+References that violate the above rules are identified and reported by this tool.
+
+To summarize: In paired components, implementations can depend on their APIs and on the APIs of other implementations, and can depend on simple components, but APIs can't depend on other APIs, and implementations can't depend on other implementations (other than by dependency injection);
+and simple components can depend on other simple components below them, but never on APIs or implementations for paired components.
 
 Notes:
 
@@ -75,6 +80,10 @@ Notes:
 
 * Incremental compilation is a nice side effect of this approach. So long as a programmer only changes the code in the implementation of a paired component,  recompilation is limited to just that implementation. Once Mavenized (or moved into modules) this can reduce cycle time from minutes to seconds (not counting time to redeploy).
 
+* References to and from nested classes are rolled up to the outermost enclosing classes. For example, if foo.bar.utils.Utils refers to foo.bar.utils.math.Math$Multiply, the tool registers this as a reference from foo.bar.utils.Utils to foo.bar.utils.math.Math.
+In many projects this greatly shrinks the number of references that need to be analyzed. If it is important in your project to track references at the nested-class level, you need to extract nested classes to new source files, or modify the tool so it preserves nesting
+(search for "nesting" in EnforcerUtils).
+
 ### Kinds Of References ###
 
 Code does not refer to other code just by calling it.
@@ -83,40 +92,79 @@ Code can refer to other code by strings, either directly via Class.forName, or i
 
 Code can also be coupled to other code by messages (weak coupling, but that's still a dependency), and in the database (foreign keys), etc.
 
-This tool only analyzes direct references, and supports manually listing known reflection-based references.
+This tool only finds direct references, and supports manually listing known reflection-based references.
 
-Contributions of support for parsing Class.forName calls and JSP pages, "looking through" Spring references, etc. are welcomed.
+### Removing Illegal References ###
 
-### Illegal References ###
-
-References that violate the rules are identified and reported by this tool.
-
-Over time, a team can use various techniques to move the actual state of the codebase towards the desired state, gradually eliminating illegal references.
-
-The counts of illegal references can be used to generate an up-to-the-moment accurate burndown chart showing how much work remains to fix the codebase. This can be incorporated into a CI/CD pipeline, and reviewed by management.
-
-If desired, builds can be made to fail if the number of illegal references increases, although while refactoring there are often temporary spikes that have to be allowed. To support this, new illegal references can be temporarily whitelisted.
-
-Once the count of illegal references drops to zero, any attempt to add new ones should always fail the build, which protects the architecture.
+Over time, a team can use various techniques to move the actual state of the codebase towards the desired state, gradually eliminating illegal references. For example, calls from one implementation to another can be replaced with calls to APIs,
+shared types can be pushed down from APIs into lower-level simple components, etc.
 
 Once there are no illegal references, code can be forklifted into separate projects (for example, separate Maven projects, or modules). It seems that this would protect the architecture, because Maven/modules don't allow circular
 dependencies among projects. Unfortunately, Maven/modules are compiler-based, and don't understand the various other sneaky ways the architecture can be violated (for example, via reflection). So, even after physically moving
 code into projects, this tool should continue to be run in CI/CD.
 
-Contributions of burndown-chart displaying code and CI/CD pipeline configurations (including forced build failures) are welcome.
+## Getting Started ##
+
+1. Download the pf-CDA zip from http://www.dependency-analyzer.org, and unpack it into some temp directory. The pf-CDA tool is free to use in binary form (the source is not available). In case the developer changes the licensing or takes down his site, the latest free version is checked into this github.
+
+1. Create a war file for your project. This is necessary even if your project isn't deployed as a war, because pf-CDA requires a war (or at least works best when pointed at a war).
+
+1. Run pf-CDA on your project's war file:
+
+	1. cd to the directory into which you unpacked the zip.
+	1. Run ./cda.sh or ./cda.bat, depending on your command line and/or OS.
+	1. Select File -> New workset...
+	1. On the Classpath tab, click Add, navigate to the war for your project, select it, and click OK.
+	1. On the General tab, give the workset a name, check "Reload this workset automatically at next start", and click Save.
+	1. When pf-CDA finishes analyzing your project, select File -> Export Model -> XML/ODEM File, give the ODEM file a name, and click Save.
+	1. Shut down pf-CDA.
+
+1. Sync and build this project.
+
+1. Using the provided example yaml file as a starting point, define the target state for your project. This can take weeks for a large project, but you can start by just defining a few basic layers (for example, data, logic, and UI), then iterate.
+
+1. Run this tool with at least the first two args specified. You can run this tool from Eclipse or Intellij, or from the command line in the target directory with the command: java -jar architecture-enforcer-1.0-SNAPSHOT.jar.
+
+The full set of args is:
+
+> /full/path/to/target/architecture/.yaml /full/path/to/pf-CDA/.odem -i/full/path/to/packages/to/ignore -r/full/path/to/reflection/references
+
+The last two args are optional, but see the notes below.
+
+Notes:
+
+* Typically a project uses a bunch of third-party classes, and/or classes from inside your company but outside the project being decomposed. List packages to ignore in a file you specify with the -i command-line argument.
+The syntax is full.name.of.package, without a dot at the end. The tool appends dots for you. In some cases you need to suppress dots due to some issues with pf-CDA, in which case end the package name with a !.
+
+* If your project uses reflection, you should add outermost class-to-class dependencies to a file you specify with the -r command-line argument. The syntax is: full.name.of.referring.class.Foo:full.name.of.referred.to.class.Bar.
+
+## TODOs And Welcomed Contributions ##
+
+This tool can of course be improved. Here are some things we know would make it better:
+
+* First, and most obviously, having to manually run pf-CDA at the outset is a pain, plus it thwarts automating analysis in CI/CD. The documentation on http:www.dependency-analyzer.org mentions an API that could probably be called by this tool. Or we could investigate https:innig.net/macker, or javaparser.org.
+Alternatively, someone skilled with bytecode analysis could probably replace pf-CDA entirely (we don't need all of its features, just a dump of class-to-class references).
+
+* Add an option to preserve nesting. Default the option to disabled (don't preserve nesting) to avoid memory/time overhead.
+
+* Parse Class.forName calls in JSP pages and add those references automatically, instead of requiring manual bookkeeping in the reflection-references file.
+
+* Identify reflection references due to Spring, and add those references automatically. (This is a big job!)
+
+* Provide a way to fail builds if the count of illegal references increases. (While refactoring, there are often temporary increases in the number of illegal references, so support would also need to be added for whitelisting new illegal references. Access to the whitelist could be restricted to just the team doing decomposition.)
+
+* Provide front-end code that displays a burndown chart based on the count of illegal references, and provide a way to integrate this into CI/CD pipelines.
+
+* Add a Maven mojo that calls EnforcerUtils directly (instead of via args in the Enforce main method), and document how to integrate the mojo into builds. (Note that this provides a straightforward solution to automating failing builds when illegal-reference counts increase.)
+
+We welcome contributions of those and other improvements.
 
 ## Implementation Notes ##
 
 This tool is a cleanroom reimplementation of a proprietary tool used for a massive decomposition project.
 
-Only concepts have been reused. The proprietary tool used a completely different approach for identifying dependencies, based on parsing source files, while this tool uses an off-the-shelf bytecode analyzer. Also, the proprietary tool had a number of things specific to that particular codebase that aren't in this reimplementation. And the proprietary tool was a custom Maven mojo, whereas this is just a simple jar with a main (because not all Java projects use Maven). And the proprietary tool was based on directories and files instead of a war.
+Only general, well-known refactoring concepts have been reused (layering, encapsulation, etc.). Nothing from the proprietary tool's code was used, and this tool differs significantly from how that tool worked.
 
-Regarding the off-the-shelf parser, this tool depends on the output from pf-CDA (http:www.dependency-analyzer.org) as a starting point. pf-CDA is free to use in binary form, but the source code is not available.
-It's possible we could use https:innig.net/macker instead (which is open-source), but we'd have to start over on format, etc. Or perhaps we could use javaparser.org.
-
-The tool supports a file of packages to ignore in the analysis. A default file is provided.
-
-Nested classes are rolled up to their enclosing classes, and references to nested classes are similarly rolled up.
 
 ## Caveats ##
 
@@ -126,6 +174,4 @@ For example, pf-CDA determines dependencies from bytecode, and static constants 
 
 In addition, the reflection-based references, being entered manually, are only as good as your team's ability to find them all.
 
-But overall, this tool can probably get it 99% correct, which is close enough to start trying to actually move the decomposed code, at which point some gotchas will pop up that need to be dealt with.
-
-Assume that your team can get within 99%, and then assume some iteration will be required to kill off the remaining illegal references.
+But overall, this tool can probably get it > 95% correct, which is close enough to start trying to actually move the decomposed code, at which point some gotchas will pop up that need to be dealt with.
