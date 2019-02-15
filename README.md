@@ -127,7 +127,13 @@ code into projects, this tool should continue to be run in CI/CD.
 
 The full set of args is:
 
-/full/path/to/target/architecture/.yaml /full/path/to/pf-CDA/.odem -i/full/path/to/packages/to/ignore -r/full/path/to/reflection/references
+> /full/path/to/target/architecture/.yaml
+
+> /full/path/to/pf-CDA/.odem
+
+> -i/full/path/to/packages/to/ignore
+
+> -r/full/path/to/reflection/references
 
 The last two args are optional, but see the notes below.
 
