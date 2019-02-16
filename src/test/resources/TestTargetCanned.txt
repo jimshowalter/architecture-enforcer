@@ -1,3 +1,4 @@
+Target-state specification:
 	LAYERS:
 		name='My First Layer', depth=-3
 		Some descriptive text more description

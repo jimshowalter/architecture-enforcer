@@ -14,6 +14,7 @@
 package com.jimandlisa.enforcer;
 
 import java.io.File;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
@@ -69,7 +70,31 @@ public class Enforce {
 		}
 		usage("unrecognized option " + arg);
 	}
-
+	
+	static void mainImpl(Inputs inputs, PrintStream ps, boolean debug) throws Exception {
+		Target target = TargetUtils.parse(inputs.target());
+		Set<String> problems = new HashSet<>();
+		Map<String, Type> types = EnforcerUtils.resolve(inputs, problems);
+		EnforcerUtils.correlate(types, target, problems);
+		if (debug) {
+			TargetUtils.dump(target, ps);
+			RollUp.dump(ps);
+			ps.println("Total outermost types: " + types.size());
+			for (String fullName : CollectionUtils.sort(new ArrayList<>(types.keySet()))) {
+				ps.println("\t" + fullName);
+				for (String referenceName : CollectionUtils.sort(new ArrayList<>(types.get(fullName).referenceNames()))) {
+					ps.println("\t\t" + referenceName);
+				}
+			}
+			if (!problems.isEmpty()) {
+				ps.println("PROBLEMS:");
+				for (String problem : CollectionUtils.sort(new ArrayList<>(problems))) {
+					ps.println("\t" + problem);
+				}
+			}
+		}
+	}
+	
 	static final boolean DEBUG = true;
 
 	public static void main(String[] args) {
@@ -85,27 +110,7 @@ public class Enforce {
 				parse(args[i], inputs);
 			}
 			System.out.println("Analyzing/enforcing architecture with " + inputs.toString());
-			Target target = TargetUtils.parse(inputs.target());
-			Set<String> problems = new HashSet<>();
-			Map<String, Type> types = EnforcerUtils.resolve(inputs, problems);
-			EnforcerUtils.correlate(types, target, problems);
-			if (DEBUG) {
-				TargetUtils.dump(target, System.out);
-				RollUp.dump(System.out);
-				System.out.println("Total outermost types: " + types.size());
-				for (String fullName : CollectionUtils.sort(new ArrayList<>(types.keySet()))) {
-					System.out.println("\t" + fullName);
-					for (String referenceName : CollectionUtils.sort(new ArrayList<>(types.get(fullName).referenceNames()))) {
-						System.out.println("\t\t" + referenceName);
-					}
-				}
-				if (!problems.isEmpty()) {
-					System.out.println("PROBLEMS:");
-					for (String problem : CollectionUtils.sort(new ArrayList<>(problems))) {
-						System.out.println("\t" + problem);
-					}
-				}
-			}
+			mainImpl(inputs, System.out, DEBUG);
 		} catch (Throwable t) {
 			System.out.println(t.getMessage());
 		}

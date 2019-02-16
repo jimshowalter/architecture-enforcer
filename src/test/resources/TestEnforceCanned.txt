@@ -1,0 +1,63 @@
+Target-state specification:
+	LAYERS:
+		name='Data', depth=0
+		Data layer.
+		name='App', depth=1
+		Application logic and service APIs.
+		name='UI', depth=2
+		User interface.
+	DOMAINS:
+		name='Data'
+		Data.
+		name='One'
+		Domain 1.
+		name='Two'
+		Domain 2.
+	COMPONENTS:
+		name='App One', layer='App', depth=1, domain='One'
+		Middle tier of app one.
+		packages:
+			com.jimandlisa.app.one
+			com.jimandlisa.service.one
+		name='App Two', layer='App', depth=1, domain='Two'
+		Middle tier of app two.
+		packages:
+			com.jimandlisa.app.two
+			com.jimandlisa.service
+		name='Data', layer='Data', depth=0, domain='Data'
+		null
+		packages:
+			com.jimandlisa.data
+		name='UI One', layer='UI', depth=2, domain='One'
+		UI for app one.
+		packages:
+			com.jimandlisa.ui.one
+		name='UI Two', layer='UI', depth=2, domain='Two'
+		UI for app two.
+		packages:
+			com.jimandlisa.ui.two
+Packages and components:
+	com.jimandlisa.ui.two!UI Two
+	com.jimandlisa.ui.one!UI One
+	com.jimandlisa.service.one!App One
+	com.jimandlisa.service!App Two
+	com.jimandlisa.data!Data
+	com.jimandlisa.app.two!App Two
+	com.jimandlisa.app.one!App One
+Total outermost types: 7
+	com.jimandlisa.app.one.App1
+		com.jimandlisa.data.Data
+	com.jimandlisa.app.two.App2
+		com.jimandlisa.data.Data
+	com.jimandlisa.data.Data
+	com.jimandlisa.service.Service2
+		com.jimandlisa.app.two.App2
+	com.jimandlisa.service.one.Service1
+		com.jimandlisa.app.one.App1
+		com.jimandlisa.ui.one.UI1
+	com.jimandlisa.ui.one.UI1
+		com.jimandlisa.service.one.Service1
+	com.jimandlisa.ui.two.UI2
+		com.jimandlisa.service.Service2
+PROBLEMS:
+	ILLEGAL REFERENCE: com.jimandlisa.service.one.Service1 in component 'App One' in layer 1 refers to component 'UI One' in layer 2

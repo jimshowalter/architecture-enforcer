@@ -20,14 +20,15 @@ import java.nio.charset.StandardCharsets;
 
 import org.junit.Test;
 
-public class TargetTest {
+public class EnforcerTest {
 
 	@Test
 	public void doTest() throws Exception {
-		Target target = TargetUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("TestTarget.yaml").getPath()));
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
-			TargetUtils.dump(target, ps);
-			TestUtils.compare(baos, "TestTargetCanned.txt");
+			Inputs inputs = new Inputs(new File(Thread.currentThread().getContextClassLoader().getResource("SampleTarget.yaml").getPath()), new File(Thread.currentThread().getContextClassLoader().getResource("Sample.odem").getPath()));
+			inputs.setIgnores(new File(Thread.currentThread().getContextClassLoader().getResource("SamplePackageIgnores.txt").getPath()));
+			Enforce.mainImpl(inputs, ps, true);
+			TestUtils.compare(baos, "TestEnforceCanned.txt");
 		}
 	}
 }
