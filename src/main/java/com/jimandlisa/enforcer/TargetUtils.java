@@ -60,7 +60,7 @@ public class TargetUtils {
 		set.removeAll(allowed);
 		if (!set.isEmpty()) {
 			if (set.size() == 1) {
-				throw new TargetException("Unrecognized " + kind + " key: " + set.iterator().next());
+				throw new EnforcerException("Unrecognized " + kind + " key: " + set.iterator().next());
 			}
 			StringBuilder builder = new StringBuilder();
 			boolean first = true;
@@ -72,7 +72,7 @@ public class TargetUtils {
 				}
 				builder.append(key);
 			}
-			throw new TargetException("Unrecognized " + kind + " keys: " + builder.toString());
+			throw new EnforcerException("Unrecognized " + kind + " keys: " + builder.toString());
 		}
 	}
 	
@@ -110,11 +110,11 @@ public class TargetUtils {
 			validate(map, ALLOWED_LAYER_KEYS, "layer");
 			Layer layer = new Layer(get(map, "name"), getInteger(map, "depth"), get(map, "description"));
 			if (depths.contains(layer.depth())) {
-				throw new TargetException("Duplicate layer depth " + layer.depth());
+				throw new EnforcerException("Duplicate layer depth " + layer.depth());
 			}
 			depths.add(layer.depth());
 			if (target.layers().containsKey(layer.name())) {
-				throw new TargetException("Duplicate layer name '" + layer.name() + "'");
+				throw new EnforcerException("Duplicate layer name '" + layer.name() + "'");
 			}
 			target.add(layer);
 		}
@@ -123,7 +123,7 @@ public class TargetUtils {
 			validate(map, ALLOWED_DOMAIN_KEYS, "domain");
 			Domain domain = new Domain(get(map, "name"), get(map, "description"));
 			if (target.domains().containsKey(domain.name())) {
-				throw new TargetException("Duplicate domain name '" + domain.name() + "'");
+				throw new EnforcerException("Duplicate domain name '" + domain.name() + "'");
 			}
 			target.add(domain);
 		}
@@ -133,10 +133,10 @@ public class TargetUtils {
 			validate(map, ALLOWED_COMPONENT_KEYS, "component");
 			Component component = new Component(get(map, "name"), layer(target.layers(), get(map, "layer")), domain(target.domains(), get(map, "domain")), get(map, "description"));
 			if (target.components().containsKey(component.name())) {
-				throw new TargetException("Duplicate component name '" + component.name() + "'");
+				throw new EnforcerException("Duplicate component name '" + component.name() + "'");
 			}
 			if (requireDomains && component.domain() == null) {
-				throw new TargetException("Must specify domain for component '" + component.name() + "'");
+				throw new EnforcerException("Must specify domain for component '" + component.name() + "'");
 			}
 			List<String> packages = getList(map, "packages");
 			if (packages != null) {

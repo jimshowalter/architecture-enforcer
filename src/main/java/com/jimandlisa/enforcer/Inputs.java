@@ -19,15 +19,28 @@ public class Inputs {
 
 	private final File target;
 	private final File odem;
-	private final File ignores;
-	private final File reflections;
+	private File ignores = null;
+	private File reflections = null;
+	private File fixUnresolveds = null;
+	
+	static File check(File file) {
+		try {
+			if (!file.exists()) {
+				throw new EnforcerException(file + " does not exist");
+			}
+			if (!file.canRead()) {
+				throw new EnforcerException("cannot read " + file);
+			}
+			return file;
+		} catch (Throwable t) {
+			throw new EnforcerException("error validating file " + file + ": " + t.getMessage());
+		}
+	}
 
-	public Inputs(final File target, final File odem, final File ignores, final File reflections) {
+	public Inputs(final File target, final File odem) {
 		super();
-		this.target = target;
-		this.odem = odem;
-		this.ignores = ignores;
-		this.reflections = reflections;
+		this.target = check(target);
+		this.odem = check(odem);
 	}
 	
 	public final File target() {
@@ -37,17 +50,42 @@ public class Inputs {
 	public final File odem() {
 		return odem;
 	}
+	
+	public final void setIgnores(File ignores) {
+		if (ignores() != null) {
+			throw new EnforcerException("already set ignores file " + ignores());
+		}
+		this.ignores = check(ignores);
+	}
 
 	public final File ignores() {
 		return ignores;
+	}
+	
+	public final void setReflections(File reflections) {
+		if (reflections() != null) {
+			throw new EnforcerException("already set reflections file " + reflections());
+		}
+		this.reflections = check(reflections);
 	}
 
 	public final File reflections() {
 		return reflections;
 	}
 	
+	public final void setFixUnresolveds(File fixedUnresolveds) {
+		if (fixUnresolveds() != null) {
+			throw new EnforcerException("already set fix-unresolveds file " + fixUnresolveds());
+		}
+		this.fixUnresolveds = check(fixedUnresolveds);
+	}
+	
+	public final File fixUnresolveds() {
+		return fixUnresolveds;
+	}
+	
 	@Override
 	public String toString() {
-		return "target: " + target() + ", ODEM: " + odem() + ", ignores: " + ignores() + ", reflections: " + reflections();
+		return "target=" + target() + ", ODEM=" + odem() + ", ignores=" + ignores() + ", reflections=" + reflections() + ", fix-unresolveds=" + fixUnresolveds();
 	}
 }

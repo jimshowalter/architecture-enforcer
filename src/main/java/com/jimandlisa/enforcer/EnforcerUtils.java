@@ -14,6 +14,7 @@
 package com.jimandlisa.enforcer;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,12 +23,12 @@ import java.util.Set;
 
 public class EnforcerUtils {
 	
-	static Set<String> ignores(Inputs inputs) throws Exception {
+	static Set<String> ignores(File ignoresFile) throws Exception {
 		Set<String> ignores = new HashSet<>();
-		if (inputs.ignores() == null) {
+		if (ignoresFile == null) {
 			return ignores;
 		}
-		try (BufferedReader reader = new BufferedReader(new FileReader(inputs.ignores()))) {
+		try (BufferedReader reader = new BufferedReader(new FileReader(ignoresFile))) {
 			String line = null;
 			while ((line = reader.readLine()) != null) {
 				String ignore = line.trim();
@@ -48,59 +49,106 @@ public class EnforcerUtils {
 		return ignores;
 	}
 	
-	static boolean skip(String name, Set<String> ignores) {
-		if (name.contains(":")) { // Handles errors in pf-CDA, for example "evelField:Ljava.lang.Object".
+	static boolean skip(String fullName, Set<String> ignores) {
+		if (fullName.contains(":")) { // Handles glitches in pf-CDA, for example "evelField:Ljava.lang.Object".
 			return true;
 		}
 		for (String ignore : ignores) {
-			if (name.startsWith(ignore)) {
+			if (fullName.startsWith(ignore)) {
 				return true;
 			}
 		}
 		return false;
 	}
 	
-	static String denest(String typeName) {
-		return typeName.replaceAll("[$].*$", ""); // To preserve class nesting, remove calls to this method, or make it just return the unmodified type name.
+	private static final boolean DENEST = true;
+	
+	static String denest(String fullName) {
+		if (fullName.startsWith("$")) {
+			throw new EnforcerException("malformed class name '" + fullName + "'");
+		}
+		if (DENEST) {
+			return fullName.replaceAll("[$].*$", "");
+		}
+		return fullName;
 	}
 	
-	public static Map<String, Type> resolve(Inputs inputs, Set<String> unresolveds) throws Exception {
-		Set<String> ignores = ignores(inputs);
+	static Type get(String fullName, Map<String, Type> types) {
+		Type type = types.get(fullName);
+		if (type == null) {
+			type = new Type(fullName);
+			types.put(type.fullName(), type);
+		}
+		return type;
+	}
+	
+	static void parse(File file, Map<String, Type> types, Set<String> ignores, Set<String> problems, String entryName) throws Exception {
+		if (file == null) {
+			return;
+		}
+		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+			String line = null;
+			Type type = null;
+			while ((line = reader.readLine()) != null) {
+				String[] segments = line.trim().replaceAll("[ \t]+", "").split(":");
+				if (segments.length != 2) {
+					throw new EnforcerException("invalid " + entryName + " entry in " + file + ": " + line);
+				}
+				String referringClass = denest(segments[0]);
+				if (skip(referringClass, ignores)) {
+					problems.add(entryName.toUpperCase() + " CLASS IS LISTED AS REFERRING BUT ALSO LISTED IN IGNORES: " + referringClass);
+					continue;
+				}
+				type = get(referringClass, types);
+				String[] segments2 = segments[1].split(",");
+				for (String segment : segments2) {
+					String referredToClass = denest(segment);
+					if (skip(referringClass, ignores)) {
+						problems.add(entryName.toUpperCase() + " CLASS IS LISTED AS REFERRED-TO BUT ALSO LISTED IN IGNORES: " + referringClass);
+						continue;
+					}
+					type.referenceNames().add(referredToClass);
+				}
+			}
+		}
+	}
+	
+	public static Map<String, Type> resolve(Inputs inputs, Set<String> problems) throws Exception {
+		Set<String> ignores = ignores(inputs.ignores());
 		Map<String, Type> types = new HashMap<>();
+		// Get referring and referred-to classes from pf-CDA output.
 		try (BufferedReader reader = new BufferedReader(new FileReader(inputs.odem()))) {
 			String line = null;
 			Type type = null;
 			while ((line = reader.readLine()) != null) {
 				if (line.trim().startsWith("<type name=\"")) {
-					String fullName = denest(line.trim().replace("<type name=\"", "").replaceAll("\".*$", ""));
-					if (skip(fullName, ignores)) {
+					String referringClass = denest(line.trim().replace("<type name=\"", "").replaceAll("\".*$", ""));
+					if (skip(referringClass, ignores)) {
 						type = null;
 						continue;
 					}
-					type = types.get(fullName);
-					if (type == null) {
-						type = new Type(fullName);
-						types.put(type.fullName(), type);
-					}
+					type = get(referringClass, types);
 					continue;
 				}
 				if (line.trim().startsWith("<depends-on name=\"")) {
 					if (type == null) {
 						continue;
 					}
-					String reference = denest(line.trim().replace("<depends-on name=\"", "").replaceAll("\".*$", ""));
-					if (skip(reference, ignores) || reference.equals(type.fullName())) {
+					String referredToClass = denest(line.trim().replace("<depends-on name=\"", "").replaceAll("\".*$", ""));
+					if (skip(referredToClass, ignores) || referredToClass.equals(type.fullName())) {
 						continue;
 					}
-					type.referenceNames().add(reference);
+					type.referenceNames().add(referredToClass);
 				}
 			}
 		}
+		parse(inputs.reflections(), types, ignores, problems, "reflection"); // Get reflection-based referring and referred-to classes from reflections file.
+		parse(inputs.fixUnresolveds(), types, ignores, problems, "fix-unresolved"); // Get referring and referred-to classes from fix-unresolveds file.
 		for (Type type : types.values()) {
 			for (String referenceName : type.referenceNames()) {
 				Type reference = types.get(referenceName);
 				if (reference == null) {
-					unresolveds.add(referenceName);
+					problems.add("UNRESOLVED: " + referenceName);
 					continue;
 				}
 				type.references().add(reference);

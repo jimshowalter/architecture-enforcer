@@ -82,7 +82,7 @@ Notes:
 
 * References to and from nested classes are rolled up to the outermost enclosing classes. For example, if foo.bar.utils.Utils refers to foo.bar.utils.math.Math$Multiply, the tool registers this as a reference from foo.bar.utils.Utils to foo.bar.utils.math.Math.
 In many projects this greatly shrinks the number of references that need to be analyzed. If it is important in your project to track references at the nested-class level, you need to extract nested classes to new source files, or modify the tool so it preserves nesting
-(search for "nesting" in EnforcerUtils).
+(search for "DENEST" in EnforcerUtils).
 
 ### Kinds Of References ###
 
@@ -135,14 +135,23 @@ The full set of args is:
 
 > -r/full/path/to/reflection/references
 
-The last two args are optional, but see the notes below.
+> -f/full/path/to/fixed/unresolveds
+
+The last three args are optional, and can appear in any order (or not at all). For details, see the notes below.
 
 Notes:
 
 * Typically a project uses a bunch of third-party classes, and/or classes from inside your company but outside the project being decomposed. List packages to ignore in a file you specify with the -i command-line argument.
 The syntax is full.name.of.package, without a dot at the end. The tool appends dots for you. In some cases you need to suppress dots due to some issues with pf-CDA, in which case end the package name with a !.
 
-* If your project uses reflection, you should add outermost class-to-class dependencies to a file you specify with the -r command-line argument. The syntax is: full.name.of.referring.class.Foo:full.name.of.referred.to.class.Bar.
+* If your project uses reflection, you should add outermost class-to-class dependencies to a file you specify with the -r command-line argument. The syntax is: full.name.of.referring.class.Foo:full.name.of.referred.to.class.Bar,full.name.of.referred.to.class.Baz....,
+where the referred-to classes are outermost classes to which the referring class refers to by reflection. If there are too many referred-to classes to fit cleanly on one line, you can start multiple lines with the referring class.
+
+* Sometimes the pf-CDA odem file is missing classes that are referred to by other classes in the file. To fix these, you should add the missing outermost classes to a file you specify with the -f command-line argument.
+The syntax is: full.name.of.missing.class.Foo:full.name.of.referred.to.class.Bar,full.name.of.referred.to.class.Baz..., where the referred-to classes are outermost classes to which the missing class refers.
+If there are too many referred-to classes to fit cleanly on one line, you can start multiple lines with the referring class.
+
+* Adding a referred-to class to the reflections or fix-unresolveds files can introduce new unresolved classes. When that happens, you need to keep entering classes until all classes are defined.
 
 ## TODOs And Welcomed Contributions ##
 
@@ -151,7 +160,7 @@ This tool can of course be improved. Here are some things we know would make it 
 * First, and most obviously, having to manually run pf-CDA at the outset is a pain, plus it thwarts automating analysis in CI/CD. The documentation on http:www.dependency-analyzer.org mentions an API that could probably be called by this tool. Or we could investigate https:innig.net/macker, or javaparser.org.
 Alternatively, someone skilled with bytecode analysis could probably replace pf-CDA entirely (we don't need all of its features, just a dump of class-to-class references).
 
-* Add an option to preserve nesting. Default the option to disabled (don't preserve nesting) to avoid memory/time overhead.
+* Add an option to preserve nesting. Default the option to disabled (don't preserve nesting) to avoid memory/time overhead. (Search for "DENEST" in EnforcerUtils.)
 
 * Parse Class.forName calls in JSP pages and add those references automatically, instead of requiring manual bookkeeping in the reflection-references file.
 
@@ -170,7 +179,6 @@ We welcome contributions of those and other improvements.
 This tool is a cleanroom reimplementation of a proprietary tool used for a massive decomposition project.
 
 Only general, well-known refactoring concepts have been reused (layering, encapsulation, etc.). Nothing from the proprietary tool's code was used, and this tool differs significantly from how that tool worked.
-
 
 ## Caveats ##
 

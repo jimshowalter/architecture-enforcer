@@ -13,11 +13,15 @@
 
 package com.jimandlisa.enforcer;
 
-public class TargetException extends RuntimeException {
+public class EnforcerException extends RuntimeException {
 
 	private static final long serialVersionUID = -5884940638619087890L;
 
-	public TargetException(String msg) {
+	public EnforcerException(String msg) {
 		super(msg);
+	}
+	
+	public EnforcerException(String msg, Throwable t) {
+		super(msg, t);
 	}
 }

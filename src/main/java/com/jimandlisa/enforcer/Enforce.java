@@ -21,61 +21,88 @@ import java.util.Set;
 
 public class Enforce {
 	
-	private static void usage(String error) {
-		System.out.println(error);
-		System.out.println(Enforce.class.getSimpleName() + ": usage: /full/path/to/target/architecture/.yaml /full/path/to/pf-CDA/.odem, /full/path/to/packages/to/ignore, /full/path/to/reflection/references");
-	}
-	
-	private static File validate(String[] inputs, int i) {
-		if (i > inputs.length - 1) {
-			return null;
+	static enum Optionals {
+		IGNORES("-i"),
+		REFLECTIONS("-r"),
+		FIX_UNRESOLVEDS("-f");
+		
+		private final String indicator;
+		private Optionals(final String indicator) {
+			this.indicator = indicator;
 		}
-		String name = inputs[i];
-		try {
-			File file = new File(name);
-			if (!file.exists()) {
-				throw new RuntimeException(name + " does not exist");
-			}
-			if (!file.canRead()) {
-				throw new RuntimeException("cannot read " + name);
-			}
-			return file;
-		} catch (Throwable t) {
-			throw new RuntimeException("error validating file " + name);
+		
+		public String indicator() {
+			return indicator;
+		}
+		
+		@Override
+		public String toString() {
+			return indicator();
 		}
 	}
 	
-	private static final boolean DEBUG = true;
+	static void usage(String error) {
+		throw new EnforcerException(error + ": usage: /full/path/to/target/architecture/.yaml /full/path/to/pf-CDA/.odem " + Optionals.IGNORES + "/full/path/to/packages/to/ignore " + Optionals.REFLECTIONS + "/full/path/to/reflection/references " + Optionals.FIX_UNRESOLVEDS + "/full/path/to/fixed/unresolveds [last three args optional and unordered]");
+	}
+	
+	static void parse(String arg, Inputs inputs) {
+		if (arg.startsWith(Optionals.IGNORES.indicator())) {
+			if (inputs.ignores() != null) {
+				usage("already specified " + Optionals.IGNORES.indicator() + " option");
+			}
+			inputs.setIgnores(new File(arg.replaceFirst(Optionals.IGNORES.indicator(), "")));
+			return;
+		}
+		if (arg.startsWith(Optionals.REFLECTIONS.indicator())) {
+			if (inputs.reflections() != null) {
+				usage("already specified " + Optionals.REFLECTIONS.indicator() + " option");
+			}
+			inputs.setReflections(new File(arg.replaceFirst(Optionals.REFLECTIONS.indicator(), "")));
+			return;
+		}
+		if (arg.startsWith(Optionals.FIX_UNRESOLVEDS.indicator())) {
+			if (inputs.fixUnresolveds() != null) {
+				usage("already specified " + Optionals.FIX_UNRESOLVEDS.indicator() + " option");
+			}
+			inputs.setFixUnresolveds(new File(arg.replaceFirst(Optionals.FIX_UNRESOLVEDS.indicator(), "")));
+			return;
+		}
+		usage("unrecognized option " + arg);
+	}
+
+	static final boolean DEBUG = true;
 
 	public static void main(String[] args) {
-		if (args.length < 2) {
-			usage("not enough args");
-			return;
-		}
-		if (args.length > 4) {
-			usage("too many args");
-			return;
-		}
 		try {
-			Inputs inputs = new Inputs(validate(args, 0), validate(args, 1), validate(args, 2), validate(args, 3));
+			if (args.length < 2) {
+				usage("not enough args");
+			}
+			if (args.length > 5) {
+				usage("too many args");
+			}
+			Inputs inputs = new Inputs(new File(args[0]), new File(args[1]));
+			for (int i = 2; i < args.length; i++) {
+				parse(args[i], inputs);
+			}
 			System.out.println("Analyzing/enforcing architecture with " + inputs.toString());
 			Target target = TargetUtils.parse(inputs.target());
-			Set<String> unresolveds = new HashSet<>();
-			Map<String, Type> types = EnforcerUtils.resolve(inputs, unresolveds);
+			Set<String> problems = new HashSet<>();
+			Map<String, Type> types = EnforcerUtils.resolve(inputs, problems);
+			EnforcerUtils.correlate(types, target);
 			if (DEBUG) {
 				System.out.println("Target specification:");
 				TargetUtils.dump(target, System.out);
-				System.out.println("Total outermost types: " + types.size() + ", unresolved: " + unresolveds.size());
+				System.out.println("Total outermost types: " + types.size());
 				for (String fullName : CollectionUtils.sort(new ArrayList<>(types.keySet()))) {
 					System.out.println(fullName);
 					for (String referenceName : CollectionUtils.sort(new ArrayList<>(types.get(fullName).referenceNames()))) {
 						System.out.println("\t" + referenceName);
 					}
 				}
-				if (!unresolveds.isEmpty()) {
-					System.out.println("UNRESOLVED!:");
-					for (String unresolved : CollectionUtils.sort(new ArrayList<>(unresolveds))) {
-						System.out.println("\t" + unresolved);
+				if (!problems.isEmpty()) {
+					System.out.println("PROBLEMS:");
+					for (String problem : CollectionUtils.sort(new ArrayList<>(problems))) {
+						System.out.println("\t" + problem);
 					}
 				}
 			}
