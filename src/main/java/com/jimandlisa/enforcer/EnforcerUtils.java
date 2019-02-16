@@ -179,7 +179,7 @@ public class EnforcerUtils {
 					continue; // Skip intra-component references.
 				}
 				if (type.definedIn().layer().depth() <= referredTo.definedIn().layer().depth()) {
-					problems.add("ILLEGAL REFERENCE: " + type + " in component " + type.definedIn().name() + " in layer " + type.definedIn().layer().depth() + " refers to " + referredTo.definedIn().name() + " in layer " + referredTo.definedIn().layer().depth());
+					problems.add("ILLEGAL REFERENCE: " + type + " in component " + type.definedIn().name() + " in layer " + type.definedIn().layer().depth() + " refers to component " + referredTo.definedIn().name() + " in layer " + referredTo.definedIn().layer().depth());
 				}
 			}
 		}
