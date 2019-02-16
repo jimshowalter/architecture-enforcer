@@ -166,6 +166,7 @@ public class TargetUtils {
 			public int compare(Component d1, Component d2) {
 				return d1.name().compareTo(d2.name());
 			}});
+		ps.println("Target-state specification:");
 		ps.println("\tLAYERS:");
 		for (Layer layer : layers) {
 			ps.println("\t\t" + layer);

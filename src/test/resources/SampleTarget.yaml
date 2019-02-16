@@ -34,7 +34,7 @@ components:
     domain: Two
     description: Middle tier of app two.
     packages:
-      - com.jimandlisa.app.one
+      - com.jimandlisa.app.two
       - com.jimandlisa.service
   - name: UI One
     layer: UI

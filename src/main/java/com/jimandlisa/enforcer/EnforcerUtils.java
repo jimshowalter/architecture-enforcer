@@ -157,7 +157,31 @@ public class EnforcerUtils {
 		return types;
 	}
 	
-	public static void correlate(Map<String, Type> types, Target target) {
-		
+	public static void correlate(Map<String, Type> types, Target target, Set<String> problems) {
+		RollUp.add(target.components().values());
+		for (Type type : types.values()) {
+			String componentName = RollUp.get(type.fullName());
+			if (componentName == null) {
+				problems.add("UNABLE TO RESOLVE TYPE TO COMPONENT NAME: " + type.fullName());
+				continue;
+			}
+			Component component = target.components().get(componentName);
+			if (component == null) {
+				problems.add("UNABLE TO RESOLVE COMPONENT NAME TO COMPONENT: " + componentName); // This should be impossible.
+				continue;
+			}
+			component.add(type);
+			type.setDefinedIn(component);
+		}
+		for (Type type : types.values()) {
+			for (Type referredTo : type.references()) {
+				if (type.definedIn() == referredTo.definedIn()) {
+					continue; // Skip intra-component references.
+				}
+				if (type.definedIn().layer().depth() <= referredTo.definedIn().layer().depth()) {
+					problems.add("ILLEGAL REFERENCE: " + type + " in component " + type.definedIn().name() + " in layer " + type.definedIn().layer().depth() + " refers to " + referredTo.definedIn().name() + " in layer " + referredTo.definedIn().layer().depth());
+				}
+			}
+		}
 	}
 }

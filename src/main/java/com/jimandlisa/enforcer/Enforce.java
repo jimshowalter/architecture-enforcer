@@ -88,10 +88,10 @@ public class Enforce {
 			Target target = TargetUtils.parse(inputs.target());
 			Set<String> problems = new HashSet<>();
 			Map<String, Type> types = EnforcerUtils.resolve(inputs, problems);
-			EnforcerUtils.correlate(types, target);
+			EnforcerUtils.correlate(types, target, problems);
 			if (DEBUG) {
-				System.out.println("Target-state specification:");
 				TargetUtils.dump(target, System.out);
+				RollUp.dump(System.out);
 				System.out.println("Total outermost types: " + types.size());
 				for (String fullName : CollectionUtils.sort(new ArrayList<>(types.keySet()))) {
 					System.out.println("\t" + fullName);

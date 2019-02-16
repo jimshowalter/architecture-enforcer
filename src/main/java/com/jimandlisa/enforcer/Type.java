@@ -22,6 +22,7 @@ public class Type {
 	private final String simpleName;
 	private final Set<String> referenceNames = new HashSet<>();
 	private final Set<Type> references = new HashSet<>();
+	private Component definedIn = null;
 	
 	public Type(final String fullName) {
 		super();
@@ -43,6 +44,14 @@ public class Type {
 	
 	public Set<Type> references() {
 		return references;
+	}
+	
+	public void setDefinedIn(final Component component) {
+		this.definedIn = component;
+	}
+	
+	public Component definedIn() {
+		return definedIn;
 	}
 	
 	@Override
