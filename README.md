@@ -186,7 +186,7 @@ It's possible this tool can miss some dependencies.
 
 For example, pf-CDA determines dependencies from bytecode, and static constants are inlined in bytecode without any "backpointer" to the defining class.
 
-In addition, the reflection-based references, being entered manually, are only as good as your team's ability to find them all.
+In addition, the reflection-based references and unresolved fixes, being entered manually, are only as good as your team's ability to find them all.
 
 But overall, this tool can probably get it > 95% correct, which is close enough to start trying to actually move the decomposed code, at which point some gotchas will pop up that need to be dealt with.
 
