@@ -153,6 +153,8 @@ If there are too many referred-to classes to fit cleanly on one line, you can st
 
 * Adding a referred-to class to the reflections or fix-unresolveds files can introduce new unresolved classes. When that happens, you need to keep entering classes until all classes are defined.
 
+* Example files are located in the test resources directory.
+
 ## TODOs And Welcomed Contributions ##
 
 This tool can of course be improved. Here are some things we know would make it better:
