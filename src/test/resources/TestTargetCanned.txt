@@ -1,15 +1,16 @@
-LAYERS:
-name='My First Layer', depth=-3
-Some descriptive text more description
+	LAYERS:
+		name='My First Layer', depth=-3
+		Some descriptive text more description
 
-name='Another Layer', depth=4
-This description and that description
+		name='Another Layer', depth=4
+		This description and that description
 
-DOMAINS:
-name='Domain A'
-abcd efgh foo bar baz
-COMPONENTS:
-name='My Component', layer='My First Layer', depth=-3, domain='Domain A'
-null
-com.foo.bar
-org.baz
+	DOMAINS:
+		name='Domain A'
+		abcd efgh foo bar baz
+	COMPONENTS:
+		name='My Component', layer='My First Layer', depth=-3, domain='Domain A'
+		null
+		packages:
+			com.foo.bar
+			org.baz

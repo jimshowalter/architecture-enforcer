@@ -116,7 +116,7 @@ code into projects, this tool should continue to be run in CI/CD.
 	1. Select File -> New workset...
 	1. On the Classpath tab, click Add, navigate to the war for your project, select it, and click OK.
 	1. On the General tab, give the workset a name, check "Reload this workset automatically at next start", and click Save.
-	1. When pf-CDA finishes analyzing your project, select File -> Export Model -> XML/ODEM File, give the ODEM file a name, and click Save.
+	1. When pf-CDA finishes analyzing your project, right-click on the analysis, select Export Model -> XML/ODEM File, give the ODEM file a name, and click Save.
 	1. Shut down pf-CDA.
 
 1. Sync and build this project.

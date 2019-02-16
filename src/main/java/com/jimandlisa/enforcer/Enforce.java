@@ -90,13 +90,13 @@ public class Enforce {
 			Map<String, Type> types = EnforcerUtils.resolve(inputs, problems);
 			EnforcerUtils.correlate(types, target);
 			if (DEBUG) {
-				System.out.println("Target specification:");
+				System.out.println("Target-state specification:");
 				TargetUtils.dump(target, System.out);
 				System.out.println("Total outermost types: " + types.size());
 				for (String fullName : CollectionUtils.sort(new ArrayList<>(types.keySet()))) {
-					System.out.println(fullName);
+					System.out.println("\t" + fullName);
 					for (String referenceName : CollectionUtils.sort(new ArrayList<>(types.get(fullName).referenceNames()))) {
-						System.out.println("\t" + referenceName);
+						System.out.println("\t\t" + referenceName);
 					}
 				}
 				if (!problems.isEmpty()) {

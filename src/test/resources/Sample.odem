@@ -12,16 +12,24 @@
     <container name="/some/path/architecture-enforcer-sample-1.0-SNAPSHOT.war" classification="war">
     </container>
     <container name="/some/path/architecture-enforcer-sample-1.0-SNAPSHOT.war/WEB-INF/classes" classification="dir">
-      <namespace name="com.jimandlisa.app">
-        <type name="com.jimandlisa.app.App1" classification="class" visibility="public">
+      <namespace name="com.jimandlisa.app.one">
+        <type name="com.jimandlisa.app.one.App1" classification="class" visibility="public">
           <dependencies count="2">
             <depends-on name="java.lang.Object" classification="extends" />
-            <depends-on name="com.jimandlisa.data.Data1" classification="uses" />
+            <depends-on name="com.jimandlisa.data.Data" classification="uses" />
+          </dependencies>
+        </type>
+      </namespace>
+      <namespace name="com.jimandlisa.app.two">
+        <type name="com.jimandlisa.app.two.App2" classification="class" visibility="public">
+          <dependencies count="2">
+            <depends-on name="java.lang.Object" classification="extends" />
+            <depends-on name="com.jimandlisa.data.Data" classification="uses" />
           </dependencies>
         </type>
       </namespace>
       <namespace name="com.jimandlisa.data">
-        <type name="com.jimandlisa.data.Data1" classification="class" visibility="public">
+        <type name="com.jimandlisa.data.Data" classification="class" visibility="public">
           <dependencies count="3">
             <depends-on name="java.lang.Object" classification="extends" />
             <depends-on name="java.lang.System" classification="uses" />
@@ -30,19 +38,35 @@
         </type>
       </namespace>
       <namespace name="com.jimandlisa.service">
-        <type name="com.jimandlisa.service.Service1" classification="class" visibility="public">
-          <dependencies count="3">
+        <type name="com.jimandlisa.service.Service2" classification="class" visibility="public">
+          <dependencies count="2">
             <depends-on name="java.lang.Object" classification="extends" />
-            <depends-on name="com.jimandlisa.app.App1" classification="uses" />
-            <depends-on name="com.jimandlisa.ui.UI1" classification="uses" />
+            <depends-on name="com.jimandlisa.app.two.App2" classification="uses" />
           </dependencies>
         </type>
       </namespace>
-      <namespace name="com.jimandlisa.ui">
-        <type name="com.jimandlisa.ui.UI1" classification="class" visibility="public">
+      <namespace name="com.jimandlisa.service.one">
+        <type name="com.jimandlisa.service.one.Service1" classification="class" visibility="public">
+          <dependencies count="3">
+            <depends-on name="java.lang.Object" classification="extends" />
+            <depends-on name="com.jimandlisa.app.one.App1" classification="uses" />
+            <depends-on name="com.jimandlisa.ui.one.UI1" classification="uses" />
+          </dependencies>
+        </type>
+      </namespace>
+      <namespace name="com.jimandlisa.ui.one">
+        <type name="com.jimandlisa.ui.one.UI1" classification="class" visibility="public">
           <dependencies count="2">
             <depends-on name="java.lang.Object" classification="extends" />
-            <depends-on name="com.jimandlisa.service.Service1" classification="uses" />
+            <depends-on name="com.jimandlisa.service.one.Service1" classification="uses" />
+          </dependencies>
+        </type>
+      </namespace>
+      <namespace name="com.jimandlisa.ui.two">
+        <type name="com.jimandlisa.ui.two.UI2" classification="class" visibility="public">
+          <dependencies count="2">
+            <depends-on name="java.lang.Object" classification="extends" />
+            <depends-on name="com.jimandlisa.service.Service2" classification="uses" />
           </dependencies>
         </type>
       </namespace>

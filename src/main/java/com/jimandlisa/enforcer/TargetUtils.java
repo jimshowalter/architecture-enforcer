@@ -166,22 +166,23 @@ public class TargetUtils {
 			public int compare(Component d1, Component d2) {
 				return d1.name().compareTo(d2.name());
 			}});
-		ps.println("LAYERS:");
+		ps.println("\tLAYERS:");
 		for (Layer layer : layers) {
-			ps.println(layer);
-			ps.println(layer.description());
+			ps.println("\t\t" + layer);
+			ps.println("\t\t" + layer.description());
 		}
-		ps.println("DOMAINS:");
+		ps.println("\tDOMAINS:");
 		for (Domain domain : domains) {
-			ps.println(domain);
-			ps.println(domain.description());
+			ps.println("\t\t" + domain);
+			ps.println("\t\t" + domain.description());
 		}
-		ps.println("COMPONENTS:");
+		ps.println("\tCOMPONENTS:");
 		for (Component component : components) {
-			ps.println(component);
-			ps.println(component.description());
+			ps.println("\t\t" + component);
+			ps.println("\t\t" + component.description());
+			ps.println("\t\tpackages:");
 			for (String pkg : component.packages()) {
-				ps.println(pkg);
+				ps.println("\t\t\t" + pkg);
 			}
 		}
 	}
