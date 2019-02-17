@@ -63,7 +63,7 @@ public class EnforcerUtils {
 	
 	static String denest(String typeName) {
 		if (typeName.startsWith("$")) {
-			throw new EnforcerException("malformed class name '" + typeName + "'");
+			throw new EnforcerException("malformed class name '" + typeName + "'", Errors.MALFORMED_CLASS_NAME);
 		}
 		return typeName.replaceAll("[$].*$", ""); // To stop denesting, change this to just return the unmodified type name.
 	}
@@ -94,7 +94,7 @@ public class EnforcerUtils {
 				}
 				String[] segments = trimmed.replaceAll("[ \t]+", "").split(":");
 				if (segments.length != 2) {
-					throw new EnforcerException("invalid " + entryName + " entry in " + file + ": " + line);
+					throw new EnforcerException("invalid " + entryName + " entry in " + file + ": " + line, Errors.INVALID_CLASS_TO_CLASS_ENTRY);
 				}
 				String referringClass = denest(segments[0]);
 				if (skip(referringClass, ignores)) {

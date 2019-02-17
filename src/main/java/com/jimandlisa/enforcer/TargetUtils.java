@@ -56,12 +56,36 @@ public class TargetUtils {
 		return (Map<String, Object>)obj;
 	}
 	
-	static void validate(Map<String, Object> map, Set<String> allowed, String kind) {
+	private static final Set<String> ALLOWED_LAYER_KEYS = new HashSet<>(Arrays.asList(new String[] {"name", "depth", "description"}));
+	private static final Set<String> ALLOWED_DOMAIN_KEYS = new HashSet<>(Arrays.asList(new String[] {"name", "description"}));
+	private static final Set<String> ALLOWED_COMPONENT_KEYS = new HashSet<>(Arrays.asList(new String[] {"name", "layer", "domain", "description", "packages"}));
+	
+	static String kind(Set<String> allowedKeys) {
+		if (allowedKeys == ALLOWED_LAYER_KEYS) {
+			return "layer";
+		}
+		if (allowedKeys == ALLOWED_DOMAIN_KEYS) {
+			return "domain";
+		}
+		return "component";
+	}
+	
+	static Errors error(Set<String> allowedKeys) {
+		if (allowedKeys == ALLOWED_LAYER_KEYS) {
+			return Errors.UNRECOGNIZED_LAYER_KEY;
+		}
+		if (allowedKeys == ALLOWED_DOMAIN_KEYS) {
+			return Errors.UNRECOGNIZED_DOMAIN_KEY;
+		}
+		return Errors.UNRECOGNIZED_COMPONENT_KEY;
+	}
+	
+	static void validate(Map<String, Object> map, Set<String> allowed) {
 		Set<String> set = new HashSet<>(map.keySet());
 		set.removeAll(allowed);
 		if (!set.isEmpty()) {
 			if (set.size() == 1) {
-				throw new EnforcerException("unrecognized " + kind + " key: " + set.iterator().next());
+				throw new EnforcerException("unrecognized " + kind(allowed) + " key: " + set.iterator().next(), error(allowed));
 			}
 			StringBuilder builder = new StringBuilder();
 			boolean first = true;
@@ -73,7 +97,7 @@ public class TargetUtils {
 				}
 				builder.append(key);
 			}
-			throw new EnforcerException("unrecognized " + kind + " keys: " + builder.toString());
+			throw new EnforcerException("unrecognized " + kind(allowed) + " keys: " + builder.toString(), error(allowed));
 		}
 	}
 	
@@ -90,10 +114,6 @@ public class TargetUtils {
 		return (List<String>)map.get(key);
 	}
 	
-	private static final Set<String> ALLOWED_LAYER_KEYS = new HashSet<>(Arrays.asList(new String[] {"name", "depth", "description"}));
-	private static final Set<String> ALLOWED_DOMAIN_KEYS = new HashSet<>(Arrays.asList(new String[] {"name", "description"}));
-	private static final Set<String> ALLOWED_COMPONENT_KEYS = new HashSet<>(Arrays.asList(new String[] {"name", "layer", "domain", "description", "packages"}));
-	
 	static Layer layer(Map<String, Layer> layers, String name) {
 		return layers.get(ArgUtils.check(name, "layer name"));
 	}
@@ -108,24 +128,24 @@ public class TargetUtils {
 		Set<Integer> depths = new HashSet<>();
 		for (Object obj : json.getJSONArray("layers").toList()) {
 			Map<String, Object> map = cast(obj);
-			validate(map, ALLOWED_LAYER_KEYS, "layer");
+			validate(map, ALLOWED_LAYER_KEYS);
 			Layer layer = new Layer(get(map, "name"), getInteger(map, "depth"), get(map, "description"));
 			if (depths.contains(layer.depth())) {
-				throw new EnforcerException("duplicate layer depth " + layer.depth());
+				throw new EnforcerException("duplicate layer depth " + layer.depth(), Errors.DUPLICATE_LAYER_DEPTH);
 			}
 			depths.add(layer.depth());
 			if (target.layers().containsKey(layer.name())) {
-				throw new EnforcerException("duplicate layer name '" + layer.name() + "'");
+				throw new EnforcerException("duplicate layer name '" + layer.name() + "'", Errors.DUPLICATE_LAYER_NAME);
 			}
 			target.add(layer);
 		}
 		if (json.has("domains")) {
 			for (Object obj : json.getJSONArray("domains").toList()) {
 				Map<String, Object> map = cast(obj);
-				validate(map, ALLOWED_DOMAIN_KEYS, "domain");
+				validate(map, ALLOWED_DOMAIN_KEYS);
 				Domain domain = new Domain(get(map, "name"), get(map, "description"));
 				if (target.domains().containsKey(domain.name())) {
-					throw new EnforcerException("duplicate domain name '" + domain.name() + "'");
+					throw new EnforcerException("duplicate domain name '" + domain.name() + "'", Errors.DUPLICATE_DOMAIN_NAME);
 				}
 				target.add(domain);
 			}
@@ -134,10 +154,10 @@ public class TargetUtils {
 		boolean requireDomains = !target.domains().isEmpty();
 		for (Object obj : json.getJSONArray("components").toList()) {
 			Map<String, Object> map = cast(obj);
-			validate(map, ALLOWED_COMPONENT_KEYS, "component");
+			validate(map, ALLOWED_COMPONENT_KEYS);
 			Component component = new Component(get(map, "name"), layer(target.layers(), get(map, "layer")), (requireDomains ? domain(target.domains(), get(map, "domain")) : null), get(map, "description"));
 			if (target.components().containsKey(component.name())) {
-				throw new EnforcerException("duplicate component name '" + component.name() + "'");
+				throw new EnforcerException("duplicate component name '" + component.name() + "'", Errors.DUPLICATE_COMPONENT_NAME);
 			}
 			component.layer().components().put(component.name(), component);
 			if (component.domain() != null) {
@@ -149,7 +169,7 @@ public class TargetUtils {
 					String normalized = pkg.replaceAll("[.]+$", "");
 					Component other = allPackages.get(normalized);
 					if (other != null) {
-						throw new EnforcerException("duplicate package name used in " + other.name() + " and " + component.name());
+						throw new EnforcerException("duplicate package name used in " + other.name() + " and " + component.name(), Errors.DUPLICATE_PACKAGE_NAME);
 					}
 					component.packages().add(normalized);
 					allPackages.put(normalized, component);

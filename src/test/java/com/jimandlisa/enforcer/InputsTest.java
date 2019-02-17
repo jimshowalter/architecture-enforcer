@@ -13,6 +13,7 @@
 
 package com.jimandlisa.enforcer;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -48,19 +49,23 @@ public class InputsTest {
 	@Test
 	public void doTest() {
 		try {
-			Inputs.check(new File("no/such/file"));
+			Inputs.check(new File(Thread.currentThread().getContextClassLoader().getResource("SamplePackageIgnores.txt").getPath() + "bogus"));
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("does not exist"));
+			assertEquals(Errors.FILE_DOES_NOT_EXIST, e.error());
 		}
 		try {
 			Inputs.check(new MockFile(Thread.currentThread().getContextClassLoader().getResource("SampleTarget.yaml").getPath()));
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("cannot read"));
+			assertEquals(Errors.CANNOT_READ_FILE, e.error());
 		}
 		try {
 			Inputs.check(new MockFile(Thread.currentThread().getContextClassLoader().getResource("SampleTarget.yaml").getPath(), true));
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("error validating file"));
+			assertEquals(Errors.ERROR_VALIDATING_FILE, e.error());
+			assertEquals("COVERAGE", e.getCause().getMessage());
 		}
 		Inputs inputs = TestUtils.inputs(false, false, false);
 		inputs.toString();
@@ -76,16 +81,19 @@ public class InputsTest {
 			inputs.setIgnores(new File("foo"));
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("already set ignores file"));
+			assertEquals(Errors.IGNORES_FILE_ALREADY_SPECIFIED, e.error());
 		}
 		try {
 			inputs.setReflections(new File("foo"));
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("already set reflections file"));
+			assertEquals(Errors.REFLECTIONS_FILE_ALREADY_SPECIFIED, e.error());
 		}
 		try {
 			inputs.setFixUnresolveds(new File("foo"));
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("already set fix-unresolveds file"));
+			assertEquals(Errors.FIX_UNRESOLVEDS_FILE_ALREADY_SPECIFIED, e.error());
 		}
 	}
 }

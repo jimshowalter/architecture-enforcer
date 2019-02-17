@@ -13,20 +13,28 @@
 
 package com.jimandlisa.enforcer;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import org.junit.Test;
 
 public class TargetTest {
+	
+	@SuppressWarnings("unchecked")
+	private static Set<String> allowed(String name) throws Exception {
+		Field allowedField = TargetUtils.class.getDeclaredField(name);
+		allowedField.setAccessible(true);
+		return (Set<String>)allowedField.get(null);
+	}
 
 	@Test
 	public void doTest() throws Exception {
@@ -38,47 +46,78 @@ public class TargetTest {
 		}
 		Map<String, Object> map = new HashMap<>();
 		map.put("foo", "bar");
-		Set<String> allowed = new HashSet<>();
 		try {
-			TargetUtils.validate(map, allowed, "coverage");
+			TargetUtils.validate(map, allowed("ALLOWED_LAYER_KEYS"));
 		} catch (EnforcerException e) {
-			assertTrue(e.getMessage().contains("unrecognized coverage key:"));
+			assertTrue(e.getMessage().contains("unrecognized layer key:"));
+			assertEquals(Errors.UNRECOGNIZED_LAYER_KEY, e.error());
+		}
+		try {
+			TargetUtils.validate(map, allowed("ALLOWED_DOMAIN_KEYS"));
+		} catch (EnforcerException e) {
+			assertTrue(e.getMessage().contains("unrecognized domain key:"));
+			assertEquals(Errors.UNRECOGNIZED_DOMAIN_KEY, e.error());
+		}
+		try {
+			TargetUtils.validate(map, allowed("ALLOWED_COMPONENT_KEYS"));
+		} catch (EnforcerException e) {
+			assertTrue(e.getMessage().contains("unrecognized component key:"));
+			assertEquals(Errors.UNRECOGNIZED_COMPONENT_KEY, e.error());
 		}
 		map.put("baz", "baz2");
 		try {
-			TargetUtils.validate(map, allowed, "coverage");
+			TargetUtils.validate(map, allowed("ALLOWED_LAYER_KEYS"));
 		} catch (EnforcerException e) {
-			assertTrue(e.getMessage().contains("unrecognized coverage keys:"));
+			assertTrue(e.getMessage().contains("unrecognized layer keys:"));
+			assertEquals(Errors.UNRECOGNIZED_LAYER_KEY, e.error());
+		}
+		try {
+			TargetUtils.validate(map, allowed("ALLOWED_DOMAIN_KEYS"));
+		} catch (EnforcerException e) {
+			assertTrue(e.getMessage().contains("unrecognized domain keys:"));
+			assertEquals(Errors.UNRECOGNIZED_DOMAIN_KEY, e.error());
+		}
+		try {
+			TargetUtils.validate(map, allowed("ALLOWED_COMPONENT_KEYS"));
+		} catch (EnforcerException e) {
+			assertTrue(e.getMessage().contains("unrecognized component keys:"));
+			assertEquals(Errors.UNRECOGNIZED_COMPONENT_KEY, e.error());
 		}
 		try {
 			TargetUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("BadTarget1.yaml").getPath()));
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("duplicate layer depth"));
+			assertEquals(Errors.DUPLICATE_LAYER_DEPTH, e.error());
 		}
 		try {
 			TargetUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("BadTarget2.yaml").getPath()));
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("duplicate layer name"));
+			assertEquals(Errors.DUPLICATE_LAYER_NAME, e.error());
 		}
 		try {
 			TargetUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("BadTarget3.yaml").getPath()));
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("duplicate domain name"));
+			assertEquals(Errors.DUPLICATE_DOMAIN_NAME, e.error());
 		}
 		try {
 			TargetUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("BadTarget4.yaml").getPath()));
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("duplicate component name"));
+			assertEquals(Errors.DUPLICATE_COMPONENT_NAME, e.error());
 		}
 		try {
 			TargetUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("BadTarget5.yaml").getPath()));
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("null domain name"));
+			assertEquals(Errors.NULL_STRING_ARG, e.error());
 		}
 		try {
 			TargetUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("BadTarget6.yaml").getPath()));
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("duplicate package name"));
+			assertEquals(Errors.DUPLICATE_PACKAGE_NAME, e.error());
 		}
 	}
 }

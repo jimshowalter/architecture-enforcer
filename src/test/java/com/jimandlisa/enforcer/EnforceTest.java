@@ -13,6 +13,8 @@
 
 package com.jimandlisa.enforcer;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.HashSet;
 
 import org.junit.Assert;
@@ -31,27 +33,27 @@ public class EnforceTest {
 			Enforce.parse(Optionals.IGNORES.indicator() + "foo", TestUtils.inputs(true, false, false));
 			Assert.fail();
 		} catch (EnforcerException e) {
-			// Do nothing, expected.
+			assertEquals(Errors.IGNORES_FILE_ALREADY_SPECIFIED, e.error());
 		}
 		Enforce.parse(Optionals.REFLECTIONS.indicator() + Thread.currentThread().getContextClassLoader().getResource("SampleReflections.txt").getPath(), TestUtils.inputs(false, false, false));
 		try {
 			Enforce.parse(Optionals.REFLECTIONS.indicator() + "foo", TestUtils.inputs(false, true, false));
 			Assert.fail();
 		} catch (EnforcerException e) {
-			// Do nothing, expected.
+			assertEquals(Errors.REFLECTIONS_FILE_ALREADY_SPECIFIED, e.error());
 		}
 		Enforce.parse(Optionals.FIX_UNRESOLVEDS.indicator() + Thread.currentThread().getContextClassLoader().getResource("SampleFixUnresolveds.txt").getPath(), TestUtils.inputs(false, false, false));
 		try {
 			Enforce.parse(Optionals.FIX_UNRESOLVEDS.indicator() + "foo", TestUtils.inputs(false, false, true));
 			Assert.fail();
 		} catch (EnforcerException e) {
-			// Do nothing, expected.
+			assertEquals(Errors.FIX_UNRESOLVEDS_FILE_ALREADY_SPECIFIED, e.error());
 		}
 		try {
 			Enforce.parse("foo", TestUtils.inputs(false, false, false));
 			Assert.fail();
 		} catch (EnforcerException e) {
-			// Do nothing, expected.
+			assertEquals(Errors.UNRECOGNIZED_COMMAND_LINE_OPTION, e.error());
 		}
 		Enforce.debug(false, null, null, null);
 		Enforce.problems(new HashSet<String>(), null);

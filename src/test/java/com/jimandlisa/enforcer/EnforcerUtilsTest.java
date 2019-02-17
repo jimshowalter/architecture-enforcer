@@ -47,6 +47,7 @@ public class EnforcerUtilsTest {
 			EnforcerUtils.denest("$Foo");
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("malformed class name"));
+			assertEquals(Errors.MALFORMED_CLASS_NAME, e.error());
 		}
 		Map<String, Type> types = new HashMap<>();
 		Type type0 = EnforcerUtils.get("foo", types);
@@ -62,6 +63,7 @@ public class EnforcerUtilsTest {
 			EnforcerUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("BadFixUnresolveds.txt").getPath()), types, ignores, problems, "fix-unresolved");
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("invalid fix-unresolved entry in"));
+			assertEquals(Errors.INVALID_CLASS_TO_CLASS_ENTRY, e.error());
 		}
 		EnforcerUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("TestFixUnresolveds.txt").getPath()), types, ignores, problems, "fix-unresolved");
 		assertTrue(problems.isEmpty());

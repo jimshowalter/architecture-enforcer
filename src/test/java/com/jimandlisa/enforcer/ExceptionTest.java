@@ -22,14 +22,16 @@ public class ExceptionTest {
 	@Test
 	public void doTest() {
 		try {
-			throw new EnforcerException("foo");
+			throw new EnforcerException("foo", Errors.NULL_STRING_ARG);
 		} catch (EnforcerException e) {
 			assertEquals("foo", e.getMessage());
+			assertEquals(Errors.NULL_STRING_ARG, e.error());
 		}
 		try {
-			throw new EnforcerException("foo", new RuntimeException("bar"));
+			throw new EnforcerException("foo", Errors.NULL_STRING_ARG, new RuntimeException("bar"));
 		} catch (EnforcerException e) {
 			assertEquals("foo", e.getMessage());
+			assertEquals(Errors.NULL_STRING_ARG, e.error());
 			assertEquals("bar", e.getCause().getMessage());
 		}
 	}

@@ -27,26 +27,26 @@ public class Enforce {
 	static void parse(String arg, Inputs inputs) {
 		if (arg.startsWith(Optionals.IGNORES.indicator())) {
 			if (inputs.ignores() != null) {
-				throw new EnforcerException("already specified " + Optionals.IGNORES.indicator() + " option" + USAGE);
+				throw new EnforcerException("already specified " + Optionals.IGNORES.indicator() + " option" + USAGE, Errors.IGNORES_FILE_ALREADY_SPECIFIED);
 			}
 			inputs.setIgnores(new File(arg.replaceFirst(Optionals.IGNORES.indicator(), "")));
 			return;
 		}
 		if (arg.startsWith(Optionals.REFLECTIONS.indicator())) {
 			if (inputs.reflections() != null) {
-				throw new EnforcerException("already specified " + Optionals.REFLECTIONS.indicator() + " option" + USAGE);
+				throw new EnforcerException("already specified " + Optionals.REFLECTIONS.indicator() + " option" + USAGE, Errors.REFLECTIONS_FILE_ALREADY_SPECIFIED);
 			}
 			inputs.setReflections(new File(arg.replaceFirst(Optionals.REFLECTIONS.indicator(), "")));
 			return;
 		}
 		if (arg.startsWith(Optionals.FIX_UNRESOLVEDS.indicator())) {
 			if (inputs.fixUnresolveds() != null) {
-				throw new EnforcerException("already specified " + Optionals.FIX_UNRESOLVEDS.indicator() + " option" + USAGE);
+				throw new EnforcerException("already specified " + Optionals.FIX_UNRESOLVEDS.indicator() + " option" + USAGE, Errors.FIX_UNRESOLVEDS_FILE_ALREADY_SPECIFIED);
 			}
 			inputs.setFixUnresolveds(new File(arg.replaceFirst(Optionals.FIX_UNRESOLVEDS.indicator(), "")));
 			return;
 		}
-		throw new EnforcerException("unrecognized option " + arg + USAGE);
+		throw new EnforcerException("unrecognized option " + arg + USAGE, Errors.UNRECOGNIZED_COMMAND_LINE_OPTION);
 	}
 	
 	static void debug(boolean debug, Target target, Map<String, Type> types, PrintStream ps) throws Exception {
@@ -89,10 +89,10 @@ public class Enforce {
 	public static void mainImpl(String[] args) {
 		try {
 			if (args.length < 2) {
-				throw new EnforcerException("not enough args" + USAGE);
+				throw new EnforcerException("not enough args" + USAGE, Errors.NOT_ENOUGH_ARGS);
 			}
 			if (args.length > 5) {
-				throw new EnforcerException("too many args" + USAGE);
+				throw new EnforcerException("too many args" + USAGE, Errors.TOO_MANY_ARGS);
 			}
 			Inputs inputs = new Inputs(new File(args[0]), new File(args[1]));
 			for (int i = 2; i < args.length; i++) {

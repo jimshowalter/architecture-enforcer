@@ -26,14 +26,16 @@ public class Inputs {
 	static File check(File file) {
 		try {
 			if (!file.exists()) {
-				throw new EnforcerException(file + " does not exist");
+				throw new EnforcerException(file + " does not exist", Errors.FILE_DOES_NOT_EXIST);
 			}
 			if (!file.canRead()) {
-				throw new EnforcerException("cannot read " + file);
+				throw new EnforcerException("cannot read " + file, Errors.CANNOT_READ_FILE);
 			}
 			return file;
+		} catch (EnforcerException e) {
+			throw e;
 		} catch (Throwable t) {
-			throw new EnforcerException("error validating file " + file + ": " + t.getMessage());
+			throw new EnforcerException("error validating file " + file + ": " + t.getMessage(), Errors.ERROR_VALIDATING_FILE, t);
 		}
 	}
 
@@ -53,7 +55,7 @@ public class Inputs {
 	
 	public final void setIgnores(File ignores) {
 		if (ignores() != null) {
-			throw new EnforcerException("already set ignores file " + ignores());
+			throw new EnforcerException("already set ignores file " + ignores(), Errors.IGNORES_FILE_ALREADY_SPECIFIED);
 		}
 		this.ignores = check(ignores);
 	}
@@ -64,7 +66,7 @@ public class Inputs {
 	
 	public final void setReflections(File reflections) {
 		if (reflections() != null) {
-			throw new EnforcerException("already set reflections file " + reflections());
+			throw new EnforcerException("already set reflections file " + reflections(), Errors.REFLECTIONS_FILE_ALREADY_SPECIFIED);
 		}
 		this.reflections = check(reflections);
 	}
@@ -75,7 +77,7 @@ public class Inputs {
 	
 	public final void setFixUnresolveds(File fixedUnresolveds) {
 		if (fixUnresolveds() != null) {
-			throw new EnforcerException("already set fix-unresolveds file " + fixUnresolveds());
+			throw new EnforcerException("already set fix-unresolveds file " + fixUnresolveds(), Errors.FIX_UNRESOLVEDS_FILE_ALREADY_SPECIFIED);
 		}
 		this.fixUnresolveds = check(fixedUnresolveds);
 	}
