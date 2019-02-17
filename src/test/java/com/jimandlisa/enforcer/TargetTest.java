@@ -75,5 +75,10 @@ public class TargetTest {
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("null domain name"));
 		}
+		try {
+			TargetUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("BadTarget6.yaml").getPath()));
+		} catch (EnforcerException e) {
+			assertTrue(e.getMessage().contains("duplicate package name"));
+		}
 	}
 }

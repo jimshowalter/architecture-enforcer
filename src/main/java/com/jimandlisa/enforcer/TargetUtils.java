@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -129,6 +130,7 @@ public class TargetUtils {
 				target.add(domain);
 			}
 		}
+		Map<String, Component> allPackages = new HashMap<>();
 		boolean requireDomains = !target.domains().isEmpty();
 		for (Object obj : json.getJSONArray("components").toList()) {
 			Map<String, Object> map = cast(obj);
@@ -144,7 +146,13 @@ public class TargetUtils {
 			List<String> packages = getList(map, "packages");
 			if (packages != null) {
 				for (String pkg : packages) {
-					component.packages().add(pkg.replaceAll("[.]+$", ""));
+					String normalized = pkg.replaceAll("[.]+$", "");
+					Component other = allPackages.get(normalized);
+					if (other != null) {
+						throw new EnforcerException("duplicate package name used in " + other.name() + " and " + component.name());
+					}
+					component.packages().add(normalized);
+					allPackages.put(normalized, component);
 				}
 			}
 			target.add(component);
