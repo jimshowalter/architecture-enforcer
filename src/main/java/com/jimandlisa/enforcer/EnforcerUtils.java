@@ -49,12 +49,12 @@ public class EnforcerUtils {
 		return ignores;
 	}
 	
-	static boolean skip(String fullName, Set<String> ignores) {
-		if (fullName.contains(":")) { // Handles glitches in pf-CDA, for example "evelField:Ljava.lang.Object".
+	static boolean skip(String typeName, Set<String> ignores) {
+		if (typeName.contains(":")) { // Handles glitches in pf-CDA, for example "evelField:Ljava.lang.Object".
 			return true;
 		}
 		for (String ignore : ignores) {
-			if (fullName.startsWith(ignore)) {
+			if (typeName.startsWith(ignore)) {
 				return true;
 			}
 		}
@@ -63,21 +63,21 @@ public class EnforcerUtils {
 	
 	private static final boolean DENEST = true;
 	
-	static String denest(String fullName) {
-		if (fullName.startsWith("$")) {
-			throw new EnforcerException("malformed class name '" + fullName + "'");
+	static String denest(String typeName) {
+		if (typeName.startsWith("$")) {
+			throw new EnforcerException("malformed class name '" + typeName + "'");
 		}
 		if (DENEST) {
-			return fullName.replaceAll("[$].*$", "");
+			return typeName.replaceAll("[$].*$", "");
 		}
-		return fullName;
+		return typeName;
 	}
 	
-	static Type get(String fullName, Map<String, Type> types) {
-		Type type = types.get(fullName);
+	static Type get(String typeName, Map<String, Type> types) {
+		Type type = types.get(typeName);
 		if (type == null) {
-			type = new Type(fullName);
-			types.put(type.fullName(), type);
+			type = new Type(typeName);
+			types.put(type.name(), type);
 		}
 		return type;
 	}
@@ -135,7 +135,7 @@ public class EnforcerUtils {
 						continue;
 					}
 					String referredToClass = denest(line.trim().replace("<depends-on name=\"", "").replaceAll("\".*$", ""));
-					if (skip(referredToClass, ignores) || referredToClass.equals(type.fullName())) {
+					if (skip(referredToClass, ignores) || referredToClass.equals(type.name())) {
 						continue;
 					}
 					type.referenceNames().add(referredToClass);
@@ -160,9 +160,9 @@ public class EnforcerUtils {
 	public static void correlate(Map<String, Type> types, Target target, Set<String> problems) {
 		RollUp.add(target.components().values());
 		for (Type type : types.values()) {
-			String componentName = RollUp.get(type.fullName());
+			String componentName = RollUp.get(type.name());
 			if (componentName == null) {
-				problems.add("UNABLE TO RESOLVE TYPE TO COMPONENT NAME: " + type.fullName());
+				problems.add("UNABLE TO RESOLVE TYPE TO COMPONENT NAME: " + type.name());
 				continue;
 			}
 			Component component = target.components().get(componentName);

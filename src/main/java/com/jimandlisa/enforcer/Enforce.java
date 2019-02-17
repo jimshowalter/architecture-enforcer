@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class Enforce {
-	
+
 	static enum Optionals {
 		IGNORES("-i"),
 		REFLECTIONS("-r"),
@@ -42,33 +42,57 @@ public class Enforce {
 		}
 	}
 	
-	static void usage(String error) {
-		throw new EnforcerException(error + ": usage: /full/path/to/target/architecture/.yaml /full/path/to/pf-CDA/.odem " + Optionals.IGNORES + "/full/path/to/packages/to/ignore " + Optionals.REFLECTIONS + "/full/path/to/reflection/references " + Optionals.FIX_UNRESOLVEDS + "/full/path/to/fixed/unresolveds [last three args optional and unordered]");
-	}
-	
+	private static final String USAGE = ": usage: /full/path/to/target/architecture/.yaml /full/path/to/pf-CDA/.odem " + Optionals.IGNORES + "/full/path/to/packages/to/ignore " + Optionals.REFLECTIONS + "/full/path/to/reflection/references " + Optionals.FIX_UNRESOLVEDS + "/full/path/to/fixed/unresolveds [last three args optional and unordered]";
+
 	static void parse(String arg, Inputs inputs) {
 		if (arg.startsWith(Optionals.IGNORES.indicator())) {
 			if (inputs.ignores() != null) {
-				usage("already specified " + Optionals.IGNORES.indicator() + " option");
+				throw new EnforcerException("already specified " + Optionals.IGNORES.indicator() + " option" + USAGE);
 			}
 			inputs.setIgnores(new File(arg.replaceFirst(Optionals.IGNORES.indicator(), "")));
 			return;
 		}
 		if (arg.startsWith(Optionals.REFLECTIONS.indicator())) {
 			if (inputs.reflections() != null) {
-				usage("already specified " + Optionals.REFLECTIONS.indicator() + " option");
+				throw new EnforcerException("already specified " + Optionals.REFLECTIONS.indicator() + " option" + USAGE);
 			}
 			inputs.setReflections(new File(arg.replaceFirst(Optionals.REFLECTIONS.indicator(), "")));
 			return;
 		}
 		if (arg.startsWith(Optionals.FIX_UNRESOLVEDS.indicator())) {
 			if (inputs.fixUnresolveds() != null) {
-				usage("already specified " + Optionals.FIX_UNRESOLVEDS.indicator() + " option");
+				throw new EnforcerException("already specified " + Optionals.FIX_UNRESOLVEDS.indicator() + " option" + USAGE);
 			}
 			inputs.setFixUnresolveds(new File(arg.replaceFirst(Optionals.FIX_UNRESOLVEDS.indicator(), "")));
 			return;
 		}
-		usage("unrecognized option " + arg);
+		throw new EnforcerException("unrecognized option " + arg + USAGE);
+	}
+	
+	static void debug(boolean debug, Target target, Map<String, Type> types, PrintStream ps) throws Exception {
+		if (!debug) {
+			return;
+		}
+		TargetUtils.dump(target, ps);
+		RollUp.dump(ps);
+		ps.println("Total outermost types: " + types.size());
+		for (String typeName : CollectionUtils.sort(new ArrayList<>(types.keySet()))) {
+			ps.println("\t" + typeName);
+			for (String referenceName : CollectionUtils.sort(new ArrayList<>(types.get(typeName).referenceNames()))) {
+				ps.println("\t\t" + referenceName);
+			}
+		}
+	}
+	
+	static void problems(Set<String> problems, PrintStream ps) {
+		if (problems.isEmpty()) {
+			return;
+		}
+		ps.println("PROBLEMS:");
+		for (String problem : CollectionUtils.sort(new ArrayList<>(problems))) {
+			ps.println("\t" + problem);
+		}
+		// TODO: Separate fatal from non-fatal, and throw at end if any fatal.
 	}
 	
 	static void mainImpl(Inputs inputs, PrintStream ps, boolean debug) throws Exception {
@@ -76,34 +100,19 @@ public class Enforce {
 		Set<String> problems = new HashSet<>();
 		Map<String, Type> types = EnforcerUtils.resolve(inputs, problems);
 		EnforcerUtils.correlate(types, target, problems);
-		if (debug) {
-			TargetUtils.dump(target, ps);
-			RollUp.dump(ps);
-			ps.println("Total outermost types: " + types.size());
-			for (String fullName : CollectionUtils.sort(new ArrayList<>(types.keySet()))) {
-				ps.println("\t" + fullName);
-				for (String referenceName : CollectionUtils.sort(new ArrayList<>(types.get(fullName).referenceNames()))) {
-					ps.println("\t\t" + referenceName);
-				}
-			}
-			if (!problems.isEmpty()) {
-				ps.println("PROBLEMS:");
-				for (String problem : CollectionUtils.sort(new ArrayList<>(problems))) {
-					ps.println("\t" + problem);
-				}
-			}
-		}
+		debug(debug, target, types, ps);
+		problems(problems, ps);
 	}
 	
-	static final boolean DEBUG = true;
+	static final boolean DEBUG = false;
 
-	public static void main(String[] args) {
+	public static void mainImpl(String[] args) {
 		try {
 			if (args.length < 2) {
-				usage("not enough args");
+				throw new EnforcerException("not enough args" + USAGE);
 			}
 			if (args.length > 5) {
-				usage("too many args");
+				throw new EnforcerException("too many args" + USAGE);
 			}
 			Inputs inputs = new Inputs(new File(args[0]), new File(args[1]));
 			for (int i = 2; i < args.length; i++) {

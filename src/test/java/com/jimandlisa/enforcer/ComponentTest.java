@@ -13,43 +13,17 @@
 
 package com.jimandlisa.enforcer;
 
-import java.util.HashSet;
-import java.util.Set;
+import org.junit.Test;
 
-public class Type {
+public class ComponentTest {
 
-	private final String name;
-	private final Set<String> referenceNames = new HashSet<>();
-	private final Set<Type> references = new HashSet<>();
-	private Component definedIn = null;
-	
-	public Type(final String name) {
-		super();
-		this.name = name;
-	}
-	
-	public String name() {
-		return name;
-	}
-
-	public Set<String> referenceNames() {
-		return referenceNames;
-	}
-	
-	public Set<Type> references() {
-		return references;
-	}
-	
-	public void setDefinedIn(final Component component) {
-		this.definedIn = component;
-	}
-	
-	public Component definedIn() {
-		return definedIn;
-	}
-	
-	@Override
-	public String toString() {
-		return name;
+	@Test
+	public void doTest() {
+		Layer layer = new Layer("name", 0, "description");
+		Domain domain = new Domain("name", "description");
+		Component component = new Component("name", layer, domain, "description");
+		component.toString();
+		component = new Component("name", layer, null, "description");
+		component.toString();
 	}
 }

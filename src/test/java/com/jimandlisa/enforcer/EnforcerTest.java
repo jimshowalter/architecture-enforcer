@@ -14,7 +14,6 @@
 package com.jimandlisa.enforcer;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 
@@ -25,9 +24,7 @@ public class EnforcerTest {
 	@Test
 	public void doTest() throws Exception {
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
-			Inputs inputs = new Inputs(new File(Thread.currentThread().getContextClassLoader().getResource("SampleTarget.yaml").getPath()), new File(Thread.currentThread().getContextClassLoader().getResource("Sample.odem").getPath()));
-			inputs.setIgnores(new File(Thread.currentThread().getContextClassLoader().getResource("SamplePackageIgnores.txt").getPath()));
-			Enforce.mainImpl(inputs, ps, true);
+			Enforce.mainImpl(TestUtils.inputs(true, false, false), ps, true);
 			TestUtils.compare(baos, "TestEnforceCanned.txt");
 		}
 	}

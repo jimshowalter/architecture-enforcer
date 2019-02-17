@@ -24,6 +24,7 @@ public class TargetTest {
 
 	@Test
 	public void doTest() throws Exception {
+		new TargetUtils();
 		Target target = TargetUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("TestTarget.yaml").getPath()));
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
 			TargetUtils.dump(target, ps);

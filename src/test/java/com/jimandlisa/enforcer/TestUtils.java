@@ -16,6 +16,7 @@ package com.jimandlisa.enforcer;
 import static org.junit.Assert.assertEquals;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -35,5 +36,19 @@ public class TestUtils {
 		String out = new String(baos.toByteArray(), StandardCharsets.UTF_8).trim().replaceAll("\r\n\r\n", "\r\n");
 		String cannedOut = read(canned).trim().replaceAll("\r\n\r\n", "\r\n");
 		assertEquals(out, cannedOut);
+	}
+	
+	public static Inputs inputs(boolean includeIgnores, boolean includeReflections, boolean includeFixUnresolveds) {
+		Inputs inputs = new Inputs(new File(Thread.currentThread().getContextClassLoader().getResource("SampleTarget.yaml").getPath()), new File(Thread.currentThread().getContextClassLoader().getResource("Sample.odem").getPath()));
+		if (includeIgnores) {
+			inputs.setIgnores(new File(Thread.currentThread().getContextClassLoader().getResource("SamplePackageIgnores.txt").getPath()));
+		}
+		if (includeReflections) {
+			inputs.setReflections(new File(Thread.currentThread().getContextClassLoader().getResource("SampleReflections.txt").getPath()));
+		}
+		if (includeFixUnresolveds) {
+			inputs.setFixUnresolveds(new File(Thread.currentThread().getContextClassLoader().getResource("SampleFixUnresolveds.txt").getPath()));
+		}
+		return inputs;
 	}
 }

@@ -13,43 +13,15 @@
 
 package com.jimandlisa.enforcer;
 
-import java.util.HashSet;
-import java.util.Set;
+import static org.junit.Assert.assertNull;
 
-public class Type {
+import org.junit.Test;
 
-	private final String name;
-	private final Set<String> referenceNames = new HashSet<>();
-	private final Set<Type> references = new HashSet<>();
-	private Component definedIn = null;
-	
-	public Type(final String name) {
-		super();
-		this.name = name;
-	}
-	
-	public String name() {
-		return name;
-	}
+public class RollUpTest {
 
-	public Set<String> referenceNames() {
-		return referenceNames;
-	}
-	
-	public Set<Type> references() {
-		return references;
-	}
-	
-	public void setDefinedIn(final Component component) {
-		this.definedIn = component;
-	}
-	
-	public Component definedIn() {
-		return definedIn;
-	}
-	
-	@Override
-	public String toString() {
-		return name;
+	@Test
+	public void doTest() {
+		new RollUp();
+		assertNull(RollUp.get("foo"));
 	}
 }

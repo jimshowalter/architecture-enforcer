@@ -13,43 +13,23 @@
 
 package com.jimandlisa.enforcer;
 
-import java.util.HashSet;
-import java.util.Set;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
-public class Type {
+import org.junit.Test;
 
-	private final String name;
-	private final Set<String> referenceNames = new HashSet<>();
-	private final Set<Type> references = new HashSet<>();
-	private Component definedIn = null;
-	
-	public Type(final String name) {
-		super();
-		this.name = name;
-	}
-	
-	public String name() {
-		return name;
-	}
+public class DomainTest {
 
-	public Set<String> referenceNames() {
-		return referenceNames;
-	}
-	
-	public Set<Type> references() {
-		return references;
-	}
-	
-	public void setDefinedIn(final Component component) {
-		this.definedIn = component;
-	}
-	
-	public Component definedIn() {
-		return definedIn;
-	}
-	
-	@Override
-	public String toString() {
-		return name;
+	@Test
+	public void doTest() {
+		Domain domain = new Domain("name", "description");
+		assertNotNull(domain.name());
+		assertNotNull(domain.description());
+		domain.toString();
+		domain = new Domain("name", null);
+		assertNotNull(domain.name());
+		assertNull(domain.description());
+		domain.toString();
+		domain.components();
 	}
 }

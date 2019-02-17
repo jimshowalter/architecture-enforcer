@@ -13,43 +13,39 @@
 
 package com.jimandlisa.enforcer;
 
-import java.util.HashSet;
-import java.util.Set;
+import static org.junit.Assert.assertEquals;
 
-public class Type {
+import org.junit.Test;
 
-	private final String name;
-	private final Set<String> referenceNames = new HashSet<>();
-	private final Set<Type> references = new HashSet<>();
-	private Component definedIn = null;
-	
-	public Type(final String name) {
-		super();
-		this.name = name;
-	}
-	
-	public String name() {
-		return name;
-	}
+public class ArgUtilsTest {
 
-	public Set<String> referenceNames() {
-		return referenceNames;
-	}
-	
-	public Set<Type> references() {
-		return references;
-	}
-	
-	public void setDefinedIn(final Component component) {
-		this.definedIn = component;
-	}
-	
-	public Component definedIn() {
-		return definedIn;
-	}
-	
-	@Override
-	public String toString() {
-		return name;
+	@Test
+	public void doTest() {
+		new ArgUtils();
+		try {
+			ArgUtils.check((String)null, "name");
+		} catch (EnforcerException e) {
+			assertEquals("Null name", e.getMessage());
+		}
+		try {
+			ArgUtils.check(" \t ", "name");
+		} catch (EnforcerException e) {
+			assertEquals("Blank name", e.getMessage());
+		}
+		try {
+			ArgUtils.check((Integer)null, "name");
+		} catch (EnforcerException e) {
+			assertEquals("Null name", e.getMessage());
+		}
+		try {
+			ArgUtils.check((Layer)null, "name");
+		} catch (EnforcerException e) {
+			assertEquals("Null name", e.getMessage());
+		}
+		try {
+			ArgUtils.check((Domain)null, "name");
+		} catch (EnforcerException e) {
+			assertEquals("Null name", e.getMessage());
+		}
 	}
 }

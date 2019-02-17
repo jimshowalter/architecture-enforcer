@@ -135,8 +135,12 @@ public class TargetUtils {
 			if (target.components().containsKey(component.name())) {
 				throw new EnforcerException("Duplicate component name '" + component.name() + "'");
 			}
+			component.layer().components().put(component.name(), component);
 			if (requireDomains && component.domain() == null) {
 				throw new EnforcerException("Must specify domain for component '" + component.name() + "'");
+			}
+			if (component.domain() != null) {
+				component.domain().components().put(component.name(), component);
 			}
 			List<String> packages = getList(map, "packages");
 			if (packages != null) {

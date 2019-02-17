@@ -31,7 +31,7 @@ public class Component {
 		super();
 		this.name = ArgUtils.check(name, "name");
 		this.layer = ArgUtils.check(layer, "layer for component '" + name() + "' (check if layer is defined)");
-		this.domain = ArgUtils.check(domain, "domain for component '" + name() + "' (check if domain is defined)");
+		this.domain = domain == null ? null : ArgUtils.check(domain, "domain for component '" + name() + "' (check if domain is defined)");
 		this.description = description == null ? null : description.trim();
 	}
 	
@@ -60,7 +60,7 @@ public class Component {
 	}
 	
 	public void add(Type type) {
-		types().put(type.fullName(), type);
+		types().put(type.name(), type);
 	}
 
 	@Override

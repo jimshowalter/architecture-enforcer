@@ -21,7 +21,7 @@ import java.util.Comparator;
 import java.util.List;
 
 public class RollUp {
-	
+
 	private static final List<String> packagesAndComponents = new ArrayList<>();
 
 	public static void add(Collection<Component> components) {
