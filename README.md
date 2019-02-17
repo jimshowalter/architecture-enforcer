@@ -180,13 +180,13 @@ We welcome contributions of those and other improvements.
 
 This tool is a cleanroom reimplementation of a proprietary tool used for a massive decomposition project.
 
-Only general, well-known refactoring concepts have been reused (layering, encapsulation, etc.). Nothing from the proprietary tool's code was used, and this tool differs significantly from how that tool worked.
+Only general, well-known refactoring concepts have been reused (layering, encapsulation, APIs, implementation, etc.). Nothing from the proprietary tool's code was used, and this tool differs significantly from how that tool worked.
 
 ## Caveats ##
 
 It's possible this tool can miss some dependencies.
 
-For example, pf-CDA determines dependencies from bytecode, and static constants are inlined in bytecode without any "backpointer" to the defining class.
+For example, pf-CDA determines dependencies from bytecode, and static constants are inlined in bytecode without any "backpointer" to the defining class (it might be possible to fix this by looking at debug symbols).
 
 In addition, the reflection-based references and unresolved fixes, being entered manually, are only as good as your team's ability to find them all.
 
