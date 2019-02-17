@@ -18,5 +18,5 @@ components:
     layer: My First Layer
     domain: Domain A
     packages:
-      - com.foo.bar
+      - com.foo.bar.
       - org.baz

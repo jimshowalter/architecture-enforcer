@@ -143,7 +143,9 @@ public class TargetUtils {
 			}
 			List<String> packages = getList(map, "packages");
 			if (packages != null) {
-				component.packages().addAll(CollectionUtils.sort(packages));
+				for (String pkg : packages) {
+					component.packages().add(pkg.replaceAll("[.]+$", ""));
+				}
 			}
 			target.add(component);
 		}

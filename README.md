@@ -82,7 +82,7 @@ Notes:
 
 * References to and from nested classes are rolled up to the outermost enclosing classes. For example, if foo.bar.utils.Utils refers to foo.bar.utils.math.Math$Multiply, the tool registers this as a reference from foo.bar.utils.Utils to foo.bar.utils.math.Math.
 In many projects this greatly shrinks the number of references that need to be analyzed. If it is important in your project to track references at the nested-class level, you need to extract nested classes to new source files, or modify the tool so it preserves nesting
-(search for "DENEST" in EnforcerUtils).
+(look at EnforcerUtils.denest).
 
 ### Kinds Of References ###
 
@@ -162,7 +162,7 @@ This tool can of course be improved. Here are some things we know would make it 
 * First, and most obviously, having to manually run pf-CDA at the outset is a pain, plus it thwarts automating analysis in CI/CD. The documentation on http:www.dependency-analyzer.org mentions an API that could probably be called by this tool. Or we could investigate https:innig.net/macker, or javaparser.org.
 Alternatively, someone skilled with bytecode analysis could probably replace pf-CDA entirely (we don't need all of its features, just a dump of class-to-class references).
 
-* Add an option to preserve nesting. Default the option to disabled (don't preserve nesting) to avoid memory/time overhead. (Search for "DENEST" in EnforcerUtils.)
+* Add an option to preserve nesting. Default the option to disabled (don't preserve nesting) to avoid memory/time overhead. (Look at EnforcerUtils.denest.)
 
 * Parse Class.forName calls in JSP pages and add those references automatically, instead of requiring manual bookkeeping in the reflection-references file.
 

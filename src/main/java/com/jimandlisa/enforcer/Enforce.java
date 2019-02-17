@@ -99,7 +99,7 @@ public class Enforce {
 		Target target = TargetUtils.parse(inputs.target());
 		Set<String> problems = new HashSet<>();
 		Map<String, Type> types = EnforcerUtils.resolve(inputs, problems);
-		EnforcerUtils.correlate(types, target, problems);
+		EnforcerUtils.correlate(types, target.components(), problems);
 		debug(debug, target, types, ps);
 		problems(problems, ps);
 	}

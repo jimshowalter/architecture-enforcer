@@ -36,7 +36,7 @@ public class EnforcerUtils {
 					continue;
 				}
 				if (ignore.endsWith("!")) {
-					ignores.add(ignore.replaceAll("[!]$", ""));
+					ignores.add(ignore.replaceAll("[!]+$", ""));
 					continue;
 				}
 				if (ignore.endsWith(".")) {
@@ -61,16 +61,11 @@ public class EnforcerUtils {
 		return false;
 	}
 	
-	private static final boolean DENEST = true;
-	
 	static String denest(String typeName) {
 		if (typeName.startsWith("$")) {
 			throw new EnforcerException("malformed class name '" + typeName + "'");
 		}
-		if (DENEST) {
-			return typeName.replaceAll("[$].*$", "");
-		}
-		return typeName;
+		return typeName.replaceAll("[$].*$", ""); // To stop denesting, change this to just return the unmodified type name.
 	}
 	
 	static Type get(String typeName, Map<String, Type> types) {
@@ -90,7 +85,14 @@ public class EnforcerUtils {
 			String line = null;
 			Type type = null;
 			while ((line = reader.readLine()) != null) {
-				String[] segments = line.trim().replaceAll("[ \t]+", "").split(":");
+				String trimmed = line.trim();
+				if (trimmed.isEmpty()) {
+					continue;
+				}
+				if (trimmed.startsWith("#")) {
+					continue;
+				}
+				String[] segments = trimmed.replaceAll("[ \t]+", "").split(":");
 				if (segments.length != 2) {
 					throw new EnforcerException("invalid " + entryName + " entry in " + file + ": " + line);
 				}
@@ -103,12 +105,25 @@ public class EnforcerUtils {
 				String[] segments2 = segments[1].split(",");
 				for (String segment : segments2) {
 					String referredToClass = denest(segment);
-					if (skip(referringClass, ignores)) {
+					if (skip(referredToClass, ignores)) {
 						problems.add(entryName.toUpperCase() + " CLASS IS LISTED AS REFERRED-TO BUT ALSO LISTED IN IGNORES: " + referringClass);
 						continue;
 					}
 					type.referenceNames().add(referredToClass);
 				}
+			}
+		}
+	}
+	
+	static void resolve(Map<String, Type> types, Set<String> problems) {
+		for (Type type : types.values()) {
+			for (String referenceName : type.referenceNames()) {
+				Type reference = types.get(referenceName);
+				if (reference == null) {
+					problems.add("UNRESOLVED: " + referenceName);
+					continue;
+				}
+				type.references().add(reference);
 			}
 		}
 	}
@@ -135,41 +150,31 @@ public class EnforcerUtils {
 						continue;
 					}
 					String referredToClass = denest(line.trim().replace("<depends-on name=\"", "").replaceAll("\".*$", ""));
-					if (skip(referredToClass, ignores) || referredToClass.equals(type.name())) {
+					if (skip(referredToClass, ignores)) {
 						continue;
 					}
+//					if (referredToClass.equals(type.name())) { // Skip self-references. Commented out because pf-CDA seems to filter them for us.
+//						continue;
+//					}
 					type.referenceNames().add(referredToClass);
 				}
 			}
 		}
 		parse(inputs.reflections(), types, ignores, problems, "reflection"); // Get reflection-based referring and referred-to classes from reflections file.
 		parse(inputs.fixUnresolveds(), types, ignores, problems, "fix-unresolved"); // Get referring and referred-to classes from fix-unresolveds file.
-		for (Type type : types.values()) {
-			for (String referenceName : type.referenceNames()) {
-				Type reference = types.get(referenceName);
-				if (reference == null) {
-					problems.add("UNRESOLVED: " + referenceName);
-					continue;
-				}
-				type.references().add(reference);
-			}
-		}
+		resolve(types, problems);
 		return types;
 	}
 	
-	public static void correlate(Map<String, Type> types, Target target, Set<String> problems) {
-		RollUp.add(target.components().values());
+	public static void correlate(Map<String, Type> types, Map<String, Component> components, Set<String> problems) {
+		RollUp.add(components.values());
 		for (Type type : types.values()) {
 			String componentName = RollUp.get(type.name());
 			if (componentName == null) {
 				problems.add("UNABLE TO RESOLVE TYPE TO COMPONENT NAME: " + type.name());
 				continue;
 			}
-			Component component = target.components().get(componentName);
-			if (component == null) {
-				problems.add("UNABLE TO RESOLVE COMPONENT NAME TO COMPONENT: " + componentName); // This should be impossible.
-				continue;
-			}
+			Component component = components.get(componentName);
 			component.add(type);
 			type.setDefinedIn(component);
 		}
