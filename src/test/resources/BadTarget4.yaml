@@ -1,0 +1,8 @@
+layers:
+  - name: Data
+    depth: 0
+components:
+  - name: Data
+    layer: Data
+  - name: Data
+    layer: Data

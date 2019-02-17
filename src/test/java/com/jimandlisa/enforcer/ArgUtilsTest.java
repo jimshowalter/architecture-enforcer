@@ -25,27 +25,27 @@ public class ArgUtilsTest {
 		try {
 			ArgUtils.check((String)null, "name");
 		} catch (EnforcerException e) {
-			assertEquals("Null name", e.getMessage());
+			assertEquals("null name", e.getMessage());
 		}
 		try {
 			ArgUtils.check(" \t ", "name");
 		} catch (EnforcerException e) {
-			assertEquals("Blank name", e.getMessage());
+			assertEquals("blank name", e.getMessage());
 		}
 		try {
 			ArgUtils.check((Integer)null, "name");
 		} catch (EnforcerException e) {
-			assertEquals("Null name", e.getMessage());
+			assertEquals("null name", e.getMessage());
 		}
 		try {
 			ArgUtils.check((Layer)null, "name");
 		} catch (EnforcerException e) {
-			assertEquals("Null name", e.getMessage());
+			assertEquals("null name", e.getMessage());
 		}
 		try {
 			ArgUtils.check((Domain)null, "name");
 		} catch (EnforcerException e) {
-			assertEquals("Null name", e.getMessage());
+			assertEquals("null name", e.getMessage());
 		}
 	}
 }

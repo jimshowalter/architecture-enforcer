@@ -13,10 +13,16 @@
 
 package com.jimandlisa.enforcer;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -29,6 +35,45 @@ public class TargetTest {
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
 			TargetUtils.dump(target, ps);
 			TestUtils.compare(baos, "TestTargetCanned.txt");
+		}
+		Map<String, Object> map = new HashMap<>();
+		map.put("foo", "bar");
+		Set<String> allowed = new HashSet<>();
+		try {
+			TargetUtils.validate(map, allowed, "coverage");
+		} catch (EnforcerException e) {
+			assertTrue(e.getMessage().contains("unrecognized coverage key:"));
+		}
+		map.put("baz", "baz2");
+		try {
+			TargetUtils.validate(map, allowed, "coverage");
+		} catch (EnforcerException e) {
+			assertTrue(e.getMessage().contains("unrecognized coverage keys:"));
+		}
+		try {
+			TargetUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("BadTarget1.yaml").getPath()));
+		} catch (EnforcerException e) {
+			assertTrue(e.getMessage().contains("duplicate layer depth"));
+		}
+		try {
+			TargetUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("BadTarget2.yaml").getPath()));
+		} catch (EnforcerException e) {
+			assertTrue(e.getMessage().contains("duplicate layer name"));
+		}
+		try {
+			TargetUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("BadTarget3.yaml").getPath()));
+		} catch (EnforcerException e) {
+			assertTrue(e.getMessage().contains("duplicate domain name"));
+		}
+		try {
+			TargetUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("BadTarget4.yaml").getPath()));
+		} catch (EnforcerException e) {
+			assertTrue(e.getMessage().contains("duplicate component name"));
+		}
+		try {
+			TargetUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("BadTarget5.yaml").getPath()));
+		} catch (EnforcerException e) {
+			assertTrue(e.getMessage().contains("null domain name"));
 		}
 	}
 }

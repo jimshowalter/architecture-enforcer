@@ -17,32 +17,32 @@ public class ArgUtils {
 
 	public static String check(String val, String name) {
 		if (val == null) {
-			throw new EnforcerException("Null " + name);
+			throw new EnforcerException("null " + name);
 		}
 		String trimmed = val.trim();
 		if (trimmed.isEmpty()) {
-			throw new EnforcerException("Blank " + name);
+			throw new EnforcerException("blank " + name);
 		}
 		return trimmed;
 	}
 	
 	public static Integer check(Integer val, String name) {
 		if (val == null) {
-			throw new EnforcerException("Null " + name);
+			throw new EnforcerException("null " + name);
 		}
 		return val;
 	}
 	
 	public static Layer check(Layer val, String name) {
 		if (val == null) {
-			throw new EnforcerException("Null " + name);
+			throw new EnforcerException("null " + name);
 		}
 		return val;
 	}
 	
 	public static Domain check(Domain val, String name) {
 		if (val == null) {
-			throw new EnforcerException("Null " + name);
+			throw new EnforcerException("null " + name);
 		}
 		return val;
 	}

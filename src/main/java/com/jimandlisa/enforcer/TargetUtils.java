@@ -60,7 +60,7 @@ public class TargetUtils {
 		set.removeAll(allowed);
 		if (!set.isEmpty()) {
 			if (set.size() == 1) {
-				throw new EnforcerException("Unrecognized " + kind + " key: " + set.iterator().next());
+				throw new EnforcerException("unrecognized " + kind + " key: " + set.iterator().next());
 			}
 			StringBuilder builder = new StringBuilder();
 			boolean first = true;
@@ -72,7 +72,7 @@ public class TargetUtils {
 				}
 				builder.append(key);
 			}
-			throw new EnforcerException("Unrecognized " + kind + " keys: " + builder.toString());
+			throw new EnforcerException("unrecognized " + kind + " keys: " + builder.toString());
 		}
 	}
 	
@@ -110,35 +110,34 @@ public class TargetUtils {
 			validate(map, ALLOWED_LAYER_KEYS, "layer");
 			Layer layer = new Layer(get(map, "name"), getInteger(map, "depth"), get(map, "description"));
 			if (depths.contains(layer.depth())) {
-				throw new EnforcerException("Duplicate layer depth " + layer.depth());
+				throw new EnforcerException("duplicate layer depth " + layer.depth());
 			}
 			depths.add(layer.depth());
 			if (target.layers().containsKey(layer.name())) {
-				throw new EnforcerException("Duplicate layer name '" + layer.name() + "'");
+				throw new EnforcerException("duplicate layer name '" + layer.name() + "'");
 			}
 			target.add(layer);
 		}
-		for (Object obj : json.getJSONArray("domains").toList()) {
-			Map<String, Object> map = cast(obj);
-			validate(map, ALLOWED_DOMAIN_KEYS, "domain");
-			Domain domain = new Domain(get(map, "name"), get(map, "description"));
-			if (target.domains().containsKey(domain.name())) {
-				throw new EnforcerException("Duplicate domain name '" + domain.name() + "'");
+		if (json.has("domains")) {
+			for (Object obj : json.getJSONArray("domains").toList()) {
+				Map<String, Object> map = cast(obj);
+				validate(map, ALLOWED_DOMAIN_KEYS, "domain");
+				Domain domain = new Domain(get(map, "name"), get(map, "description"));
+				if (target.domains().containsKey(domain.name())) {
+					throw new EnforcerException("duplicate domain name '" + domain.name() + "'");
+				}
+				target.add(domain);
 			}
-			target.add(domain);
 		}
 		boolean requireDomains = !target.domains().isEmpty();
 		for (Object obj : json.getJSONArray("components").toList()) {
 			Map<String, Object> map = cast(obj);
 			validate(map, ALLOWED_COMPONENT_KEYS, "component");
-			Component component = new Component(get(map, "name"), layer(target.layers(), get(map, "layer")), domain(target.domains(), get(map, "domain")), get(map, "description"));
+			Component component = new Component(get(map, "name"), layer(target.layers(), get(map, "layer")), (requireDomains ? domain(target.domains(), get(map, "domain")) : null), get(map, "description"));
 			if (target.components().containsKey(component.name())) {
-				throw new EnforcerException("Duplicate component name '" + component.name() + "'");
+				throw new EnforcerException("duplicate component name '" + component.name() + "'");
 			}
 			component.layer().components().put(component.name(), component);
-			if (requireDomains && component.domain() == null) {
-				throw new EnforcerException("Must specify domain for component '" + component.name() + "'");
-			}
 			if (component.domain() != null) {
 				component.domain().components().put(component.name(), component);
 			}
