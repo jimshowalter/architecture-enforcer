@@ -21,7 +21,7 @@ public class Type {
 	private final String name;
 	private final Set<String> referenceNames = new HashSet<>();
 	private final Set<Type> references = new HashSet<>();
-	private Component definedIn = null;
+	private Component belongsTo = null;
 	
 	public Type(final String name) {
 		super();
@@ -40,12 +40,12 @@ public class Type {
 		return references;
 	}
 	
-	public void setDefinedIn(final Component component) {
-		this.definedIn = component;
+	public void setBelongsTo(final Component component) {
+		this.belongsTo = component;
 	}
 	
-	public Component definedIn() {
-		return definedIn;
+	public Component belongsTo() {
+		return belongsTo;
 	}
 	
 	@Override

@@ -105,7 +105,7 @@ public class EnforcerUtilsTest {
 		components.put(component1.name(), component1);
 		EnforcerUtils.correlate(types, components, problems);
 		assertTrue(problems.isEmpty());
-		assertEquals(component1, type1.definedIn());
+		assertEquals(component1, type1.belongsTo());
 		assertEquals(type1, component1.types().get(type1.name()));
 		Type type3 = new Type("com.bar.Baz");
 		types.put(type3.name(), type3);

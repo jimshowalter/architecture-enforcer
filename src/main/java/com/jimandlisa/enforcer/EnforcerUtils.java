@@ -176,15 +176,15 @@ public class EnforcerUtils {
 			}
 			Component component = components.get(componentName);
 			component.add(type);
-			type.setDefinedIn(component);
+			type.setBelongsTo(component);
 		}
 		for (Type type : types.values()) {
 			for (Type referredTo : type.references()) {
-				if (type.definedIn() == referredTo.definedIn()) {
+				if (type.belongsTo() == referredTo.belongsTo()) {
 					continue; // Skip intra-component references.
 				}
-				if (type.definedIn().layer().depth() <= referredTo.definedIn().layer().depth()) {
-					problems.add("ILLEGAL REFERENCE: " + type + " in component '" + type.definedIn().name() + "' in layer " + type.definedIn().layer().depth() + " refers to component '" + referredTo.definedIn().name() + "' in layer " + referredTo.definedIn().layer().depth());
+				if (type.belongsTo().layer().depth() <= referredTo.belongsTo().layer().depth()) {
+					problems.add("ILLEGAL REFERENCE: " + type + " in component '" + type.belongsTo().name() + "' in layer " + type.belongsTo().layer().depth() + " refers to component '" + referredTo.belongsTo().name() + "' in layer " + referredTo.belongsTo().layer().depth());
 				}
 			}
 		}
