@@ -18,14 +18,12 @@ import java.util.HashSet;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.jimandlisa.enforcer.Enforce.Optionals;
-
 public class EnforceTest {
 
 	@Test
 	public void doTest() throws Exception {
 		new Enforce();
-		for (Optionals optional : Enforce.Optionals.values()) {
+		for (Optionals optional : Optionals.values()) {
 			optional.toString();
 		}
 		Enforce.parse(Optionals.IGNORES.indicator() + Thread.currentThread().getContextClassLoader().getResource("SamplePackageIgnores.txt").getPath(), TestUtils.inputs(false, false, false));

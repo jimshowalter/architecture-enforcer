@@ -22,26 +22,6 @@ import java.util.Set;
 
 public class Enforce {
 
-	static enum Optionals {
-		IGNORES("-i"),
-		REFLECTIONS("-r"),
-		FIX_UNRESOLVEDS("-f");
-		
-		private final String indicator;
-		private Optionals(final String indicator) {
-			this.indicator = indicator;
-		}
-		
-		public String indicator() {
-			return indicator;
-		}
-		
-		@Override
-		public String toString() {
-			return indicator();
-		}
-	}
-	
 	private static final String USAGE = ": usage: /full/path/to/target/architecture/.yaml /full/path/to/pf-CDA/.odem " + Optionals.IGNORES + "/full/path/to/packages/to/ignore " + Optionals.REFLECTIONS + "/full/path/to/reflection/references " + Optionals.FIX_UNRESOLVEDS + "/full/path/to/fixed/unresolveds [last three args optional and unordered]";
 
 	static void parse(String arg, Inputs inputs) {
