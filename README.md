@@ -145,15 +145,19 @@ Notes:
 The syntax is full.name.of.package, without a dot at the end. The tool appends dots for you. In some cases you need to suppress dots due to some issues with pf-CDA, in which case end the package name with a !.
 
 * If your project uses reflection, you should add outermost class-to-class dependencies to a file you specify with the -r command-line argument. The syntax is: full.name.of.referring.class.Foo:full.name.of.referred.to.class.Bar,full.name.of.referred.to.class.Baz....,
-where the referred-to classes are outermost classes to which the referring class refers to by reflection. If there are too many referred-to classes to fit cleanly on one line, you can start multiple lines with the referring class.
+where the referred-to classes are outermost classes to which the referring class refers by reflection. At least one referred-to class is required. If there are too many referred-to classes to fit cleanly on one line, you can start multiple lines with the referring class.
 
 * Sometimes the pf-CDA odem file is missing classes that are referred to by other classes in the file. To fix these, you should add the missing outermost classes to a file you specify with the -f command-line argument.
 The syntax is: full.name.of.missing.class.Foo:full.name.of.referred.to.class.Bar,full.name.of.referred.to.class.Baz..., where the referred-to classes are outermost classes to which the missing class refers.
-If there are too many referred-to classes to fit cleanly on one line, you can start multiple lines with the referring class.
+If there are too many referred-to classes to fit cleanly on one line, you can start multiple lines with the referring class. If the unresolved class you are adding does not refer to other classes in your project,
+you don't need to add any referred-to classes (and you don't need a colon after the first class on the line).
 
 * Adding a referred-to class to the reflections or fix-unresolveds files can introduce new unresolved classes. When that happens, you need to keep entering classes until all classes are defined.
 
-* Example files are located in the test resources directory.
+* pf-CDA is smart enough to add references on its own for simple Class.forName calls where the string name of the class is directly specified, as in Class.forName("com.foo.bar.Baz"), but it can't follow complicated string concatenations, strings returned by functions, etc.,
+for example Class.forName(someStringFromAVariable + SomeClass.someFunction(some args from somewhere) + SOME_STRING_CONSTANT + ".foo"). That's why you have to add them manually. Also, pf-CDA doesn't parse reflection references in JSP files, Spring, etc.
+
+* Sample files are located in the test resources directory.
 
 ## TODOs And Welcomed Contributions ##
 
@@ -162,11 +166,11 @@ This tool can of course be improved. Here are some things we know would make it 
 * First, and most obviously, having to manually run pf-CDA at the outset is a pain, plus it thwarts automating analysis in CI/CD. The documentation on http:www.dependency-analyzer.org mentions an API that could probably be called by this tool. Or we could investigate https:innig.net/macker, or javaparser.org.
 Alternatively, someone skilled with bytecode analysis could probably replace pf-CDA entirely (we don't need all of its features, just a dump of class-to-class references).
 
-* Add an option to preserve nesting. Default the option to disabled (don't preserve nesting) to avoid memory/time overhead. (Look at EnforcerUtils.denest.)
+* Various flags are supported by the implementation, but are not currently offered on the command line. They could be added as more optional arguments, parsed, and used to create the Flags object passed to the implementation.
 
 * Parse Class.forName calls in JSP pages and add those references automatically, instead of requiring manual bookkeeping in the reflection-references file.
 
-* Identify reflection references due to Spring, and add those references automatically. (This is a big job!)
+* Identify reflection references due to Spring, and add those references automatically.
 
 * Provide a way to fail builds if the count of illegal references increases. (While refactoring, there are often temporary increases in the number of illegal references, so support would also need to be added for whitelisting new illegal references. Access to the whitelist could be restricted to just the team doing decomposition.)
 

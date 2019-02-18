@@ -86,8 +86,9 @@ public class Enforce {
 	
 	static final boolean DEBUG = false;
 
-	public static void mainImpl(String[] args) {
-		// TODO: Parse options for preserving nested types, strict, and debug, and from them create Flags object to pass to mainImpl.
+	public static void mainImpl(String[] args) throws Exception {
+		Inputs inputs = null;
+		Flags flags = null;
 		try {
 			if (args.length < 2) {
 				throw new EnforcerException("not enough args" + USAGE, Errors.NOT_ENOUGH_ARGS);
@@ -95,14 +96,17 @@ public class Enforce {
 			if (args.length > 5) {
 				throw new EnforcerException("too many args" + USAGE, Errors.TOO_MANY_ARGS);
 			}
-			Inputs inputs = new Inputs(new File(args[0]), new File(args[1]));
+			inputs = new Inputs(new File(args[0]), new File(args[1]));
 			for (int i = 2; i < args.length; i++) {
 				parse(args[i], inputs);
 			}
-			System.out.println("Analyzing/enforcing architecture with " + inputs.toString());
-			mainImpl(inputs, System.out, new Flags(false, false, DEBUG));
+			// TODO: Parse options for preserving nested types, strict, and debug, and from them create Flags object to pass to mainImpl.
+			flags = new Flags(false, false, DEBUG);
 		} catch (Throwable t) {
 			System.out.println(t.getMessage());
+			return;
 		}
+		System.out.println("Analyzing/enforcing architecture with " + inputs.toString());
+		mainImpl(inputs, System.out, flags); 
 	}
 }
