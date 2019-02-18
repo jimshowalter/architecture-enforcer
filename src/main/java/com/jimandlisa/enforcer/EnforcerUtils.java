@@ -65,7 +65,7 @@ public class EnforcerUtils {
 		if (typeName.startsWith("$")) {
 			throw new EnforcerException("malformed class name '" + typeName + "'", Errors.MALFORMED_CLASS_NAME);
 		}
-		return typeName.replaceAll("[$].*$", ""); // To stop denesting, change this to just return the unmodified type name.
+		return typeName.replaceAll("[$].*$", ""); // TODO: To stop denesting, change this to just return the unmodified type name, and toggle this with an option.
 	}
 	
 	static Type get(String typeName, Map<String, Type> types) {
@@ -77,7 +77,7 @@ public class EnforcerUtils {
 		return type;
 	}
 	
-	static void parse(File file, Map<String, Type> types, Set<String> ignores, Set<String> problems, String entryName) throws Exception {
+	static void parse(File file, Map<String, Type> types, Set<String> ignores, Set<Problem> problems, String entryName) throws Exception {
 		if (file == null) {
 			return;
 		}
@@ -98,7 +98,8 @@ public class EnforcerUtils {
 				}
 				String referringClass = denest(segments[0]);
 				if (skip(referringClass, ignores)) {
-					problems.add(entryName.toUpperCase() + " CLASS IS LISTED AS REFERRING BUT ALSO LISTED IN IGNORES: " + referringClass);
+					// TODO: Pass Errors.CLASS_BOTH_REFERRING_AND_IGNORED to constructor if fail on this error is set in options.
+					problems.add(new Problem(entryName.toUpperCase() + " CLASS IS LISTED AS REFERRING BUT ALSO LISTED IN IGNORES: " + referringClass));
 					continue;
 				}
 				type = get(referringClass, types);
@@ -106,7 +107,8 @@ public class EnforcerUtils {
 				for (String segment : segments2) {
 					String referredToClass = denest(segment);
 					if (skip(referredToClass, ignores)) {
-						problems.add(entryName.toUpperCase() + " CLASS IS LISTED AS REFERRED-TO BUT ALSO LISTED IN IGNORES: " + referringClass);
+						// TODO: Pass Errors.CLASS_BOTH_REFERRED_TO_AND_IGNORED to constructor if fail on this error is set in options.
+						problems.add(new Problem(entryName.toUpperCase() + " CLASS IS LISTED AS REFERRED-TO BUT ALSO LISTED IN IGNORES: " + referringClass));
 						continue;
 					}
 					type.referenceNames().add(referredToClass);
@@ -115,12 +117,13 @@ public class EnforcerUtils {
 		}
 	}
 	
-	static void resolve(Map<String, Type> types, Set<String> problems) {
+	static void resolve(Map<String, Type> types, Set<Problem> problems) {
 		for (Type type : types.values()) {
 			for (String referenceName : type.referenceNames()) {
 				Type reference = types.get(referenceName);
 				if (reference == null) {
-					problems.add("UNRESOLVED: " + referenceName);
+					// TODO: Pass Errors.UNRESOLVED_REFERENCE to constructor if fail on this error is set in options.
+					problems.add(new Problem("UNRESOLVED: " + referenceName));
 					continue;
 				}
 				type.references().add(reference);
@@ -128,7 +131,30 @@ public class EnforcerUtils {
 		}
 	}
 	
-	public static Map<String, Type> resolve(Inputs inputs, Set<String> problems) throws Exception {
+	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
+
+	static void report(Set<Problem> problems) {
+		StringBuilder builder = null;
+		Errors firstError = null;
+		boolean multipleErrors = false;
+		for (Problem problem : problems) {
+			if (problem.isFatal()) {
+				if (builder == null) {
+					builder = new StringBuilder();
+					firstError = problem.error();
+				} else {
+					multipleErrors = true;
+				}
+				builder.append(LINE_SEPARATOR);
+				builder.append(problem.description());
+			}
+		}
+		if (builder != null) {
+			throw new EnforcerException("ERROR" + (multipleErrors ? "S" : "") + ":" + builder.toString(), firstError);
+		}
+	}
+	
+	public static Map<String, Type> resolve(Inputs inputs, Set<Problem> problems) throws Exception {
 		Set<String> ignores = ignores(inputs.ignores());
 		Map<String, Type> types = new HashMap<>();
 		// Get referring and referred-to classes from pf-CDA output.
@@ -162,31 +188,36 @@ public class EnforcerUtils {
 		}
 		parse(inputs.reflections(), types, ignores, problems, "reflection"); // Get reflection-based referring and referred-to classes from reflections file.
 		parse(inputs.fixUnresolveds(), types, ignores, problems, "fix-unresolved"); // Get referring and referred-to classes from fix-unresolveds file.
+		report(problems);
 		resolve(types, problems);
+		report(problems);
 		return types;
 	}
 	
-	public static void correlate(Map<String, Type> types, Map<String, Component> components, Set<String> problems) {
+	public static void correlate(Map<String, Type> types, Map<String, Component> components, Set<Problem> problems) {
 		RollUp.add(components.values());
 		for (Type type : types.values()) {
 			String componentName = RollUp.get(type.name());
 			if (componentName == null) {
-				problems.add("UNABLE TO RESOLVE TYPE TO COMPONENT NAME: " + type.name());
+				problems.add(new Problem("UNABLE TO RESOLVE TYPE TO COMPONENT NAME: " + type.name(), Errors.TYPE_NOT_RESOLVED_TO_COMPONENT));
 				continue;
 			}
 			Component component = components.get(componentName);
 			component.add(type);
 			type.setBelongsTo(component);
 		}
+		report(problems);
 		for (Type type : types.values()) {
 			for (Type referredTo : type.references()) {
 				if (type.belongsTo() == referredTo.belongsTo()) {
 					continue; // Skip intra-component references.
 				}
 				if (type.belongsTo().layer().depth() <= referredTo.belongsTo().layer().depth()) {
-					problems.add("ILLEGAL REFERENCE: " + type + " in component '" + type.belongsTo().name() + "' in layer " + type.belongsTo().layer().depth() + " refers to component '" + referredTo.belongsTo().name() + "' in layer " + referredTo.belongsTo().layer().depth());
+					// TODO: Pass Errors.ILLEGAL_REFERENCE to constructor if fail on this error is set in options.
+					problems.add(new Problem("ILLEGAL REFERENCE: " + type + " in component '" + type.belongsTo().name() + "' in layer " + type.belongsTo().layer().depth() + " refers to component '" + referredTo.belongsTo().name() + "' in layer " + referredTo.belongsTo().layer().depth()));
 				}
 			}
 		}
+		report(problems);
 	}
 }

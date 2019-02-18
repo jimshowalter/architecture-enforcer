@@ -56,7 +56,7 @@ public class EnforceTest {
 			assertEquals(Errors.UNRECOGNIZED_COMMAND_LINE_OPTION, e.error());
 		}
 		Enforce.debug(false, null, null, null);
-		Enforce.problems(new HashSet<String>(), null);
+		Enforce.problems(new HashSet<Problem>(), null);
 		Enforce.mainImpl(new String[0]);
 		Enforce.mainImpl(new String[] { "a", "b", "c", "d", "e", "f" });
 		Enforce.mainImpl(new String[] {Thread.currentThread().getContextClassLoader().getResource("SampleTarget.yaml").getPath(), Thread.currentThread().getContextClassLoader().getResource("Sample.odem").getPath(), Optionals.IGNORES.indicator() + Thread.currentThread().getContextClassLoader().getResource("SamplePackageIgnores.txt").getPath()});

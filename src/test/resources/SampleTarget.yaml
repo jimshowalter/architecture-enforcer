@@ -1,5 +1,7 @@
 # Example target-state specification.
 layers:
+  - name: Utils
+    depth: -1
   - name: Data
     depth: 0
     description: Data layer.
@@ -10,6 +12,7 @@ layers:
     depth: 2
     description: User interface.
 domains:
+  - name: Utils
   - name: Data
     description: Data.
   - name: One
@@ -17,6 +20,11 @@ domains:
   - name: Two
     description: Domain 2.
 components:
+  - name: Utils
+    layer: Utils
+    domain: Utils
+    packages:
+      - com.jimandlisa.utils
   - name: Data
     layer: Data
     domain: Data

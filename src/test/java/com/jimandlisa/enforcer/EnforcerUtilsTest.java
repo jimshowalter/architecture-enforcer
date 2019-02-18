@@ -19,7 +19,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -58,7 +58,7 @@ public class EnforcerUtilsTest {
 		assertEquals(1, types.size());
 		types.clear();
 		ignores.clear();
-		Set<String> problems = new HashSet<>();
+		Set<Problem> problems = new LinkedHashSet<>();
 		try {
 			EnforcerUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("BadFixUnresolveds.txt").getPath()), types, ignores, problems, "fix-unresolved");
 		} catch (EnforcerException e) {
@@ -70,14 +70,14 @@ public class EnforcerUtilsTest {
 		ignores.add("foo.");
 		EnforcerUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("TestFixUnresolveds.txt").getPath()), types, ignores, problems, "fix-unresolved");
 		assertEquals(1, problems.size());
-		assertTrue(problems.iterator().next().contains("CLASS IS LISTED AS REFERRING BUT ALSO LISTED IN IGNORES:"));
+		assertTrue(problems.iterator().next().description().contains("CLASS IS LISTED AS REFERRING BUT ALSO LISTED IN IGNORES:"));
 		types.clear();
 		ignores.clear();
 		problems.clear();
 		ignores.add("com.x.");
 		EnforcerUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("TestFixUnresolveds.txt").getPath()), types, ignores, problems, "fix-unresolved");
 		assertEquals(1, problems.size());
-		assertTrue(problems.iterator().next().contains("CLASS IS LISTED AS REFERRED-TO BUT ALSO LISTED IN IGNORES:"));
+		assertTrue(problems.iterator().next().description().contains("CLASS IS LISTED AS REFERRED-TO BUT ALSO LISTED IN IGNORES:"));
 		types.clear();
 		ignores.clear();
 		problems.clear();
@@ -86,7 +86,7 @@ public class EnforcerUtilsTest {
 		types.put(type0.name(), type0);
 		EnforcerUtils.resolve(types, problems);
 		assertEquals(1, problems.size());
-		assertTrue(problems.iterator().next().contains("UNRESOLVED:"));
+		assertTrue(problems.iterator().next().description().contains("UNRESOLVED:"));
 		problems.clear();
 		types.put("bar", new Type("bar"));
 		EnforcerUtils.resolve(types, problems);
@@ -111,8 +111,11 @@ public class EnforcerUtilsTest {
 		assertEquals(type1, component1.types().get(type1.name()));
 		Type type3 = new Type("com.bar.Baz");
 		types.put(type3.name(), type3);
-		EnforcerUtils.correlate(types, components, problems);
-		assertTrue(problems.iterator().next().contains("UNABLE TO RESOLVE TYPE TO COMPONENT NAME:"));
+		try {
+			EnforcerUtils.correlate(types, components, problems);
+		} catch (EnforcerException e) {
+			assertTrue(problems.iterator().next().description().contains("UNABLE TO RESOLVE TYPE TO COMPONENT NAME:"));
+		}
 		problems.clear();
 		Layer layer0 = new Layer("L0", 0, null);
 		Component component2 = new Component("Comp0", layer0, null, null);
@@ -123,6 +126,29 @@ public class EnforcerUtilsTest {
 		type3.referenceNames().add("com.foo.bar.Baz");
 		type3.references().add(type1);
 		EnforcerUtils.correlate(types, components, problems);
-		assertTrue(problems.iterator().next().contains("ILLEGAL REFERENCE:"));
+		assertTrue(problems.iterator().next().description().contains("ILLEGAL REFERENCE:"));
+		types.clear();
+		ignores.clear();
+		problems.clear();
+		EnforcerUtils.report(problems);
+		problems.add(new Problem("COVERAGE0"));
+		EnforcerUtils.report(problems);
+		problems.add(new Problem("COVERAGE1", Errors.CANNOT_READ_FILE));
+		try {
+			EnforcerUtils.report(problems);
+		} catch (EnforcerException e) {
+			assertEquals(Errors.CANNOT_READ_FILE, e.error());
+			assertFalse(e.getMessage().contains("COVERAGE0"));
+			assertTrue(e.getMessage().contains("COVERAGE1"));
+		}
+		problems.add(new Problem("COVERAGE2", Errors.CLASS_BOTH_REFERRED_TO_AND_IGNORED));
+		try {
+			EnforcerUtils.report(problems);
+		} catch (EnforcerException e) {
+			assertEquals(Errors.CANNOT_READ_FILE, e.error());
+			assertFalse(e.getMessage().contains("COVERAGE0"));
+			assertTrue(e.getMessage().contains("COVERAGE1"));
+			assertTrue(e.getMessage().contains("COVERAGE2"));
+		}
 	}
 }

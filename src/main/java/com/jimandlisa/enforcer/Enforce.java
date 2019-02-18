@@ -16,7 +16,7 @@ package com.jimandlisa.enforcer;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -64,20 +64,19 @@ public class Enforce {
 		}
 	}
 	
-	static void problems(Set<String> problems, PrintStream ps) {
+	static void problems(Set<Problem> problems, PrintStream ps) {
 		if (problems.isEmpty()) {
 			return;
 		}
 		ps.println("PROBLEMS:");
-		for (String problem : CollectionUtils.sort(new ArrayList<>(problems))) {
+		for (Problem problem : CollectionUtils.sort(new ArrayList<>(problems))) {
 			ps.println("\t" + problem);
 		}
-		// TODO: Separate fatal from non-fatal, and throw at end if any fatal.
 	}
 	
 	static void mainImpl(Inputs inputs, PrintStream ps, boolean debug) throws Exception {
 		Target target = TargetUtils.parse(inputs.target());
-		Set<String> problems = new HashSet<>();
+		Set<Problem> problems = new LinkedHashSet<>();
 		Map<String, Type> types = EnforcerUtils.resolve(inputs, problems);
 		EnforcerUtils.correlate(types, target.components(), problems);
 		debug(debug, target, types, ps);

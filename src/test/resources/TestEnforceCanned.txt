@@ -1,5 +1,7 @@
 Target-state specification:
 	LAYERS:
+		name='Utils', depth=-1
+		null
 		name='Data', depth=0
 		Data layer.
 		name='App', depth=1
@@ -13,6 +15,8 @@ Target-state specification:
 		Domain 1.
 		name='Two'
 		Domain 2.
+		name='Utils'
+		null
 	COMPONENTS:
 		name='App One', layer='App', depth=1, domain='One'
 		Middle tier of app one.
@@ -36,7 +40,12 @@ Target-state specification:
 		UI for app two.
 		packages:
 			com.jimandlisa.ui.two
+		name='Utils', layer='Utils', depth=-1, domain='Utils'
+		null
+		packages:
+			com.jimandlisa.utils
 Packages and components:
+	com.jimandlisa.utils!Utils
 	com.jimandlisa.ui.two!UI Two
 	com.jimandlisa.ui.one!UI One
 	com.jimandlisa.service.one!App One
@@ -44,20 +53,32 @@ Packages and components:
 	com.jimandlisa.data!Data
 	com.jimandlisa.app.two!App Two
 	com.jimandlisa.app.one!App One
-Total outermost types: 7
+Total outermost types: 8
 	com.jimandlisa.app.one.App1
+		com.jimandlisa.app.two.App2
 		com.jimandlisa.data.Data
+		com.jimandlisa.utils.Utils
 	com.jimandlisa.app.two.App2
 		com.jimandlisa.data.Data
+		com.jimandlisa.utils.Utils
 	com.jimandlisa.data.Data
+		com.jimandlisa.utils.Utils
 	com.jimandlisa.service.Service2
 		com.jimandlisa.app.two.App2
+		com.jimandlisa.ui.one.UI1
+		com.jimandlisa.utils.Utils
 	com.jimandlisa.service.one.Service1
 		com.jimandlisa.app.one.App1
-		com.jimandlisa.ui.one.UI1
+		com.jimandlisa.utils.Utils
 	com.jimandlisa.ui.one.UI1
 		com.jimandlisa.service.one.Service1
+		com.jimandlisa.utils.Utils
 	com.jimandlisa.ui.two.UI2
 		com.jimandlisa.service.Service2
+		com.jimandlisa.utils.Utils
+	com.jimandlisa.utils.Utils
+		com.jimandlisa.utils.Unresolved
 PROBLEMS:
-	ILLEGAL REFERENCE: com.jimandlisa.service.one.Service1 in component 'App One' in layer 1 refers to component 'UI One' in layer 2
+	ILLEGAL REFERENCE: com.jimandlisa.app.one.App1 in component 'App One' in layer 1 refers to component 'App Two' in layer 1: error=null
+	ILLEGAL REFERENCE: com.jimandlisa.service.Service2 in component 'App Two' in layer 1 refers to component 'UI One' in layer 2: error=null
+	UNRESOLVED: com.jimandlisa.utils.Unresolved: error=null
