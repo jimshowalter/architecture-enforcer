@@ -19,38 +19,37 @@ public class Problem implements Comparable<Problem> {
 
 	private final String description;
 	private final Errors error;
-	
-	public Problem(final String description, final Errors error) { // If fatal.
+
+	public Problem(final String description, final Errors error) {
 		super();
 		this.description = description;
 		this.error = error;
 	}
-	
-	public Problem(final String description) { // If not fatal.
-		this(description, null);
-	}
-	
+
 	public String description() {
 		return description;
 	}
-	
+
 	public Errors error() {
 		return error;
 	}
-	
+
 	public boolean isFatal() {
 		return error() != null;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return description().hashCode();
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == null) {
 			return false;
+		}
+		if (this == obj) {
+			return true;
 		}
 		if (!(obj instanceof Problem)) {
 			return false;
@@ -62,7 +61,7 @@ public class Problem implements Comparable<Problem> {
 	public int compareTo(Problem other) {
 		return description().compareTo(other.description());
 	}
-	
+
 	@Override
 	public String toString() {
 		return description() + ": error=" + error();

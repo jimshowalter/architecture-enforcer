@@ -24,7 +24,7 @@ public class EnforcerTest {
 	@Test
 	public void doTest() throws Exception {
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
-			Enforce.mainImpl(TestUtils.inputs(true, false, false), ps, true);
+			Enforce.mainImpl(TestUtils.inputs(true, false, false), ps, new Flags(false, false, true));
 			TestUtils.compare(baos, "TestEnforceCanned.txt");
 		}
 	}

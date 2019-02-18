@@ -15,6 +15,7 @@ package com.jimandlisa.enforcer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -42,9 +43,10 @@ public class EnforcerUtilsTest {
 		ignores.add("foo.");
 		assertTrue(EnforcerUtils.skip("foo.bar", ignores));
 		assertFalse(EnforcerUtils.skip("baz.baz2", ignores));
-		assertEquals("com.foo.Bar", EnforcerUtils.denest("com.foo.Bar$Baz"));
+		assertEquals("com.foo.Bar", EnforcerUtils.denest("com.foo.Bar$Baz", false));
+		assertEquals("com.foo.Bar$Baz", EnforcerUtils.denest("com.foo.Bar$Baz", true));
 		try {
-			EnforcerUtils.denest("$Foo");
+			EnforcerUtils.denest("$Foo", false);
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("malformed class name"));
 			assertEquals(Errors.MALFORMED_CLASS_NAME, e.error());
@@ -59,23 +61,31 @@ public class EnforcerUtilsTest {
 		types.clear();
 		ignores.clear();
 		Set<Problem> problems = new LinkedHashSet<>();
+		Flags flags = new Flags(false, false, false);
+		EnforcerUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("TestReflections.txt").getPath()), types, ignores, problems, "reflection", true, flags);
 		try {
-			EnforcerUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("BadFixUnresolveds.txt").getPath()), types, ignores, problems, "fix-unresolved");
+			EnforcerUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("BadReflections.txt").getPath()), types, ignores, problems, "reflection", true, flags);
+		} catch (EnforcerException e) {
+			assertTrue(e.getMessage().contains("invalid reflection entry in"));
+			assertEquals(Errors.MISSING_REFERRED_TO_CLASS, e.error());
+		}
+		try {
+			EnforcerUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("BadFixUnresolveds.txt").getPath()), types, ignores, problems, "fix-unresolved", false, flags);
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("invalid fix-unresolved entry in"));
-			assertEquals(Errors.INVALID_CLASS_TO_CLASS_ENTRY, e.error());
+			assertEquals(Errors.MALFORMED_CLASS_TO_CLASS_REFERENCE, e.error());
 		}
-		EnforcerUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("TestFixUnresolveds.txt").getPath()), types, ignores, problems, "fix-unresolved");
+		EnforcerUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("TestFixUnresolveds.txt").getPath()), types, ignores, problems, "fix-unresolved", false, flags);
 		assertTrue(problems.isEmpty());
 		ignores.add("foo.");
-		EnforcerUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("TestFixUnresolveds.txt").getPath()), types, ignores, problems, "fix-unresolved");
+		EnforcerUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("TestFixUnresolveds.txt").getPath()), types, ignores, problems, "fix-unresolved", false, flags);
 		assertEquals(1, problems.size());
 		assertTrue(problems.iterator().next().description().contains("CLASS IS LISTED AS REFERRING BUT ALSO LISTED IN IGNORES:"));
 		types.clear();
 		ignores.clear();
 		problems.clear();
 		ignores.add("com.x.");
-		EnforcerUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("TestFixUnresolveds.txt").getPath()), types, ignores, problems, "fix-unresolved");
+		EnforcerUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("TestFixUnresolveds.txt").getPath()), types, ignores, problems, "fix-unresolved", false, flags);
 		assertEquals(1, problems.size());
 		assertTrue(problems.iterator().next().description().contains("CLASS IS LISTED AS REFERRED-TO BUT ALSO LISTED IN IGNORES:"));
 		types.clear();
@@ -84,12 +94,12 @@ public class EnforcerUtilsTest {
 		type0 = new Type("foo");
 		type0.referenceNames().add("bar");
 		types.put(type0.name(), type0);
-		EnforcerUtils.resolve(types, problems);
+		EnforcerUtils.resolve(types, problems, flags);
 		assertEquals(1, problems.size());
 		assertTrue(problems.iterator().next().description().contains("UNRESOLVED:"));
 		problems.clear();
 		types.put("bar", new Type("bar"));
-		EnforcerUtils.resolve(types, problems);
+		EnforcerUtils.resolve(types, problems, flags);
 		assertTrue(problems.isEmpty());
 		types.clear();
 		ignores.clear();
@@ -105,14 +115,14 @@ public class EnforcerUtilsTest {
 		Component component1 = new Component("Comp1", layer1, null, null);
 		component1.packages().add("com.foo");
 		components.put(component1.name(), component1);
-		EnforcerUtils.correlate(types, components, problems);
+		EnforcerUtils.correlate(types, components, problems, flags);
 		assertTrue(problems.isEmpty());
 		assertEquals(component1, type1.belongsTo());
 		assertEquals(type1, component1.types().get(type1.name()));
 		Type type3 = new Type("com.bar.Baz");
 		types.put(type3.name(), type3);
 		try {
-			EnforcerUtils.correlate(types, components, problems);
+			EnforcerUtils.correlate(types, components, problems, flags);
 		} catch (EnforcerException e) {
 			assertTrue(problems.iterator().next().description().contains("UNABLE TO RESOLVE TYPE TO COMPONENT NAME:"));
 		}
@@ -121,17 +131,17 @@ public class EnforcerUtilsTest {
 		Component component2 = new Component("Comp0", layer0, null, null);
 		component2.packages().add("com.bar");
 		components.put(component2.name(), component2);
-		EnforcerUtils.correlate(types, components, problems);
+		EnforcerUtils.correlate(types, components, problems, flags);
 		assertTrue(problems.isEmpty());
 		type3.referenceNames().add("com.foo.bar.Baz");
 		type3.references().add(type1);
-		EnforcerUtils.correlate(types, components, problems);
+		EnforcerUtils.correlate(types, components, problems, flags);
 		assertTrue(problems.iterator().next().description().contains("ILLEGAL REFERENCE:"));
 		types.clear();
 		ignores.clear();
 		problems.clear();
 		EnforcerUtils.report(problems);
-		problems.add(new Problem("COVERAGE0"));
+		problems.add(new Problem("COVERAGE0", null));
 		EnforcerUtils.report(problems);
 		problems.add(new Problem("COVERAGE1", Errors.CANNOT_READ_FILE));
 		try {
@@ -150,5 +160,7 @@ public class EnforcerUtilsTest {
 			assertTrue(e.getMessage().contains("COVERAGE1"));
 			assertTrue(e.getMessage().contains("COVERAGE2"));
 		}
+		assertNull(EnforcerUtils.error(Errors.CANNOT_READ_FILE, false));
+		assertEquals(Errors.CANNOT_READ_FILE, EnforcerUtils.error(Errors.CANNOT_READ_FILE, true));
 	}
 }

@@ -14,23 +14,16 @@
 package com.jimandlisa.enforcer;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-public class ProblemTest {
+public class FlagsTest {
 
 	@Test
 	public void doTest() {
-		Problem problem = new Problem("foo");
-		assertEquals("foo", problem.description());
-		assertFalse(problem.isFatal());
-		assertNull(problem.error());
-		problem = new Problem("bar", Errors.CANNOT_READ_FILE);
-		assertEquals("bar", problem.description());
-		assertTrue(problem.isFatal());
-		assertEquals(Errors.CANNOT_READ_FILE, problem.error());
+		Flags flags = new Flags(false, false, false);
+		assertEquals("preserveNestedTypes=false, strict=false, debug=false", flags.toString());
+		flags = new Flags(true, true, true);
+		assertEquals("preserveNestedTypes=true, strict=true, debug=true", flags.toString());
 	}
 }

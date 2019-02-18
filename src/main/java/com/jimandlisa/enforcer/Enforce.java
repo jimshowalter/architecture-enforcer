@@ -22,6 +22,7 @@ import java.util.Set;
 
 public class Enforce {
 
+	// TODO: Add options for preserving nested types, strict, and debug.
 	private static final String USAGE = ": usage: /full/path/to/target/architecture/.yaml /full/path/to/pf-CDA/.odem " + Optionals.IGNORES + "/full/path/to/packages/to/ignore " + Optionals.REFLECTIONS + "/full/path/to/reflection/references " + Optionals.FIX_UNRESOLVEDS + "/full/path/to/fixed/unresolveds [last three args optional and unordered]";
 
 	static void parse(String arg, Inputs inputs) {
@@ -74,18 +75,19 @@ public class Enforce {
 		}
 	}
 	
-	static void mainImpl(Inputs inputs, PrintStream ps, boolean debug) throws Exception {
+	static void mainImpl(Inputs inputs, PrintStream ps, Flags flags) throws Exception {
 		Target target = TargetUtils.parse(inputs.target());
 		Set<Problem> problems = new LinkedHashSet<>();
-		Map<String, Type> types = EnforcerUtils.resolve(inputs, problems);
-		EnforcerUtils.correlate(types, target.components(), problems);
-		debug(debug, target, types, ps);
+		Map<String, Type> types = EnforcerUtils.resolve(inputs, problems, flags);
+		EnforcerUtils.correlate(types, target.components(), problems, flags);
+		debug(flags.debug(), target, types, ps);
 		problems(problems, ps);
 	}
 	
 	static final boolean DEBUG = false;
 
 	public static void mainImpl(String[] args) {
+		// TODO: Parse options for preserving nested types, strict, and debug, and from them create Flags object to pass to mainImpl.
 		try {
 			if (args.length < 2) {
 				throw new EnforcerException("not enough args" + USAGE, Errors.NOT_ENOUGH_ARGS);
@@ -98,7 +100,7 @@ public class Enforce {
 				parse(args[i], inputs);
 			}
 			System.out.println("Analyzing/enforcing architecture with " + inputs.toString());
-			mainImpl(inputs, System.out, DEBUG);
+			mainImpl(inputs, System.out, new Flags(false, false, DEBUG));
 		} catch (Throwable t) {
 			System.out.println(t.getMessage());
 		}

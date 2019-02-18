@@ -13,36 +13,30 @@
 
 package com.jimandlisa.enforcer;
 
-public enum Errors {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
-	NULL_STRING_ARG,
-	EMPTY_STRING_ARG,
-	NULL_INTEGER_ARG,
-	NULL_LAYER_ARG,
-	NULL_DOMAIN_ARG,
-	IGNORES_FILE_ALREADY_SPECIFIED,
-	REFLECTIONS_FILE_ALREADY_SPECIFIED,
-	FIX_UNRESOLVEDS_FILE_ALREADY_SPECIFIED,
-	UNRECOGNIZED_COMMAND_LINE_OPTION,
-	NOT_ENOUGH_ARGS,
-	TOO_MANY_ARGS,
-	FILE_DOES_NOT_EXIST,
-	CANNOT_READ_FILE,
-	ERROR_VALIDATING_FILE,
-	UNRECOGNIZED_LAYER_KEY,
-	UNRECOGNIZED_DOMAIN_KEY,
-	UNRECOGNIZED_COMPONENT_KEY,
-	DUPLICATE_LAYER_DEPTH,
-	DUPLICATE_LAYER_NAME,
-	DUPLICATE_DOMAIN_NAME,
-	DUPLICATE_COMPONENT_NAME,
-	DUPLICATE_PACKAGE_NAME,
-	MALFORMED_CLASS_NAME,
-	MALFORMED_CLASS_TO_CLASS_REFERENCE,
-	MISSING_REFERRED_TO_CLASS,
-	CLASS_BOTH_REFERRING_AND_IGNORED,
-	CLASS_BOTH_REFERRED_TO_AND_IGNORED,
-	TYPE_NOT_RESOLVED_TO_COMPONENT,
-	UNRESOLVED_REFERENCE,
-	ILLEGAL_REFERENCE
+import org.junit.Test;
+
+public class ProblemsTest {
+
+	@Test
+	public void doTest() {
+		Problem problem = new Problem("foo", null);
+		assertEquals("foo", problem.description());
+		assertFalse(problem.isFatal());
+		assertNull(problem.error());
+		problem = new Problem("bar", Errors.CANNOT_READ_FILE);
+		assertEquals("bar", problem.description());
+		assertTrue(problem.isFatal());
+		assertEquals(Errors.CANNOT_READ_FILE, problem.error());
+		assertEquals(problem.description().hashCode(), problem.hashCode());
+		assertFalse(problem.equals(null));
+		assertTrue(problem.equals(problem));
+		assertFalse(problem.equals(new Object()));
+		assertFalse(problem.equals(new Problem("foo", null)));
+		assertTrue(problem.equals(new Problem("bar", null)));
+	}
 }

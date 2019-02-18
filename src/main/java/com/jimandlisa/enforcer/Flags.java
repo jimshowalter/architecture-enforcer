@@ -13,36 +13,33 @@
 
 package com.jimandlisa.enforcer;
 
-public enum Errors {
+public class Flags {
 
-	NULL_STRING_ARG,
-	EMPTY_STRING_ARG,
-	NULL_INTEGER_ARG,
-	NULL_LAYER_ARG,
-	NULL_DOMAIN_ARG,
-	IGNORES_FILE_ALREADY_SPECIFIED,
-	REFLECTIONS_FILE_ALREADY_SPECIFIED,
-	FIX_UNRESOLVEDS_FILE_ALREADY_SPECIFIED,
-	UNRECOGNIZED_COMMAND_LINE_OPTION,
-	NOT_ENOUGH_ARGS,
-	TOO_MANY_ARGS,
-	FILE_DOES_NOT_EXIST,
-	CANNOT_READ_FILE,
-	ERROR_VALIDATING_FILE,
-	UNRECOGNIZED_LAYER_KEY,
-	UNRECOGNIZED_DOMAIN_KEY,
-	UNRECOGNIZED_COMPONENT_KEY,
-	DUPLICATE_LAYER_DEPTH,
-	DUPLICATE_LAYER_NAME,
-	DUPLICATE_DOMAIN_NAME,
-	DUPLICATE_COMPONENT_NAME,
-	DUPLICATE_PACKAGE_NAME,
-	MALFORMED_CLASS_NAME,
-	MALFORMED_CLASS_TO_CLASS_REFERENCE,
-	MISSING_REFERRED_TO_CLASS,
-	CLASS_BOTH_REFERRING_AND_IGNORED,
-	CLASS_BOTH_REFERRED_TO_AND_IGNORED,
-	TYPE_NOT_RESOLVED_TO_COMPONENT,
-	UNRESOLVED_REFERENCE,
-	ILLEGAL_REFERENCE
+	private final boolean preserveNestedTypes;
+	private final boolean strict;
+	private final boolean debug;
+	
+	public Flags(final boolean preserveNestedTypes, final boolean strict, final boolean debug) {
+		super();
+		this.preserveNestedTypes = preserveNestedTypes;
+		this.strict = strict;
+		this.debug = debug;
+	}
+	
+	public boolean preserveNestedTypes() {
+		return preserveNestedTypes;
+	}
+	
+	public boolean strict() {
+		return strict;
+	}
+	
+	public boolean debug() {
+		return debug;
+	}
+	
+	@Override
+	public String toString() {
+		return "preserveNestedTypes=" + preserveNestedTypes() + ", strict=" + strict() + ", debug=" + debug();
+	}
 }
