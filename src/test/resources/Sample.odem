@@ -9,9 +9,9 @@
     </created-by>
   </header>
   <context name="A">
-    <container name="/some/path/sample.war" classification="war">
+    <container name="/some/path/architecture-enforcer-sample-1.0-SNAPSHOT.war" classification="war">
     </container>
-    <container name="/some/path/sample.war/WEB-INF/classes" classification="dir">
+    <container name="/some/path/architecture-enforcer-sample-1.0-SNAPSHOT.war/WEB-INF/classes" classification="dir">
       <namespace name="com.jimandlisa.app.one">
         <type name="com.jimandlisa.app.one.App1" classification="class" visibility="public">
           <dependencies count="6">
@@ -47,13 +47,14 @@
       </namespace>
       <namespace name="com.jimandlisa.service">
         <type name="com.jimandlisa.service.Service2" classification="class" visibility="public">
-          <dependencies count="9">
+          <dependencies count="10">
             <depends-on name="java.lang.Object" classification="extends" />
-            <depends-on name="java.lang.Class" classification="uses" />
             <depends-on name="java.lang.String" classification="uses" />
+            <depends-on name="java.lang.Class" classification="uses" />
             <depends-on name="java.lang.reflect.Method" classification="uses" />
-            <depends-on name="com.jimandlisa.ui.one.UI1" classification="uses" />
+            <depends-on name="java.lang.StringBuilder" classification="uses" />
             <depends-on name="java.lang.Exception" classification="uses" />
+            <depends-on name="java.lang.System" classification="uses" />
             <depends-on name="com.jimandlisa.utils.Utils" classification="uses" />
             <depends-on name="com.jimandlisa.app.two.App2" classification="uses" />
             <depends-on name="java.lang.Integer" classification="uses" />
@@ -111,7 +112,7 @@
         </type>
       </namespace>
     </container>
-    <container name="/some/path/sample.war/WEB-INF/lib/json-20180813.jar" classification="osgi-bundle">
+    <container name="/some/path/architecture-enforcer-sample-1.0-SNAPSHOT.war/WEB-INF/lib/json-20180813.jar" classification="osgi-bundle">
       <namespace name="org.json">
         <type name="org.json.CDL" classification="class" visibility="public">
           <dependencies count="8">
@@ -512,7 +513,7 @@
         </type>
       </namespace>
     </container>
-    <container name="/some/path/sample.war/WEB-INF/lib/snakeyaml-1.23.jar" classification="osgi-bundle">
+    <container name="/some/path/architecture-enforcer-sample-1.0-SNAPSHOT.war/WEB-INF/lib/snakeyaml-1.23.jar" classification="osgi-bundle">
       <namespace name="org.yaml.snakeyaml">
         <type name="org.yaml.snakeyaml.DumperOptions$FlowStyle" classification="enum" visibility="public" isFinal="yes">
           <dependencies count="8">
