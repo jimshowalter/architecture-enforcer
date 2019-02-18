@@ -53,7 +53,7 @@ Packages and components:
 	com.jimandlisa.data!Data
 	com.jimandlisa.app.two!App Two
 	com.jimandlisa.app.one!App One
-Total outermost types: 8
+Total outermost types: 9
 	com.jimandlisa.app.one.App1
 		com.jimandlisa.app.two.App2
 		com.jimandlisa.data.Data
@@ -76,9 +76,12 @@ Total outermost types: 8
 	com.jimandlisa.ui.two.UI2
 		com.jimandlisa.service.Service2
 		com.jimandlisa.utils.Utils
+	com.jimandlisa.utils.Unresolved
+		com.jimandlisa.utils.Utils
 	com.jimandlisa.utils.Utils
+		com.jimandlisa.utils.AnotherUnresolved
 		com.jimandlisa.utils.Unresolved
 PROBLEMS:
 	ILLEGAL REFERENCE: com.jimandlisa.app.one.App1 in component 'App One' in layer 1 refers to component 'App Two' in layer 1: error=null
 	ILLEGAL REFERENCE: com.jimandlisa.service.Service2 in component 'App Two' in layer 1 refers to component 'UI One' in layer 2: error=null
-	UNRESOLVED: com.jimandlisa.utils.Unresolved: error=null
+	UNRESOLVED: com.jimandlisa.utils.AnotherUnresolved: error=null
