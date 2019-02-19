@@ -43,8 +43,8 @@ Packages not listed in the target-state file are rolled up to the nearest enclos
 
 Different subpackages can be assigned to different components. For example, com.foo.utils.math could be assigned to a Math component, com.foo.utils.strings could be assigned to a Strings component, and com.foo.utils could be assigned to a Utils component.
 
-Individual classes can be split out from packages and assigned to different components by specifying individual classes belonging to the components. However, this should be treated as temporary, because ideally when code is relocated to Maven projects (or Java modules),
-the best practice is for every package to belong to exactly one project/module. So where possible, moving classes to different packages is preferable.
+Individual classes can be split out from packages and assigned to different components by specifying classes belonging to the components. However, this should be treated as temporary, because when code is relocated to Maven projects (or Java modules),
+best practice is for every package to belong to exactly one project/module. Sok where possible, moving classes to different packages is preferable.
 
 Classes belonging to the default package (that is, not having a package) can be assigned to components by specifying them in the components.
 
@@ -115,7 +115,7 @@ code into projects, this tool should continue to be run in CI/CD.
 
 1. Sync and build this project.
 
-1. Using the provided example yaml file as a starting point, define the target state for your project. This can take weeks for a large project, but you can start by just defining a few basic layers (for example, data, logic, and UI), then iterate.
+1. Using the provided example yaml file as a starting point, define the target state for your project. This can take weeks for a large project, but you can start by just defining a few basic layers (for example, data, logic, and UI), then iterate. (It's probably better to start small anyway, instead of trying to boil the ocean in one shot.)
 
 1. Run this tool with at least the first two args specified. You can run this tool from Eclipse or Intellij, or from the command line in the target directory with the command: java -jar architecture-enforcer-1.0-SNAPSHOT.jar.
 
