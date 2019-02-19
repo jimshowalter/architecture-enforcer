@@ -13,6 +13,7 @@ layers:
 domains:
   - name: Domain A
     description: abcd efgh foo bar baz
+  - name: Domain B
 components:
   - name: My Component
     layer: My First Layer

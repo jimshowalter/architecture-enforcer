@@ -79,6 +79,7 @@ public class EnforcerUtilsTest {
 		Map<String, Type> types = new HashMap<>();
 		Set<Problem> problems = new LinkedHashSet<>();
 		Flags flags = new Flags(false, false, false);
+		EnforcerUtils.parse(null, null, null, null, null, false, null);
 		EnforcerUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("TestReflections.txt").getPath()), types, ignores, problems, "reflection", true, flags);
 		try {
 			EnforcerUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("BadReflections.txt").getPath()), types, ignores, problems, "reflection", true, flags);

@@ -27,7 +27,7 @@ import java.util.Set;
 
 import org.junit.Test;
 
-public class TargetTest {
+public class TargetUtilsTest {
 	
 	@SuppressWarnings("unchecked")
 	private static Set<String> allowed(String name) throws Exception {

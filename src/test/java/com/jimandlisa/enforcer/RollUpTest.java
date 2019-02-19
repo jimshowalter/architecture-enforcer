@@ -13,15 +13,43 @@
 
 package com.jimandlisa.enforcer;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.Test;
 
 public class RollUpTest {
 
 	@Test
-	public void doTest() {
+	public void doTest() throws Exception {
 		RollUp rollUp = new RollUp();
 		assertNull(rollUp.get("foo"));
+		Layer layer1 = new Layer("L1", 1, null);
+		Layer layer2 = new Layer("L2", 2, null);
+		Set<Component> components = new HashSet<>();
+		Component component1 = new Component("Comp1", layer1, null, null);
+		component1.packages().add("com.foo");
+		component1.classes().add("NoPackage");
+		components.add(component1);
+		Component component2 = new Component("Comp2", layer2, null, null);
+		component2.packages().add("com.other");
+		component2.classes().add("com.foo.bar.Baz");
+		components.add(component2);
+		rollUp.add(components);
+		assertNull(rollUp.get("com.no.match"));
+		assertNull(rollUp.get("NoPackage"));
+		assertEquals("Comp1", rollUp.get("com.foo.bar"));
+		assertEquals("Comp1", rollUp.get("com.foo.bar.Baz"));
+		assertEquals("Comp2", rollUp.get("com.other.XYZ"));
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
+			rollUp.dump(ps);
+			TestUtils.compare(baos, "RollUpCanned.txt");
+		}
 	}
 }

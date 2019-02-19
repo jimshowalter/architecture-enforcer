@@ -28,6 +28,7 @@ public class ProblemsTest {
 		assertEquals("foo", problem.description());
 		assertFalse(problem.isFatal());
 		assertNull(problem.error());
+		assertEquals("foo: error=null", problem.toString());
 		problem = new Problem("bar", Errors.CANNOT_READ_FILE);
 		assertEquals("bar", problem.description());
 		assertTrue(problem.isFatal());
@@ -38,5 +39,7 @@ public class ProblemsTest {
 		assertFalse(problem.equals(new Object()));
 		assertFalse(problem.equals(new Problem("foo", null)));
 		assertTrue(problem.equals(new Problem("bar", null)));
+		assertEquals(0, problem.compareTo(new Problem("bar", null)));
+		assertEquals("bar: error=CANNOT_READ_FILE", problem.toString());
 	}
 }

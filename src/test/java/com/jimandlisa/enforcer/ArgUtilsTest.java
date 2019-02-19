@@ -22,8 +22,9 @@ public class ArgUtilsTest {
 	@Test
 	public void doTest() {
 		new ArgUtils();
+		assertEquals("abc", ArgUtils.check(" abc \t", "name"));
 		try {
-			ArgUtils.check((String)null, "name");
+			ArgUtils.check((String) null, "name");
 		} catch (EnforcerException e) {
 			assertEquals("null name", e.getMessage());
 			assertEquals(Errors.NULL_STRING_ARG, e.error());
@@ -34,20 +35,25 @@ public class ArgUtilsTest {
 			assertEquals("empty name", e.getMessage());
 			assertEquals(Errors.EMPTY_STRING_ARG, e.error());
 		}
+		assertEquals((Integer) 123, ArgUtils.check(123, "name"));
 		try {
-			ArgUtils.check((Integer)null, "name");
+			ArgUtils.check((Integer) null, "name");
 		} catch (EnforcerException e) {
 			assertEquals("null name", e.getMessage());
 			assertEquals(Errors.NULL_INTEGER_ARG, e.error());
 		}
+		Layer layer = new Layer("name", 4, null);
+		assertEquals(layer, ArgUtils.check(layer, "name"));
 		try {
-			ArgUtils.check((Layer)null, "name");
+			ArgUtils.check((Layer) null, "name");
 		} catch (EnforcerException e) {
 			assertEquals("null name", e.getMessage());
 			assertEquals(Errors.NULL_LAYER_ARG, e.error());
 		}
+		Domain domain = new Domain("name", null);
+		assertEquals(domain, ArgUtils.check(domain, "name"));
 		try {
-			ArgUtils.check((Domain)null, "name");
+			ArgUtils.check((Domain) null, "name");
 		} catch (EnforcerException e) {
 			assertEquals("null name", e.getMessage());
 			assertEquals(Errors.NULL_DOMAIN_ARG, e.error());

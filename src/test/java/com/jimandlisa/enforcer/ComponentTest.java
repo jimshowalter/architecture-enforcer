@@ -13,6 +13,10 @@
 
 package com.jimandlisa.enforcer;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 
 public class ComponentTest {
@@ -22,8 +26,21 @@ public class ComponentTest {
 		Layer layer = new Layer("name", 0, "description");
 		Domain domain = new Domain("name", "description");
 		Component component = new Component("name", layer, domain, "description");
-		component.toString();
+		assertEquals("name='name', layer='name', depth=0, domain='name'", component.toString());
+		assertEquals("description", component.description());
 		component = new Component("name", layer, null, "description");
-		component.toString();
+		assertEquals("name='name', layer='name', depth=0, domain=null", component.toString());
+		assertEquals("description", component.description());
+		component = new Component("name", layer, domain, null);
+		assertEquals("name='name', layer='name', depth=0, domain='name'", component.toString());
+		assertNull(component.description());
+		component = new Component("name", layer, null, null);
+		assertEquals("name='name', layer='name', depth=0, domain=null", component.toString());
+		assertNull(component.description());
+		assertTrue(component.packages().isEmpty());
+		assertTrue(component.classes().isEmpty());
+		assertTrue(component.types().isEmpty());
+		component.add(new Type("abcd"));
+		assertEquals("abcd", component.types().values().iterator().next().name());
 	}
 }

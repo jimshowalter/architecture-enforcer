@@ -1,0 +1,3 @@
+Packages and components:
+	com.other!Comp2
+	com.foo!Comp1
