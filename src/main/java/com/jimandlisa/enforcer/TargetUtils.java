@@ -58,7 +58,7 @@ public class TargetUtils {
 	
 	private static final Set<String> ALLOWED_LAYER_KEYS = new HashSet<>(Arrays.asList(new String[] {"name", "depth", "description"}));
 	private static final Set<String> ALLOWED_DOMAIN_KEYS = new HashSet<>(Arrays.asList(new String[] {"name", "description"}));
-	private static final Set<String> ALLOWED_COMPONENT_KEYS = new HashSet<>(Arrays.asList(new String[] {"name", "layer", "domain", "description", "packages"}));
+	private static final Set<String> ALLOWED_COMPONENT_KEYS = new HashSet<>(Arrays.asList(new String[] {"name", "layer", "domain", "description", "packages", "classes"}));
 	
 	static String kind(Set<String> allowedKeys) {
 		if (allowedKeys == ALLOWED_LAYER_KEYS) {
@@ -151,6 +151,7 @@ public class TargetUtils {
 			}
 		}
 		Map<String, Component> allPackages = new HashMap<>();
+		Map<String, Component> allClasses = new HashMap<>();
 		boolean requireDomains = !target.domains().isEmpty();
 		for (Object obj : json.getJSONArray("components").toList()) {
 			Map<String, Object> map = cast(obj);
@@ -173,6 +174,18 @@ public class TargetUtils {
 					}
 					component.packages().add(normalized);
 					allPackages.put(normalized, component);
+				}
+			}
+			List<String> classes = getList(map, "classes");
+			if (classes != null) {
+				for (String clazz : classes) {
+					String normalized = clazz.trim();
+					Component other = allClasses.get(normalized);
+					if (other != null) {
+						throw new EnforcerException("duplicate class name used in " + other.name() + " and " + component.name(), Errors.DUPLICATE_CLASS_NAME);
+					}
+					component.classes().add(normalized);
+					allClasses.put(normalized, component);
 				}
 			}
 			target.add(component);
@@ -203,20 +216,24 @@ public class TargetUtils {
 		ps.println("\tLAYERS:");
 		for (Layer layer : layers) {
 			ps.println("\t\t" + layer);
-			ps.println("\t\t" + layer.description());
+			ps.println("\t\t\t" + layer.description());
 		}
 		ps.println("\tDOMAINS:");
 		for (Domain domain : domains) {
 			ps.println("\t\t" + domain);
-			ps.println("\t\t" + domain.description());
+			ps.println("\t\t\t" + domain.description());
 		}
 		ps.println("\tCOMPONENTS:");
 		for (Component component : components) {
 			ps.println("\t\t" + component);
-			ps.println("\t\t" + component.description());
-			ps.println("\t\tpackages:");
+			ps.println("\t\t\t" + component.description());
+			ps.println("\t\t\tpackages:");
 			for (String pkg : component.packages()) {
-				ps.println("\t\t\t" + pkg);
+				ps.println("\t\t\t\t" + pkg);
+			}
+			ps.println("\t\t\tclasses:");
+			for (String clazz : component.classes()) {
+				ps.println("\t\t\t\t" + clazz);
 			}
 		}
 	}

@@ -119,5 +119,11 @@ public class TargetTest {
 			assertTrue(e.getMessage().contains("duplicate package name"));
 			assertEquals(Errors.DUPLICATE_PACKAGE_NAME, e.error());
 		}
+		try {
+			TargetUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("BadTarget7.yaml").getPath()));
+		} catch (EnforcerException e) {
+			assertTrue(e.getMessage().contains("duplicate class name"));
+			assertEquals(Errors.DUPLICATE_CLASS_NAME, e.error());
+		}
 	}
 }

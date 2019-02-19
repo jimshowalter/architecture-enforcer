@@ -20,3 +20,8 @@ components:
     packages:
       - com.foo.bar.
       - org.baz
+  - name: My Other Component
+    layer: My First Layer
+    domain: Domain A
+    classes:
+      - com.foo.bar.Baz

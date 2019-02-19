@@ -25,6 +25,7 @@ public class Component {
 	private final Domain domain;
 	private final String description;
 	private final Set<String> packages = new LinkedHashSet<>();
+	private final Set<String> classes = new LinkedHashSet<>();
 	private final Map<String, Type> types = new HashMap<>();
 	
 	public Component(final String name, final Layer layer, final Domain domain, final String description) {
@@ -53,6 +54,10 @@ public class Component {
 	
 	public Set<String> packages() {
 		return packages;
+	}
+	
+	public Set<String> classes() {
+		return classes;
 	}
 	
 	public Map<String, Type> types() {

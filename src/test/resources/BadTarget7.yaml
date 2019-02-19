@@ -1,0 +1,12 @@
+layers:
+  - name: Data
+    depth: 0
+components:
+  - name: Data1
+    layer: Data
+    classes:
+      - com.duplicate.Dup
+  - name: Data2
+    layer: Data
+    classes:
+      - com.duplicate.Dup

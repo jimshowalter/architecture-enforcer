@@ -1,49 +1,55 @@
 Target-state specification:
 	LAYERS:
 		name='Utils', depth=-1
-		null
+			null
 		name='Data', depth=0
-		Data layer.
+			Data layer.
 		name='App', depth=1
-		Application logic and service APIs.
+			Application logic and service APIs.
 		name='UI', depth=2
-		User interface.
+			User interface.
 	DOMAINS:
 		name='Data'
-		Data.
+			Data.
 		name='One'
-		Domain 1.
+			Domain 1.
 		name='Two'
-		Domain 2.
+			Domain 2.
 		name='Utils'
-		null
+			null
 	COMPONENTS:
 		name='App One', layer='App', depth=1, domain='One'
-		Middle tier of app one.
-		packages:
-			com.jimandlisa.app.one
-			com.jimandlisa.service.one
+			Middle tier of app one.
+			packages:
+				com.jimandlisa.app.one
+				com.jimandlisa.service.one
+			classes:
 		name='App Two', layer='App', depth=1, domain='Two'
-		Middle tier of app two.
-		packages:
-			com.jimandlisa.app.two
-			com.jimandlisa.service
+			Middle tier of app two.
+			packages:
+				com.jimandlisa.app.two
+				com.jimandlisa.service
+			classes:
 		name='Data', layer='Data', depth=0, domain='Data'
-		null
-		packages:
-			com.jimandlisa.data
+			null
+			packages:
+				com.jimandlisa.data
+			classes:
 		name='UI One', layer='UI', depth=2, domain='One'
-		UI for app one.
-		packages:
-			com.jimandlisa.ui.one
+			UI for app one.
+			packages:
+				com.jimandlisa.ui.one
+			classes:
 		name='UI Two', layer='UI', depth=2, domain='Two'
-		UI for app two.
-		packages:
-			com.jimandlisa.ui.two
+			UI for app two.
+			packages:
+				com.jimandlisa.ui.two
+			classes:
 		name='Utils', layer='Utils', depth=-1, domain='Utils'
-		null
-		packages:
-			com.jimandlisa.utils
+			null
+			packages:
+				com.jimandlisa.utils
+			classes:
 Packages and components:
 	com.jimandlisa.utils!Utils
 	com.jimandlisa.ui.two!UI Two
