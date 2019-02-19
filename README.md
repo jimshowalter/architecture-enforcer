@@ -5,6 +5,8 @@ Architecture analyzer/enforcer for Java codebases.
 
 Compares a codebase's current state to a desired target state, identifying and reporting on all references that violate the target architecture.
 
+This tool is not prescriptive about how you define your architecture, other than identifying illegal references.
+
 ## Defining Target State ##
 
 The target state is defined in a yaml file. The file defines layers, domains, and components, all of which are logical groupings that exist "virtually" on top of whatever snarl constitutes the current codebase.
@@ -39,50 +41,37 @@ Packages not listed in the target-state file are rolled up to the nearest enclos
 
 Different subpackages can be assigned to different components. For example, com.foo.utils.math could be assigned to a Math component, com.foo.utils.strings could be assigned to a Strings component, and com.foo.utils could be assigned to a Utils component.
 
-Individual classes cannot be split out from packages and assigned to different components. The finest granularity is the fully-qualified package name. But this can be easily remedied by simply moving classes to new subpackages.
-
-Nested classes are rolled up to the outermost enclosing class.
+Individual classes cannot be split out from packages and assigned to different components. The finest granularity is the fully-qualified package name. But this can often be easily remedied by moving classes to new subpackages.
 
 All classes must wind up in a component, or the tool fails with an error (the target state must be completely specified).
 
 Layers, domains, and packages referred to by a component must exist, or the tool fails with an error.
 
-#### Kinds Of Components ####
-
-Components can be simple, where both the API and implementation of the component are combined, or can be paired, where the API and implementation are separated.
-
-Paired components move the codebase in the direction of dependency injection, where the implementation chosen at runtime (including during testing) can vary without consumers of the API portion of the component being aware anything has changed.
-
 Components are somewhat analogous to Java 9 modules. We chose not to make them be modules, because large Java codebases tend to be legacy codebases, which tend to be on earlier versions of Java that don't support modules.
 
 ## References ##
 
-### Rules ###
+Classes typically refer to other classes.
 
-The rules for references are:
+A class in a component can refer to one or more classes in another component, and/or in the same component.
 
-1. All APIs for paired components are in a single layer.
-1. All implementations of paired components are in a single layer.
-1. The implementations layer is above the APIs layer.
-1. All simple components are in one or more layers below the APIs layer.
-1. Code in a component can only refer to code in the same component, or to code in components in lower layers.
+Intra-component references are ignored.
 
-References that violate the above rules are identified and reported by this tool.
+Inter-component references are allowed, so long as the referring component is in a layer higher than the referred-to component.
 
-To summarize: In paired components, implementations can depend on their APIs and on the APIs of other implementations, and can depend on simple components, but APIs can't depend on other APIs, and implementations can't depend on other implementations (other than by dependency injection);
-and simple components can depend on other simple components below them, but never on APIs or implementations for paired components.
+Inter-component references that refer to components in higher layers, or in the same layer, are illegal. Those are the references this tool detects and reports.
 
-Notes:
+Note that this means circular references among components are illegal.
 
-* This approach winds up putting common types and utilities in N layers of low-level shared simple components, and puts API/impl pairs on top of the low-level stuff in a clean layering.
+### Nested Classes And References ###
 
-* Teams that wish to avoid the tedium of specifying N low-level simple components can just define a single component that contains all shared types, utilities, etc. However, depending on the codebase, this can create a single component containing a million lines (or more) of code.
+By default, nested classes are rolled up to the outermost enclosing class, and references to and from nested classes are rolled up to the outermost enclosing classes.
 
-* Incremental compilation is a nice side effect of this approach. So long as a programmer only changes the code in the implementation of a paired component,  recompilation is limited to just that implementation. Once Mavenized (or moved into modules) this can reduce cycle time from minutes to seconds (not counting time to redeploy).
+For example, if foo.bar.utils.Utils$Common refers to foo.bar.utils.math.Math$Multiply, the tool registers this as a reference from foo.bar.utils.Utils to foo.bar.utils.math.Math.
 
-* References to and from nested classes are rolled up to the outermost enclosing classes. For example, if foo.bar.utils.Utils refers to foo.bar.utils.math.Math$Multiply, the tool registers this as a reference from foo.bar.utils.Utils to foo.bar.utils.math.Math.
-In many projects this greatly shrinks the number of references that need to be analyzed. If it is important in your project to track references at the nested-class level, you need to extract nested classes to new source files, or modify the tool so it preserves nesting
-(look at EnforcerUtils.denest).
+In many projects this greatly shrinks the number of references that need to be analyzed.
+
+If it is important in your project to track references at the nested-class level, you need to extract nested classes to new source files, or change the Flags object passed into mainImpl to preserve nesting.
 
 ### Kinds Of References ###
 
@@ -97,7 +86,7 @@ This tool only finds direct references, and supports manually listing known refl
 ### Removing Illegal References ###
 
 Over time, a team can use various techniques to move the actual state of the codebase towards the desired state, gradually eliminating illegal references. For example, calls from one implementation to another can be replaced with calls to APIs,
-shared types can be pushed down from APIs into lower-level simple components, etc.
+shared types can be pushed down from APIs into lower-level components, etc.
 
 Once there are no illegal references, code can be forklifted into separate projects (for example, separate Maven projects, or modules). It seems that this would protect the architecture, because Maven/modules don't allow circular
 dependencies among projects. Unfortunately, Maven/modules are compiler-based, and don't understand the various other sneaky ways the architecture can be violated (for example, via reflection). So, even after physically moving
@@ -159,12 +148,44 @@ for example Class.forName(someStringFromAVariable + SomeClass.someFunction(some 
 
 * Sample files are located in the test resources directory.
 
+## Useful Patterns ##
+
+When defining your project's target state, there are some useful patterns you might want to use.
+
+Components can be "simple", where both the API and implementation of the component are combined, or can be "paired", where the API and implementation are separated.
+
+Paired components move the codebase in the direction of dependency injection, where the implementations chosen at runtime (including during testing) can vary without consumers of the API portions of components being aware anything has changed.
+
+To define target state this way:
+
+* Put the APIs for paired components in a single layer.
+
+* Put the implementations of paired components in a single layer that is one level above the APIs layer.
+
+* Put simple components in one or more layers below the APIs layer.
+
+In this scheme:
+
+* In paired components, implementations can depend on their APIs and on the APIs of other implementations, and can depend on simple components, but APIs can't depend on other APIs; and implementations can't depend on other implementations (other than by dependency injection).
+
+* Simple components can depend on other simple components below them, but never on APIs or implementations for paired components.
+
+Notes:
+
+* Simple components provide no way to prevent other components (in higher levels) from depending on their internals. But for shared low-level utilities that is often fine.
+
+* Teams that wish to avoid the tedium of specifying N low-level simple components can just define a single component that contains all shared types, utilities, etc. However, depending on the codebase, this can create a single component containing a million lines (or more) of code.
+
+* Incremental compilation is a nice side effect of this approach. So long as a programmer only changes the code in the implementation of a paired component, recompilation is limited to just that implementation. Once Mavenized (or moved into modules) this can reduce cycle time from minutes to seconds (not counting time to redeploy).
+
 ## TODOs And Welcomed Contributions ##
 
 This tool can of course be improved. Here are some things we know would make it better:
 
 * First, and most obviously, having to manually run pf-CDA at the outset is a pain, plus it thwarts automating analysis in CI/CD. The documentation on http:www.dependency-analyzer.org mentions an API that could probably be called by this tool. Or we could investigate https:innig.net/macker, or javaparser.org.
 Alternatively, someone skilled with bytecode analysis could probably replace pf-CDA entirely (we don't need all of its features, just a dump of class-to-class references).
+
+* Add support for lists of classes to components in the target state specification. This would allow splitting packages in cases where creating subpackages is not an option. It also would provide a way to specify where classes in the default package (that is, no package) logically belong.
 
 * Various flags are supported by the implementation, but are not currently offered on the command line. They could be added as more optional arguments, parsed, and used to create the Flags object passed to the implementation.
 
@@ -174,9 +195,11 @@ Alternatively, someone skilled with bytecode analysis could probably replace pf-
 
 * Provide a way to fail builds if the count of illegal references increases. (While refactoring, there are often temporary increases in the number of illegal references, so support would also need to be added for whitelisting new illegal references. Access to the whitelist could be restricted to just the team doing decomposition.)
 
+* Add a Maven mojo that calls EnforcerUtils directly (instead of via args in the Enforce main method), and document how to integrate the mojo into builds. (Note that this provides a straightforward solution to automating failing builds when illegal-reference counts increase.)
+
 * Provide front-end code that displays a burndown chart based on the count of illegal references, and provide a way to integrate this into CI/CD pipelines.
 
-* Add a Maven mojo that calls EnforcerUtils directly (instead of via args in the Enforce main method), and document how to integrate the mojo into builds. (Note that this provides a straightforward solution to automating failing builds when illegal-reference counts increase.)
+* Support regular expressions where currently individual packages or classes have to be specified. Important note: This will break how we roll up to the nearest enclosing package, plus more than one pattern might resolve to the same classes, which would need to be reported as an error; so this might be a bad idea.
 
 We welcome contributions of those and other improvements.
 
@@ -194,7 +217,7 @@ For example, pf-CDA determines dependencies from bytecode, and static constants 
 
 In addition, the reflection-based references and unresolved fixes, being entered manually, are only as good as your team's ability to find them all.
 
-But overall, this tool can probably get it > 95% correct, which is close enough to start trying to actually move the decomposed code, at which point some gotchas will pop up that need to be dealt with.
+But overall, this tool can probably get it > 95% correct, which is close enough to start trying to actually move the decomposed code, at which point some gotchas will likely pop up that need to be dealt with.
 
 ## Copyright ##
 
