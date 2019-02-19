@@ -29,6 +29,8 @@ Domains are entirely optional.
 
 If domains are used, every component must belong to exactly one domain.
 
+Layers have no relationship to domains, and vice-versa.
+
 ### Components, Packages, And Classes ###
 
 Components provide a way to group packages.
