@@ -15,12 +15,21 @@ package com.jimandlisa.enforcer;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 public class EnforceTest {
+	
+	public static void compare(ByteArrayOutputStream baos, String canned) throws Exception {
+		String out = new String(baos.toByteArray(), StandardCharsets.UTF_8).trim().replaceAll("\r\n\r\n", "\r\n").replace("\\", "/").replaceAll("=[^=]+/architecture-enforcer/target/test-classes/", "=/architecture-enforcer/target/test-classes/");
+		String cannedOut = TestUtils.read(canned).trim().replaceAll("\r\n\r\n", "\r\n");
+		assertEquals(out, cannedOut);
+	}
 
 	@Test
 	public void doTest() throws Exception {
@@ -57,8 +66,17 @@ public class EnforceTest {
 		}
 		Enforce.debug(false, null, null, null, null);
 		Enforce.problems(new HashSet<Problem>(), null);
-		Enforce.mainImpl(new String[0]);
-		Enforce.mainImpl(new String[] { "a", "b", "c", "d", "e", "f" });
-		Enforce.mainImpl(new String[] {Thread.currentThread().getContextClassLoader().getResource("SampleTarget.yaml").getPath(), Thread.currentThread().getContextClassLoader().getResource("Sample.odem").getPath(), Optionals.IGNORES.indicator() + Thread.currentThread().getContextClassLoader().getResource("SamplePackageIgnores.txt").getPath()});
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
+			Enforce.mainImpl(new String[0], ps);
+			TestUtils.compare(baos, "TestEnforceCanned1.txt");
+		}
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
+			Enforce.mainImpl(new String[] { "a", "b", "c", "d", "e", "f" }, ps);
+			TestUtils.compare(baos, "TestEnforceCanned2.txt");
+		}
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
+			Enforce.mainImpl(new String[] {Thread.currentThread().getContextClassLoader().getResource("SampleTarget.yaml").getPath(), Thread.currentThread().getContextClassLoader().getResource("Sample.odem").getPath(), Optionals.IGNORES.indicator() + Thread.currentThread().getContextClassLoader().getResource("SamplePackageIgnores.txt").getPath()}, ps);
+			compare(baos, "TestEnforceCanned3.txt");
+		}
 	}
 }

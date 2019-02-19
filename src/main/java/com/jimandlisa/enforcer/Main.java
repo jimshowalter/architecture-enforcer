@@ -16,6 +16,6 @@ package com.jimandlisa.enforcer;
 public class Main {
 
 	public static void main(String[] args) throws Exception {
-		Enforce.mainImpl(args);
+		Enforce.mainImpl(args, System.out);
 	}
 }

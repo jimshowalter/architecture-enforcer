@@ -87,7 +87,7 @@ public class Enforce {
 	
 	static final boolean DEBUG = false;
 
-	public static void mainImpl(String[] args) throws Exception {
+	public static void mainImpl(String[] args, PrintStream ps) throws Exception {
 		Inputs inputs = null;
 		Flags flags = null;
 		try {
@@ -104,10 +104,10 @@ public class Enforce {
 			// TODO: Parse options for preserving nested types, strict, and debug, and from them create Flags object to pass to mainImpl.
 			flags = new Flags(false, false, DEBUG);
 		} catch (Throwable t) {
-			System.out.println(t.getMessage());
+			ps.println(t.getMessage());
 			return;
 		}
-		System.out.println("Analyzing/enforcing architecture with " + inputs.toString());
-		mainImpl(inputs, System.out, flags); 
+		ps.println("Analyzing/enforcing architecture with " + inputs.toString());
+		mainImpl(inputs, ps, flags); 
 	}
 }
