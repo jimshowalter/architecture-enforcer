@@ -20,6 +20,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -27,10 +28,14 @@ import java.util.Set;
 import org.junit.Test;
 
 public class EnforcerUtilsTest {
-
+	
 	@Test
-	public void doTest() throws Exception {
+	public void testMisc() {
 		new EnforcerUtils();
+	}
+	
+	@Test
+	public void testIgnores() throws Exception {
 		Set<String> ignores = EnforcerUtils.ignores(null);
 		assertTrue(ignores.isEmpty());
 		ignores = EnforcerUtils.ignores(new File(Thread.currentThread().getContextClassLoader().getResource("TestIgnores.txt").getPath()));
@@ -43,6 +48,10 @@ public class EnforcerUtilsTest {
 		ignores.add("foo.");
 		assertTrue(EnforcerUtils.skip("foo.bar", ignores));
 		assertFalse(EnforcerUtils.skip("baz.baz2", ignores));
+	}
+	
+	@Test
+	public void testDenest() {
 		assertEquals("com.foo.Bar", EnforcerUtils.denest("com.foo.Bar$Baz", false));
 		assertEquals("com.foo.Bar$Baz", EnforcerUtils.denest("com.foo.Bar$Baz", true));
 		try {
@@ -51,6 +60,10 @@ public class EnforcerUtilsTest {
 			assertTrue(e.getMessage().contains("malformed class name"));
 			assertEquals(Errors.MALFORMED_CLASS_NAME, e.error());
 		}
+	}
+	
+	@Test
+	public void testGetType() {
 		Map<String, Type> types = new HashMap<>();
 		Type type0 = EnforcerUtils.get("foo", types);
 		assertEquals("foo", type0.name());
@@ -58,8 +71,12 @@ public class EnforcerUtilsTest {
 		type0 = EnforcerUtils.get("foo", types);
 		assertEquals("foo", type0.name());
 		assertEquals(1, types.size());
-		types.clear();
-		ignores.clear();
+	}
+	
+	@Test
+	public void testParser()  throws Exception {
+		Set<String> ignores = new HashSet<>();
+		Map<String, Type> types = new HashMap<>();
 		Set<Problem> problems = new LinkedHashSet<>();
 		Flags flags = new Flags(false, false, false);
 		EnforcerUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("TestReflections.txt").getPath()), types, ignores, problems, "reflection", true, flags);
@@ -80,66 +97,19 @@ public class EnforcerUtilsTest {
 		ignores.add("foo.");
 		EnforcerUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("TestFixUnresolveds.txt").getPath()), types, ignores, problems, "fix-unresolved", false, flags);
 		assertEquals(1, problems.size());
-		assertTrue(problems.iterator().next().description().contains("CLASS IS LISTED AS REFERRING BUT ALSO LISTED IN IGNORES:"));
+		assertTrue(problems.iterator().next().description().contains("class is listed as referring but also listed in ignores:"));
 		types.clear();
 		ignores.clear();
 		problems.clear();
 		ignores.add("com.x.");
 		EnforcerUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("TestFixUnresolveds.txt").getPath()), types, ignores, problems, "fix-unresolved", false, flags);
 		assertEquals(1, problems.size());
-		assertTrue(problems.iterator().next().description().contains("CLASS IS LISTED AS REFERRED-TO BUT ALSO LISTED IN IGNORES:"));
-		types.clear();
-		ignores.clear();
-		problems.clear();
-		type0 = new Type("foo");
-		type0.referenceNames().add("bar");
-		types.put(type0.name(), type0);
-		EnforcerUtils.resolve(types, problems, flags);
-		assertEquals(1, problems.size());
-		assertTrue(problems.iterator().next().description().contains("UNRESOLVED:"));
-		problems.clear();
-		types.put("bar", new Type("bar"));
-		EnforcerUtils.resolve(types, problems, flags);
-		assertTrue(problems.isEmpty());
-		types.clear();
-		ignores.clear();
-		problems.clear();
-		Type type1 = new Type("com.foo.bar.Baz");
-		types.put(type1.name(), type1);
-		Type type2 = new Type("com.foo.bar.Baz2");
-		types.put(type2.name(), type2);
-		type1.referenceNames().add(type2.name());
-		type1.references().add(type2);
-		Layer layer1 = new Layer("L1", 1, null);
-		Map<String, Component> components = new HashMap<>();
-		Component component1 = new Component("Comp1", layer1, null, null);
-		component1.packages().add("com.foo");
-		components.put(component1.name(), component1);
-		EnforcerUtils.correlate(types, components, problems, flags);
-		assertTrue(problems.isEmpty());
-		assertEquals(component1, type1.belongsTo());
-		assertEquals(type1, component1.types().get(type1.name()));
-		Type type3 = new Type("com.bar.Baz");
-		types.put(type3.name(), type3);
-		try {
-			EnforcerUtils.correlate(types, components, problems, flags);
-		} catch (EnforcerException e) {
-			assertTrue(problems.iterator().next().description().contains("UNABLE TO RESOLVE TYPE TO COMPONENT NAME:"));
-		}
-		problems.clear();
-		Layer layer0 = new Layer("L0", 0, null);
-		Component component2 = new Component("Comp0", layer0, null, null);
-		component2.packages().add("com.bar");
-		components.put(component2.name(), component2);
-		EnforcerUtils.correlate(types, components, problems, flags);
-		assertTrue(problems.isEmpty());
-		type3.referenceNames().add("com.foo.bar.Baz");
-		type3.references().add(type1);
-		EnforcerUtils.correlate(types, components, problems, flags);
-		assertTrue(problems.iterator().next().description().contains("ILLEGAL REFERENCE:"));
-		types.clear();
-		ignores.clear();
-		problems.clear();
+		assertTrue(problems.iterator().next().description().contains("class is listed as referred-to but also listed in ignores:"));
+	}
+	
+	@Test
+	public void testReport() {
+		Set<Problem> problems = new LinkedHashSet<>();
 		EnforcerUtils.report(problems);
 		problems.add(new Problem("COVERAGE0", null));
 		EnforcerUtils.report(problems);
@@ -160,7 +130,160 @@ public class EnforcerUtilsTest {
 			assertTrue(e.getMessage().contains("COVERAGE1"));
 			assertTrue(e.getMessage().contains("COVERAGE2"));
 		}
+	}
+	
+	@Test
+	public void testErrorMaker() {
 		assertNull(EnforcerUtils.error(Errors.CANNOT_READ_FILE, false));
 		assertEquals(Errors.CANNOT_READ_FILE, EnforcerUtils.error(Errors.CANNOT_READ_FILE, true));
+	}
+	
+	@Test
+	public void testResolve() {
+		Map<String, Type> types = new HashMap<>();
+		Set<Problem> problems = new LinkedHashSet<>();
+		Flags flags = new Flags(false, false, false);
+		Type type0 = new Type("foo");
+		type0.referenceNames().add("bar");
+		types.put(type0.name(), type0);
+		EnforcerUtils.resolve(types, problems, flags);
+		assertEquals(1, problems.size());
+		assertTrue(problems.iterator().next().description().contains("unresolved:"));
+		problems.clear();
+		types.put("bar", new Type("bar"));
+		EnforcerUtils.resolve(types, problems, flags);
+		assertTrue(problems.isEmpty());
+	}
+	
+	@Test
+	public void testCorrelate() {
+		Map<String, Type> types = new HashMap<>();
+		Set<Problem> problems = new LinkedHashSet<>();
+		Flags flags = new Flags(false, false, false);
+		Type type1 = new Type("com.foo.bar.Baz");
+		types.put(type1.name(), type1);
+		Type type2 = new Type("com.foo.bar.Baz2");
+		types.put(type2.name(), type2);
+		type1.referenceNames().add(type2.name());
+		type1.references().add(type2);
+		Layer layer1 = new Layer("L1", 1, null);
+		Map<String, Component> components = new HashMap<>();
+		Component component1 = new Component("Comp1", layer1, null, null);
+		component1.packages().add("com.foo");
+		components.put(component1.name(), component1);
+		EnforcerUtils.correlate(types, components, new RollUp(), problems, flags);
+		assertTrue(problems.isEmpty());
+		assertEquals(component1, type1.belongsTo());
+		assertEquals(type1, component1.types().get(type1.name()));
+	}
+	
+	@Test
+	public void testCorrelateWithClasses() {
+		Map<String, Type> types = new HashMap<>();
+		Set<Problem> problems = new LinkedHashSet<>();
+		Flags flags = new Flags(false, false, false);
+		Type type1 = new Type("com.foo.bar.Baz");
+		types.put(type1.name(), type1);
+		Type type2 = new Type("com.foo.bar.Baz2");
+		types.put(type2.name(), type2);
+		type1.referenceNames().add(type2.name());
+		type1.references().add(type2);
+		Layer layer1 = new Layer("L1", 1, null);
+		Layer layer2 = new Layer("L2", 2, null);
+		Map<String, Component> components = new HashMap<>();
+		Component component1 = new Component("Comp1", layer1, null, null);
+		component1.packages().add("com.foo");
+		components.put(component1.name(), component1);
+		Component component2 = new Component("Comp2", layer2, null, null);
+		component2.packages().add("com.other");
+		component2.classes().add("com.foo.bar.Baz");
+		components.put(component2.name(), component2);
+		EnforcerUtils.correlate(types, components, new RollUp(), problems, flags);
+		assertTrue(problems.isEmpty());
+		assertEquals(component2, type1.belongsTo());
+		assertEquals(type1, component2.types().get(type1.name()));
+	}
+	
+	@Test
+	public void testFailedCorrelateWithClasses() {
+		Map<String, Type> types = new HashMap<>();
+		Set<Problem> problems = new LinkedHashSet<>();
+		Flags flags = new Flags(false, false, false);
+		Type type1 = new Type("com.foo.bar.Baz");
+		types.put(type1.name(), type1);
+		Type type2 = new Type("com.foo.bar.Baz2");
+		types.put(type2.name(), type2);
+		type1.referenceNames().add(type2.name());
+		type1.references().add(type2);
+		Layer layer1 = new Layer("L1", 1, null);
+		Layer layer2 = new Layer("L2", 2, null);
+		Map<String, Component> components = new HashMap<>();
+		Component component1 = new Component("Comp1", layer1, null, null);
+		component1.packages().add("com.foo");
+		components.put(component1.name(), component1);
+		Component component2 = new Component("Comp2", layer2, null, null);
+		component2.packages().add("com.other");
+		component2.classes().add("com.foo.bar.Bat");
+		components.put(component2.name(), component2);
+		try {
+			EnforcerUtils.correlate(types, components, new RollUp(), problems, flags);
+		} catch (EnforcerException e) {
+			assertTrue(problems.iterator().next().description().contains("unable to resolve class to type:"));
+			assertEquals(Errors.CLASS_NOT_RESOLVED_TO_TYPE, e.error());
+		}
+	}
+	
+	@Test
+	public void testFailedTypeToComponentCorrelate() {
+		Map<String, Type> types = new HashMap<>();
+		Set<Problem> problems = new LinkedHashSet<>();
+		Flags flags = new Flags(false, false, false);
+		Type type1 = new Type("com.foo.bar.Baz");
+		types.put(type1.name(), type1);
+		Type type2 = new Type("com.foo.bar.Baz2");
+		types.put(type2.name(), type2);
+		type1.referenceNames().add(type2.name());
+		type1.references().add(type2);
+		Type type3 = new Type("com.bar.Baz3");
+		types.put(type3.name(), type3);
+		Layer layer1 = new Layer("L1", 1, null);
+		Map<String, Component> components = new HashMap<>();
+		Component component1 = new Component("Comp1", layer1, null, null);
+		component1.packages().add("com.foo");
+		components.put(component1.name(), component1);
+		try {
+			EnforcerUtils.correlate(types, components, new RollUp(), problems, flags);
+		} catch (EnforcerException e) {
+			assertTrue(problems.iterator().next().description().contains("unable to resolve type to component name:"));
+			assertEquals(Errors.TYPE_NOT_RESOLVED_TO_COMPONENT, e.error());
+		}
+	}
+
+	@Test
+	public void testLayerViolationCorrelate() {
+		Map<String, Type> types = new HashMap<>();
+		Set<Problem> problems = new LinkedHashSet<>();
+		Flags flags = new Flags(false, false, false);
+		Type type1 = new Type("com.foo.bar.Baz");
+		types.put(type1.name(), type1);
+		Type type2 = new Type("com.foo.bar.Baz2");
+		types.put(type2.name(), type2);
+		type1.referenceNames().add(type2.name());
+		type1.references().add(type2);
+		Type type3 = new Type("com.bar.Baz3");
+		types.put(type3.name(), type3);
+		Layer layer1 = new Layer("L1", 1, null);
+		Map<String, Component> components = new HashMap<>();
+		Component component1 = new Component("Comp1", layer1, null, null);
+		component1.packages().add("com.foo");
+		components.put(component1.name(), component1);
+		Layer layer0 = new Layer("L0", 0, null);
+		Component component2 = new Component("Comp0", layer0, null, null);
+		component2.packages().add("com.bar");
+		components.put(component2.name(), component2);
+		type3.referenceNames().add("com.foo.bar.Baz");
+		type3.references().add(type1);
+		EnforcerUtils.correlate(types, components, new RollUp(), problems, flags);
+		assertTrue(problems.iterator().next().description().contains("illegal reference:"));
 	}
 }

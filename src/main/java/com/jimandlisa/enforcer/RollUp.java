@@ -22,9 +22,9 @@ import java.util.List;
 
 public class RollUp {
 
-	private static final List<String> packagesAndComponents = new ArrayList<>();
+	private final List<String> packagesAndComponents = new ArrayList<>();
 
-	public static void add(Collection<Component> components) {
+	public void add(Collection<Component> components) {
 		for (Component component : components) {
 			for (String pkg : component.packages()) {
 				packagesAndComponents.add(pkg + "!" + component.name());
@@ -38,7 +38,7 @@ public class RollUp {
 		});
 	}
 	
-	public static String get(String packageName) {
+	public String get(String packageName) {
 		for (String packageAndComponent : packagesAndComponents) {
 			String[] segments = packageAndComponent.split("!");
 			if (packageName.startsWith(segments[0])) {
@@ -48,7 +48,7 @@ public class RollUp {
 		return null;
 	}
 	
-	static void dump(PrintStream ps) {
+	void dump(PrintStream ps) {
 		ps.println("Packages and components:");
 		for (String packageAndComponent : packagesAndComponents) {
 			ps.println("\t" + packageAndComponent);

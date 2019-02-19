@@ -21,7 +21,7 @@ public class RollUpTest {
 
 	@Test
 	public void doTest() {
-		new RollUp();
-		assertNull(RollUp.get("foo"));
+		RollUp rollUp = new RollUp();
+		assertNull(rollUp.get("foo"));
 	}
 }

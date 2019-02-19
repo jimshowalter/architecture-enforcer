@@ -55,7 +55,7 @@ public class EnforceTest {
 		} catch (EnforcerException e) {
 			assertEquals(Errors.UNRECOGNIZED_COMMAND_LINE_OPTION, e.error());
 		}
-		Enforce.debug(false, null, null, null);
+		Enforce.debug(false, null, null, null, null);
 		Enforce.problems(new HashSet<Problem>(), null);
 		Enforce.mainImpl(new String[0]);
 		Enforce.mainImpl(new String[] { "a", "b", "c", "d", "e", "f" });

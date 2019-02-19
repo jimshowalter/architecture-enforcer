@@ -13,6 +13,12 @@
 
 package com.jimandlisa.enforcer;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.Test;
 
 public class CollectionUtilsTest {
@@ -20,5 +26,11 @@ public class CollectionUtilsTest {
 	@Test
 	public void doTest() {
 		new CollectionUtils();
+		List<String> list = new ArrayList<>(Arrays.asList(new String[] { "b", "a" }));
+		assertEquals("b", list.get(0));
+		assertEquals("a", list.get(1));
+		list = CollectionUtils.sort(list);
+		assertEquals("a", list.get(0));
+		assertEquals("b", list.get(1));
 	}
 }

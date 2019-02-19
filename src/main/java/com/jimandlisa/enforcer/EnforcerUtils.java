@@ -106,7 +106,7 @@ public class EnforcerUtils {
 				}
 				String referringClass = denest(segments[0], flags.preserveNestedTypes());
 				if (skip(referringClass, ignores)) {
-					problems.add(new Problem(entryName.toUpperCase() + " CLASS IS LISTED AS REFERRING BUT ALSO LISTED IN IGNORES: " + referringClass, Errors.CLASS_BOTH_REFERRING_AND_IGNORED));
+					problems.add(new Problem(entryName.toUpperCase() + " class is listed as referring but also listed in ignores: " + referringClass, Errors.CLASS_BOTH_REFERRING_AND_IGNORED));
 					continue;
 				}
 				type = get(referringClass, types);
@@ -114,7 +114,7 @@ public class EnforcerUtils {
 				for (String segment : segments2) {
 					String referredToClass = denest(segment, flags.preserveNestedTypes());
 					if (skip(referredToClass, ignores)) {
-						problems.add(new Problem(entryName.toUpperCase() + " CLASS IS LISTED AS REFERRED-TO BUT ALSO LISTED IN IGNORES: " + referringClass, Errors.CLASS_BOTH_REFERRED_TO_AND_IGNORED));
+						problems.add(new Problem(entryName.toUpperCase() + " class is listed as referred-to but also listed in ignores: " + referringClass, Errors.CLASS_BOTH_REFERRED_TO_AND_IGNORED));
 						continue;
 					}
 					type.referenceNames().add(referredToClass);
@@ -135,7 +135,7 @@ public class EnforcerUtils {
 			for (String referenceName : type.referenceNames()) {
 				Type reference = types.get(referenceName);
 				if (reference == null) {
-					problems.add(new Problem("UNRESOLVED: " + referenceName, error(Errors.UNRESOLVED_REFERENCE, flags.strict())));
+					problems.add(new Problem("unresolved: " + referenceName, error(Errors.UNRESOLVED_REFERENCE, flags.strict())));
 					continue;
 				}
 				type.references().add(reference);
@@ -162,7 +162,7 @@ public class EnforcerUtils {
 			}
 		}
 		if (builder != null) {
-			throw new EnforcerException("ERROR" + (multipleErrors ? "S" : "") + ":" + builder.toString(), firstError);
+			throw new EnforcerException("error" + (multipleErrors ? "s" : "") + ":" + builder.toString(), firstError);
 		}
 	}
 	
@@ -206,12 +206,27 @@ public class EnforcerUtils {
 		return types;
 	}
 	
-	public static void correlate(Map<String, Type> types, Map<String, Component> components, Set<Problem> problems, Flags flags) {
-		RollUp.add(components.values());
+	public static void correlate(Map<String, Type> types, Map<String, Component> components, RollUp rollUp, Set<Problem> problems, Flags flags) {
+		for (Component component : components.values()) {
+			for (String className : component.classes()) {
+				Type type = types.get(className);
+				if (type == null) {
+					problems.add(new Problem("unable to resolve class to type: " + className, Errors.CLASS_NOT_RESOLVED_TO_TYPE));
+					continue;
+				}
+				component.add(type);
+				type.setBelongsTo(component);
+			}
+		}
+		report(problems);
+		rollUp.add(components.values());
 		for (Type type : types.values()) {
-			String componentName = RollUp.get(type.name());
+			if (type.belongsTo() != null) {
+				continue;
+			}
+			String componentName = rollUp.get(type.name());
 			if (componentName == null) {
-				problems.add(new Problem("UNABLE TO RESOLVE TYPE TO COMPONENT NAME: " + type.name(), Errors.TYPE_NOT_RESOLVED_TO_COMPONENT));
+				problems.add(new Problem("unable to resolve type to component name: " + type.name(), Errors.TYPE_NOT_RESOLVED_TO_COMPONENT));
 				continue;
 			}
 			Component component = components.get(componentName);
@@ -225,7 +240,7 @@ public class EnforcerUtils {
 					continue; // Skip intra-component references.
 				}
 				if (type.belongsTo().layer().depth() <= referredTo.belongsTo().layer().depth()) {
-					problems.add(new Problem("ILLEGAL REFERENCE: " + type + " in component '" + type.belongsTo().name() + "' in layer " + type.belongsTo().layer().depth() + " refers to component '" + referredTo.belongsTo().name() + "' in layer " + referredTo.belongsTo().layer().depth(), error(Errors.ILLEGAL_REFERENCE, flags.strict())));
+					problems.add(new Problem("illegal reference: " + type + " in component '" + type.belongsTo().name() + "' in layer " + type.belongsTo().layer().depth() + " refers to component '" + referredTo.belongsTo().name() + "' in layer " + referredTo.belongsTo().layer().depth(), error(Errors.ILLEGAL_REFERENCE, flags.strict())));
 				}
 			}
 		}

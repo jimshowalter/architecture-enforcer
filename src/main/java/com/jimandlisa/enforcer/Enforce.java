@@ -50,12 +50,12 @@ public class Enforce {
 		throw new EnforcerException("unrecognized option " + arg + USAGE, Errors.UNRECOGNIZED_COMMAND_LINE_OPTION);
 	}
 	
-	static void debug(boolean debug, Target target, Map<String, Type> types, PrintStream ps) throws Exception {
+	static void debug(boolean debug, Target target, Map<String, Type> types, RollUp rollUp, PrintStream ps) throws Exception {
 		if (!debug) {
 			return;
 		}
 		TargetUtils.dump(target, ps);
-		RollUp.dump(ps);
+		rollUp.dump(ps);
 		ps.println("Total outermost types: " + types.size());
 		for (String typeName : CollectionUtils.sort(new ArrayList<>(types.keySet()))) {
 			ps.println("\t" + typeName);
@@ -79,8 +79,9 @@ public class Enforce {
 		Target target = TargetUtils.parse(inputs.target());
 		Set<Problem> problems = new LinkedHashSet<>();
 		Map<String, Type> types = EnforcerUtils.resolve(inputs, problems, flags);
-		EnforcerUtils.correlate(types, target.components(), problems, flags);
-		debug(flags.debug(), target, types, ps);
+		RollUp rollUp = new RollUp();
+		EnforcerUtils.correlate(types, target.components(), rollUp, problems, flags);
+		debug(flags.debug(), target, types, rollUp, ps);
 		problems(problems, ps);
 	}
 	
