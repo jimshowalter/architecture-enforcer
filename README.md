@@ -136,10 +136,10 @@ Notes:
 The syntax is full.name.of.package, without a dot at the end. The tool appends dots for you. In some cases you need to suppress dots due to some issues with pf-CDA, in which case end the package name with a !.
 
 * If your project uses reflection, you should add outermost class-to-class dependencies to a file you specify with the -r command-line argument. The syntax is: full.name.of.referring.class.Foo:full.name.of.referred.to.class.Bar,full.name.of.referred.to.class.Baz....,
-where the referred-to classes are outermost classes to which the referring class refers by reflection. At least one referred-to class is required. If there are too many referred-to classes to fit cleanly on one line, you can start multiple lines with the referring class.
+where the referred-to classes are classes to which the referring class refers by reflection. At least one referred-to class is required. If there are too many referred-to classes to fit cleanly on one line, you can start multiple lines with the referring class.
 
 * Sometimes the pf-CDA odem file is missing classes that are referred to by other classes in the file. To fix these, you should add the missing outermost classes to a file you specify with the -f command-line argument.
-The syntax is: full.name.of.missing.class.Foo:full.name.of.referred.to.class.Bar,full.name.of.referred.to.class.Baz..., where the referred-to classes are outermost classes to which the missing class refers.
+The syntax is: full.name.of.missing.class.Foo:full.name.of.referred.to.class.Bar,full.name.of.referred.to.class.Baz..., where the referred-to classes are classes to which the missing class refers.
 If there are too many referred-to classes to fit cleanly on one line, you can start multiple lines with the referring class. If the unresolved class you are adding does not refer to other classes in your project,
 you don't need to add any referred-to classes (and you don't need a colon after the first class on the line).
 
