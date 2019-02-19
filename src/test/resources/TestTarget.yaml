@@ -25,3 +25,4 @@ components:
     domain: Domain A
     classes:
       - com.foo.bar.Baz
+      - NoPackage

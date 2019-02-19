@@ -188,11 +188,14 @@ public class EnforcerUtilsTest {
 		types.put(type2.name(), type2);
 		type1.referenceNames().add(type2.name());
 		type1.references().add(type2);
+		Type type3 = new Type("NoPackage");
+		types.put(type3.name(), type3);
 		Layer layer1 = new Layer("L1", 1, null);
 		Layer layer2 = new Layer("L2", 2, null);
 		Map<String, Component> components = new HashMap<>();
 		Component component1 = new Component("Comp1", layer1, null, null);
 		component1.packages().add("com.foo");
+		component1.classes().add("NoPackage");
 		components.put(component1.name(), component1);
 		Component component2 = new Component("Comp2", layer2, null, null);
 		component2.packages().add("com.other");

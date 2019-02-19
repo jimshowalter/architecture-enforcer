@@ -19,3 +19,4 @@ Target-state specification:
 			packages:
 			classes:
 				com.foo.bar.Baz
+				NoPackage

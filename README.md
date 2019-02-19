@@ -43,7 +43,10 @@ Packages not listed in the target-state file are rolled up to the nearest enclos
 
 Different subpackages can be assigned to different components. For example, com.foo.utils.math could be assigned to a Math component, com.foo.utils.strings could be assigned to a Strings component, and com.foo.utils could be assigned to a Utils component.
 
-Individual classes cannot be split out from packages and assigned to different components. The finest granularity is the fully-qualified package name. But this can often be easily remedied by moving classes to new subpackages.
+Individual classes can be split out from packages and assigned to different components by specifying individual classes belonging to the components. However, this should be treated as temporary, because ideally when code is relocated to Maven projects (or Java modules),
+the best practice is for every package to belong to exactly one project/module. So where possible, moving classes to different packages is preferable.
+
+Classes belonging to the default package (that is, not having a package) can be assigned to components by specifying them in the components.
 
 All classes must wind up in a component, or the tool fails with an error (the target state must be completely specified).
 
@@ -186,8 +189,6 @@ This tool can of course be improved. Here are some things we know would make it 
 
 * First, and most obviously, having to manually run pf-CDA at the outset is a pain, plus it thwarts automating analysis in CI/CD. The documentation on http:www.dependency-analyzer.org mentions an API that could probably be called by this tool. Or we could investigate https:innig.net/macker, or javaparser.org.
 Alternatively, someone skilled with bytecode analysis could probably replace pf-CDA entirely (we don't need all of its features, just a dump of class-to-class references).
-
-* Add support for lists of classes to components in the target state specification. This would allow splitting packages in cases where creating subpackages is not an option. It also would provide a way to specify where classes in the default package (that is, no package) logically belong.
 
 * Various flags are supported by the implementation, but are not currently offered on the command line. They could be added as more optional arguments, parsed, and used to create the Flags object passed to the implementation.
 
