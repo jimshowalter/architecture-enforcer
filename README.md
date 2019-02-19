@@ -141,7 +141,7 @@ where the referred-to classes are classes to which the referring class refers by
 * Sometimes the pf-CDA odem file is missing classes that are referred to by other classes in the file. To fix these, you should add the missing classes to a file you specify with the -f command-line argument.
 The syntax is: full.name.of.missing.class.Foo:full.name.of.referred.to.class.Bar,full.name.of.referred.to.class.Baz..., where the referred-to classes are classes to which the missing class refers.
 If there are too many referred-to classes to fit cleanly on one line, you can start multiple lines with the referring class. If the unresolved class you are adding does not refer to other classes in your project,
-you don't need to add any referred-to classes (and you don't need a colon after the first class on the line).
+you don't need to add any referred-to classes (and you don't need a colon after the referring class on the line).
 
 * Adding a referred-to class to the reflections or fix-unresolveds files can introduce new unresolved classes. When that happens, you need to keep entering classes until all classes are defined.
 
