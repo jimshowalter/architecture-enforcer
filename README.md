@@ -168,7 +168,7 @@ To define target state this way:
 
 In this scheme:
 
-* In paired components, implementations can depend on their APIs and on the APIs of other implementations, and can depend on simple components, but APIs can't depend on other APIs; and implementations can't depend on other implementations (other than by dependency injection).
+* In paired components, implementations can depend on their APIs and on the APIs of other implementations, and can depend on simple components, but APIs can't depend on other APIs, and implementations can't depend on other implementations (other than by dependency injection).
 
 * Simple components can depend on other simple components below them, but never on APIs or implementations for paired components.
 
