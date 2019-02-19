@@ -148,7 +148,7 @@ you don't need to add any referred-to classes (and you don't need a colon after 
 * pf-CDA is smart enough to add references on its own for simple Class.forName calls where the string name of the class is directly specified, as in Class.forName("com.foo.bar.Baz"), but it can't follow complicated string concatenations, strings returned by functions, etc.,
 for example Class.forName(someStringFromAVariable + SomeClass.someFunction(some args from somewhere) + SOME_STRING_CONSTANT + ".foo"). That's why you have to add them manually. Also, pf-CDA doesn't parse reflection references in JSP files, Spring, etc.
 
-* Sample files are located in the test resources directory.
+* Sample files are located in the test resources directory. They start with "Sample".
 
 ## Useful Patterns ##
 
