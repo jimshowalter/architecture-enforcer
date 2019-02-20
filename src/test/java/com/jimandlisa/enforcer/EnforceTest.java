@@ -20,7 +20,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.HashSet;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -41,10 +45,14 @@ public class EnforceTest {
 		String cannedOut = TestUtils.read(canned).trim().replaceAll("\r\n\r\n", "\r\n");
 		assertEquals(out, cannedOut);
 	}
-
+	
 	@Test
-	public void doTest() throws Exception {
+	public void testMisc() {
 		new Enforce();
+	}
+	
+	@Test
+	public void testArgs() {
 		Inputs inputs = null;
 		Flags flags = null;
 		inputs = TestUtils.inputs(false, false, false);
@@ -113,8 +121,104 @@ public class EnforceTest {
 		} catch (EnforcerException e) {
 			assertEquals(Errors.UNRECOGNIZED_COMMAND_LINE_OPTION, e.error());
 		}
+	}
+	
+	@Test
+	public void testDebug() throws Exception {
 		Enforce.debug(null, null, null, null, new Flags());
-		Enforce.reportProblems(new HashSet<Problem>(), null, null);
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
+			Target target = new Target();
+			Flags flags = new Flags();
+			flags.setDebug(true);
+			Enforce.debug(target, new HashMap<String, Type>(), new RollUp(), ps, flags);
+			TestUtils.compare(baos, "TestDebugCanned1.txt");
+		}
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
+			Target target = new Target();
+			Flags flags = new Flags();
+			flags.setDebug(true);
+			Map<String, Type> types = new HashMap<>();
+			types.put("foo", new Type("foo"));
+			Enforce.debug(target, types, new RollUp(), ps, flags);
+			TestUtils.compare(baos, "TestDebugCanned2.txt");
+		}
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
+			Target target = new Target();
+			Flags flags = new Flags();
+			flags.setDebug(true);
+			Map<String, Type> types = new HashMap<>();
+			Type type = new Type("foo");
+			type.referenceNames().add("bar");
+			types.put(type.name(), type);
+			Enforce.debug(target, types, new RollUp(), ps, flags);
+			TestUtils.compare(baos, "TestDebugCanned3.txt");
+		}
+	}
+	
+	@Test
+	public void testReportProblems() throws Exception {
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
+			Set<Problem> problems = new LinkedHashSet<Problem>();
+			problems.add(new Problem("foo", Errors.ILLEGAL_REFERENCE));
+			Outputs outputs = new Outputs(Paths.get(TestUtils.targetDir().toString(), "reports").toFile());
+			outputs.unresolvedTypes().delete();
+			outputs.illegalReferences().delete();
+			Enforce.reportProblems(problems, ps, outputs);
+			assertTrue(!outputs.unresolvedTypes().exists());
+			assertTrue(outputs.illegalReferences().exists());
+			outputs.illegalReferences().delete();
+		}
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
+			Set<Problem> problems = new LinkedHashSet<Problem>();
+			problems.add(new Problem("bar", Errors.UNRESOLVED_REFERENCE));
+			Outputs outputs = new Outputs(Paths.get(TestUtils.targetDir().toString(), "reports").toFile());
+			outputs.unresolvedTypes().delete();
+			outputs.illegalReferences().delete();
+			Enforce.reportProblems(problems, ps, outputs);
+			assertTrue(outputs.unresolvedTypes().exists());
+			assertTrue(!outputs.illegalReferences().exists());
+			outputs.unresolvedTypes().delete();
+		}
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
+			Set<Problem> problems = new LinkedHashSet<Problem>();
+			problems.add(new Problem("foo", Errors.ILLEGAL_REFERENCE));
+			problems.add(new Problem("bar", Errors.UNRESOLVED_REFERENCE));
+			Outputs outputs = new Outputs(Paths.get(TestUtils.targetDir().toString(), "reports").toFile());
+			outputs.unresolvedTypes().delete();
+			outputs.illegalReferences().delete();
+			Enforce.reportProblems(problems, ps, outputs);
+			assertTrue(outputs.unresolvedTypes().exists());
+			assertTrue(outputs.illegalReferences().exists());
+			outputs.unresolvedTypes().delete();
+			outputs.illegalReferences().delete();
+		}
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
+			Set<Problem> problems = new LinkedHashSet<Problem>();
+			problems.add(new Problem("bar", Errors.UNRESOLVED_REFERENCE));
+			problems.add(new Problem("foo", Errors.ILLEGAL_REFERENCE));
+			Outputs outputs = new Outputs(Paths.get(TestUtils.targetDir().toString(), "reports").toFile());
+			outputs.unresolvedTypes().delete();
+			outputs.illegalReferences().delete();
+			Enforce.reportProblems(problems, ps, outputs);
+			assertTrue(outputs.unresolvedTypes().exists());
+			assertTrue(outputs.illegalReferences().exists());
+			outputs.unresolvedTypes().delete();
+			outputs.illegalReferences().delete();
+		}
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
+			Set<Problem> problems = new LinkedHashSet<Problem>();
+			problems.add(new Problem("foo", Errors.CANNOT_READ_FILE)); // Won't happen, but need to do this to force a codepath.
+			Outputs outputs = new Outputs(Paths.get(TestUtils.targetDir().toString(), "reports").toFile());
+			outputs.unresolvedTypes().delete();
+			outputs.illegalReferences().delete();
+			Enforce.reportProblems(problems, ps, outputs);
+			assertTrue(!outputs.unresolvedTypes().exists());
+			assertTrue(!outputs.illegalReferences().exists());
+		}
+	}
+
+	@Test
+	public void testMainImpl() throws Exception {
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
 			Enforce.mainImpl(new String[0], ps);
 			TestUtils.compare(baos, "TestEnforceCanned2.txt");

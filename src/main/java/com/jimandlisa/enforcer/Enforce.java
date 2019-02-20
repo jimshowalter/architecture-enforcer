@@ -103,9 +103,6 @@ public class Enforce {
 	// To have gotten here, there can't be any fatal errors. In strict mode, that means we can't get here at all if there are any problems.
 	// In non-strict mode, we can get here, but only if all problems are fatal only when strict is specified. We need to report those errors.
 	static void reportProblems(Set<Problem> problems, PrintStream ps, Outputs outputs) throws Exception {
-		if (problems.isEmpty()) {
-			return;
-		}
 		boolean foundUnresolvedTypes = false;
 		boolean foundIllegalReferences = false;
 		for (Problem problem : problems) {
