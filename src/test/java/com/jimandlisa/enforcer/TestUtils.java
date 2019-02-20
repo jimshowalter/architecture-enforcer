@@ -24,18 +24,32 @@ import java.nio.file.Paths;
 
 public class TestUtils {
 	
+	public static Path targetDir() {
+		return Paths.get(System.getProperty("user.dir"), "target");
+	}
+	
 	public static Path path(String file) {
-		return Paths.get(System.getProperty("user.dir"), "target", "test-classes", file);
+		return Paths.get(targetDir().toString(), "test-classes", file);
 	}
 	
 	public static String read(String file) throws Exception {
 		return new String(Files.readAllBytes(path(file)), StandardCharsets.UTF_8.name());
 	}
 	
+	public static String readTarget(String file) throws Exception {
+		return new String(Files.readAllBytes(Paths.get(targetDir().toString(), file)), StandardCharsets.UTF_8.name());
+	}
+	
 	public static void compare(ByteArrayOutputStream baos, String canned) throws Exception {
 		String out = new String(baos.toByteArray(), StandardCharsets.UTF_8).trim().replaceAll("\r\n\r\n", "\r\n");
 		String cannedOut = read(canned).trim().replaceAll("\r\n\r\n", "\r\n");
 		assertEquals(out, cannedOut);
+	}
+	
+	public static void compareTarget(String file, String canned) throws Exception {
+		String s1 = readTarget(file).trim().replaceAll("\r\n\r\n", "\r\n");
+		String s2 = read(canned).trim().replaceAll("\r\n\r\n", "\r\n");
+		assertEquals(s1, s2);
 	}
 	
 	public static Inputs inputs(boolean includeIgnores, boolean includeReflections, boolean includeFixUnresolveds) {
@@ -50,5 +64,9 @@ public class TestUtils {
 			inputs.setFixUnresolveds(new File(Thread.currentThread().getContextClassLoader().getResource("SampleFixUnresolveds.txt").getPath()));
 		}
 		return inputs;
+	}
+	
+	public static Outputs outputs() {
+		return new Outputs(targetDir().toFile());
 	}
 }

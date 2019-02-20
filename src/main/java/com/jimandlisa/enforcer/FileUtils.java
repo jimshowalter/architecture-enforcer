@@ -13,21 +13,38 @@
 
 package com.jimandlisa.enforcer;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
+import java.io.File;
+import java.nio.file.Files;
 
-import org.junit.Test;
+public class FileUtils {
 
-public class EnforcerTest {
-
-	@Test
-	public void doTest() throws Exception {
-		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
-			Flags flags = new Flags();
-			flags.setDebug(true);
-			Enforce.mainImpl(TestUtils.inputs(true, true, true), TestUtils.outputs(), ps, flags);
-			TestUtils.compare(baos, "TestEnforceCanned1.txt");
+	public static File checkReadFile(File file) {
+		try {
+			if (!file.exists()) {
+				throw new EnforcerException(file + " does not exist", Errors.FILE_DOES_NOT_EXIST);
+			}
+			if (!file.canRead()) {
+				throw new EnforcerException("cannot read " + file, Errors.CANNOT_READ_FILE);
+			}
+			return file;
+		} catch (EnforcerException e) {
+			throw e;
+		} catch (Throwable t) {
+			throw new EnforcerException("error validating file " + file + ": " + t.getMessage(), Errors.ERROR_VALIDATING_FILE, t);
+		}
+	}
+	
+	public static File checkWriteDir(File dir) {
+		try {
+			Files.createDirectories(dir.toPath());
+			if (!dir.canWrite()) {
+				throw new EnforcerException("cannot write to " + dir, Errors.CANNOT_WRITE_TO_DIRECTORY);
+			}
+			return dir;
+		} catch (EnforcerException e) {
+			throw e;
+		} catch (Throwable t) {
+			throw new EnforcerException("error validating directory " + dir + ": " + t.getMessage(), Errors.ERROR_VALIDATING_DIRECTORY, t);
 		}
 	}
 }

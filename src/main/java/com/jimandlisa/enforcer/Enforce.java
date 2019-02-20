@@ -13,7 +13,9 @@
 
 package com.jimandlisa.enforcer;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -22,7 +24,7 @@ import java.util.Set;
 
 public class Enforce {
 
-	private static final String USAGE = ": usage: /full/path/to/target/architecture/.yaml /full/path/to/pf-CDA/.odem " + Optionals.IGNORES + "/full/path/to/packages/to/ignore " + Optionals.REFLECTIONS
+	private static final String USAGE = ": usage: /full/path/to/target/architecture/.yaml /full/path/to/pf-CDA/.odem /full/path/to/output/directory " + Optionals.IGNORES + "/full/path/to/packages/to/ignore " + Optionals.REFLECTIONS
 			+ "/full/path/to/reflection/references " + Optionals.FIX_UNRESOLVEDS + "/full/path/to/fixed/unresolveds " + Optionals.PRESERVE_NESTED_TYPES + " (preserves nested types) "
 			+ Optionals.STRICT + " (strict, requires that all types resolve and no illegal references) " + Optionals.DEBUG + " (debug) [last six args optional and unordered]";
 
@@ -87,48 +89,86 @@ public class Enforce {
 		}
 	}
 	
-	// To have gotten here, there can't be any fatal errors. In strict mode, that means we can't get here at all if there are any problems.
-	// In non-strict mode, we can get here, but only if all problems are fatal only when strict is specified. We need to report those errors.
-	static void problems(Set<Problem> problems, PrintStream ps) {
-		if (problems.isEmpty()) {
-			return;
-		}
-		ps.println("PROBLEMS:");
-		for (Problem problem : CollectionUtils.sort(new ArrayList<>(problems))) {
-			ps.println(problem);
+	static void reportProblems(Set<Problem> problems, Errors error, PrintStream ps, File out) throws Exception {
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(out))) {
+			for (Problem problem :  CollectionUtils.sort(new ArrayList<>(problems))) {
+				if (problem.error() == error) {
+					writer.append(problem.description());
+					writer.newLine();
+				}
+			}
 		}
 	}
 	
-	static void mainImpl(Inputs inputs, PrintStream ps, Flags flags) throws Exception {
+	// To have gotten here, there can't be any fatal errors. In strict mode, that means we can't get here at all if there are any problems.
+	// In non-strict mode, we can get here, but only if all problems are fatal only when strict is specified. We need to report those errors.
+	static void reportProblems(Set<Problem> problems, PrintStream ps, Outputs outputs) throws Exception {
+		if (problems.isEmpty()) {
+			return;
+		}
+		boolean foundUnresolvedTypes = false;
+		boolean foundIllegalReferences = false;
+		for (Problem problem : problems) {
+			if (problem.error() == Errors.UNRESOLVED_REFERENCE) {
+				foundUnresolvedTypes = true;
+				if (foundIllegalReferences) {
+					break;
+				}
+				continue;
+			}
+			if (problem.error() == Errors.ILLEGAL_REFERENCE) {
+				foundIllegalReferences = true;
+				if (foundUnresolvedTypes) {
+					break;
+				}
+			}
+		}
+		if (!foundUnresolvedTypes && !foundIllegalReferences) {
+			return;
+		}
+		ps.println("PROBLEMS FOUND, SEE FILES IN TARGET DIRECTORY:");
+		if (foundUnresolvedTypes) {
+			reportProblems(problems, Errors.UNRESOLVED_REFERENCE, ps, outputs.unresolvedTypes());
+			ps.println(outputs.unresolvedTypes().getName());
+		}
+		if (foundIllegalReferences) {
+			reportProblems(problems, Errors.ILLEGAL_REFERENCE, ps, outputs.illegalReferences());
+			ps.println(outputs.illegalReferences().getName());
+		}
+	}
+	
+	static void mainImpl(Inputs inputs, Outputs outputs, PrintStream ps, Flags flags) throws Exception {
 		Target target = TargetUtils.parse(inputs.target());
 		Set<Problem> problems = new LinkedHashSet<>();
 		Map<String, Type> types = EnforcerUtils.resolve(inputs, problems, flags);
 		RollUp rollUp = new RollUp();
 		EnforcerUtils.correlate(types, target.components(), rollUp, problems, flags);
 		debug(target, types, rollUp, ps, flags);
-		problems(problems, ps);
+		reportProblems(problems, ps, outputs);
 	}
 
 	public static void mainImpl(String[] args, PrintStream ps) throws Exception {
 		Inputs inputs = null;
+		Outputs outputs = null;
 		Flags flags = null;
 		try {
-			if (args.length < 2) {
+			if (args.length < 3) {
 				throw new EnforcerException("not enough args" + USAGE, Errors.NOT_ENOUGH_ARGS);
 			}
-			if (args.length > 8) {
+			if (args.length > 9) {
 				throw new EnforcerException("too many args" + USAGE, Errors.TOO_MANY_ARGS);
 			}
 			inputs = new Inputs(new File(args[0]), new File(args[1]));
+			outputs = new Outputs(new File(args[2]));
 			flags = new Flags();
-			for (int i = 2; i < args.length; i++) {
+			for (int i = 3; i < args.length; i++) {
 				parse(args[i], inputs, flags);
 			}
 		} catch (Throwable t) {
 			ps.println(t.getMessage());
 			return;
 		}
-		ps.println("Analyzing/enforcing architecture with " + inputs.toString() + ", " + flags.toString());
-		mainImpl(inputs, ps, flags); 
+		ps.println("Analyzing/enforcing architecture with " + inputs.toString() + ", " + outputs.toString() + ", " + flags.toString());
+		mainImpl(inputs, outputs, ps, flags); 
 	}
 }

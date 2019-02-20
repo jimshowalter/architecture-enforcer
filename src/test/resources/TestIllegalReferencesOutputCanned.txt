@@ -1,0 +1,1 @@
+com.jimandlisa.app.one.App1 in component 'App One' in layer 1 refers to component 'App Two' in layer 1

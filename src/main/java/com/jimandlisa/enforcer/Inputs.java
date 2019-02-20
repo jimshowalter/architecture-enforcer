@@ -22,29 +22,13 @@ public class Inputs {
 	private File ignores = null;
 	private File reflections = null;
 	private File fixUnresolveds = null;
-	
-	static File check(File file) {
-		try {
-			if (!file.exists()) {
-				throw new EnforcerException(file + " does not exist", Errors.FILE_DOES_NOT_EXIST);
-			}
-			if (!file.canRead()) {
-				throw new EnforcerException("cannot read " + file, Errors.CANNOT_READ_FILE);
-			}
-			return file;
-		} catch (EnforcerException e) {
-			throw e;
-		} catch (Throwable t) {
-			throw new EnforcerException("error validating file " + file + ": " + t.getMessage(), Errors.ERROR_VALIDATING_FILE, t);
-		}
-	}
 
 	public Inputs(final File target, final File odem) {
 		super();
-		this.target = check(target);
-		this.odem = check(odem);
+		this.target = FileUtils.checkReadFile(target);
+		this.odem = FileUtils.checkReadFile(odem);
 	}
-	
+
 	public final File target() {
 		return target;
 	}
@@ -52,40 +36,40 @@ public class Inputs {
 	public final File odem() {
 		return odem;
 	}
-	
+
 	public final void setIgnores(File ignores) {
 		if (ignores() != null) {
 			throw new EnforcerException("already set ignores file " + ignores(), Errors.IGNORES_FILE_ALREADY_SPECIFIED);
 		}
-		this.ignores = check(ignores);
+		this.ignores = FileUtils.checkReadFile(ignores);
 	}
 
 	public final File ignores() {
 		return ignores;
 	}
-	
+
 	public final void setReflections(File reflections) {
 		if (reflections() != null) {
 			throw new EnforcerException("already set reflections file " + reflections(), Errors.REFLECTIONS_FILE_ALREADY_SPECIFIED);
 		}
-		this.reflections = check(reflections);
+		this.reflections = FileUtils.checkReadFile(reflections);
 	}
 
 	public final File reflections() {
 		return reflections;
 	}
-	
+
 	public final void setFixUnresolveds(File fixedUnresolveds) {
 		if (fixUnresolveds() != null) {
 			throw new EnforcerException("already set fix-unresolveds file " + fixUnresolveds(), Errors.FIX_UNRESOLVEDS_FILE_ALREADY_SPECIFIED);
 		}
-		this.fixUnresolveds = check(fixedUnresolveds);
+		this.fixUnresolveds = FileUtils.checkReadFile(fixedUnresolveds);
 	}
-	
+
 	public final File fixUnresolveds() {
 		return fixUnresolveds;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "target=" + target() + ", ODEM=" + odem() + ", ignores=" + ignores() + ", reflections=" + reflections() + ", fix-unresolveds=" + fixUnresolveds();

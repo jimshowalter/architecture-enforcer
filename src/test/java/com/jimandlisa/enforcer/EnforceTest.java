@@ -26,7 +26,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class EnforceTest {
-	
+
 	private static String normalize(Path path) {
 		String normalized = path.toString().replace("\\", "/");
 		if (!normalized.startsWith("/")) {
@@ -34,9 +34,10 @@ public class EnforceTest {
 		}
 		return normalized;
 	}
-	
+
 	private static void compare(ByteArrayOutputStream baos, String canned) throws Exception {
-		String out = new String(baos.toByteArray(), StandardCharsets.UTF_8).trim().replaceAll("\r\n\r\n", "\r\n").replace("\\", "/").replaceAll("=[^=]+/architecture-enforcer/target/test-classes/", "=/architecture-enforcer/target/test-classes/");
+		String out = new String(baos.toByteArray(), StandardCharsets.UTF_8).trim().replaceAll("\r\n\r\n", "\r\n").replace("\\", "/").replaceAll("=[^=]+/architecture-enforcer/target/test-classes/",
+				"=/architecture-enforcer/target/test-classes/");
 		String cannedOut = TestUtils.read(canned).trim().replaceAll("\r\n\r\n", "\r\n");
 		assertEquals(out, cannedOut);
 	}
@@ -59,7 +60,7 @@ public class EnforceTest {
 		inputs = TestUtils.inputs(false, false, false);
 		flags = new Flags();
 		Enforce.parse(Optionals.REFLECTIONS.indicator() + Thread.currentThread().getContextClassLoader().getResource("SampleReflections.txt").getPath(), inputs, flags);
-		assertEquals(Thread.currentThread().getContextClassLoader().getResource("SampleReflections.txt").getPath(),  normalize(inputs.reflections().toPath()));
+		assertEquals(Thread.currentThread().getContextClassLoader().getResource("SampleReflections.txt").getPath(), normalize(inputs.reflections().toPath()));
 		try {
 			Enforce.parse(Optionals.REFLECTIONS.indicator() + "foo", TestUtils.inputs(false, true, false), flags);
 			Assert.fail();
@@ -69,7 +70,7 @@ public class EnforceTest {
 		inputs = TestUtils.inputs(false, false, false);
 		flags = new Flags();
 		Enforce.parse(Optionals.FIX_UNRESOLVEDS.indicator() + Thread.currentThread().getContextClassLoader().getResource("SampleFixUnresolveds.txt").getPath(), inputs, flags);
-		assertEquals(Thread.currentThread().getContextClassLoader().getResource("SampleFixUnresolveds.txt").getPath(),  normalize(inputs.fixUnresolveds().toPath()));
+		assertEquals(Thread.currentThread().getContextClassLoader().getResource("SampleFixUnresolveds.txt").getPath(), normalize(inputs.fixUnresolveds().toPath()));
 		try {
 			Enforce.parse(Optionals.FIX_UNRESOLVEDS.indicator() + "foo", TestUtils.inputs(false, false, true), flags);
 			Assert.fail();
@@ -113,21 +114,28 @@ public class EnforceTest {
 			assertEquals(Errors.UNRECOGNIZED_COMMAND_LINE_OPTION, e.error());
 		}
 		Enforce.debug(null, null, null, null, new Flags());
-		Enforce.problems(new HashSet<Problem>(), null);
+		Enforce.reportProblems(new HashSet<Problem>(), null, null);
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
 			Enforce.mainImpl(new String[0], ps);
 			TestUtils.compare(baos, "TestEnforceCanned2.txt");
 		}
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
-			Enforce.mainImpl(new String[] { "a", "b", "c", "d", "e", "f", "g", "h", "i" }, ps);
+			Enforce.mainImpl(new String[] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" }, ps);
 			TestUtils.compare(baos, "TestEnforceCanned3.txt");
 		}
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
-			Enforce.mainImpl(new String[] {Thread.currentThread().getContextClassLoader().getResource("SampleTarget2.yaml").getPath(), Thread.currentThread().getContextClassLoader().getResource("Sample.odem").getPath(), Optionals.IGNORES.indicator() + Thread.currentThread().getContextClassLoader().getResource("SamplePackageIgnores.txt").getPath()}, ps);
+			Enforce.mainImpl(new String[] { Thread.currentThread().getContextClassLoader().getResource("SampleTarget2.yaml").getPath(),
+					Thread.currentThread().getContextClassLoader().getResource("Sample.odem").getPath(),
+					TestUtils.targetDir().toString(),
+					Optionals.IGNORES.indicator() + Thread.currentThread().getContextClassLoader().getResource("SamplePackageIgnores.txt").getPath() }, ps);
 			compare(baos, "TestEnforceCanned4.txt");
 		}
+		TestUtils.compareTarget(Outputs.UNRESOLVED_TYPES_DEFAULT_FILE_NAME, "TestUnresolvedsOutputCanned.txt");
+		TestUtils.compareTarget(Outputs.ILLEGAL_REFERENCES_DEFAULT_FILE_NAME, "TestIllegalReferencesOutputCanned.txt");
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
-			Enforce.mainImpl(new String[] {Thread.currentThread().getContextClassLoader().getResource("SampleTarget2.yaml").getPath(), Thread.currentThread().getContextClassLoader().getResource("Sample.odem").getPath(), Optionals.IGNORES.indicator() + Thread.currentThread().getContextClassLoader().getResource("SamplePackageIgnores.txt").getPath(), "-s"}, ps);
+			Enforce.mainImpl(new String[] { Thread.currentThread().getContextClassLoader().getResource("SampleTarget2.yaml").getPath(),
+					Thread.currentThread().getContextClassLoader().getResource("Sample.odem").getPath(),
+					Optionals.IGNORES.indicator() + Thread.currentThread().getContextClassLoader().getResource("SamplePackageIgnores.txt").getPath(), "-s" }, ps);
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("FATAL ERRORS:"));
 			assertTrue(e.getMessage().contains("UNRESOLVED_REFERENCE: com.jimandlisa.utils.Unresolved"));

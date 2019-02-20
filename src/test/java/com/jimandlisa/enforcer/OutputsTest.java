@@ -13,21 +13,16 @@
 
 package com.jimandlisa.enforcer;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-public class EnforcerTest {
+public class OutputsTest {
 
 	@Test
-	public void doTest() throws Exception {
-		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
-			Flags flags = new Flags();
-			flags.setDebug(true);
-			Enforce.mainImpl(TestUtils.inputs(true, true, true), TestUtils.outputs(), ps, flags);
-			TestUtils.compare(baos, "TestEnforceCanned1.txt");
-		}
+	public void doTest() {
+		Outputs outputs = new Outputs(TestUtils.targetDir().toFile());
+		assertEquals(Outputs.ILLEGAL_REFERENCES_DEFAULT_FILE_NAME, outputs.illegalReferences().getName());
+		assertEquals(Outputs.UNRESOLVED_TYPES_DEFAULT_FILE_NAME, outputs.unresolvedTypes().getName());
 	}
 }

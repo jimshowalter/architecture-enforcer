@@ -21,52 +21,9 @@ import java.io.File;
 import org.junit.Test;
 
 public class InputsTest {
-	
-	private static class MockFile extends File { // TODO: Replace with mockito.
-
-		private static final long serialVersionUID = -6543042914615276188L;
-
-		public MockFile(final String pathname) {
-			super(pathname);
-		}
-		
-		private boolean blowUp = false;
-		
-		public MockFile(final String pathname, final boolean blowUp) {
-			super(pathname);
-			this.blowUp = blowUp;
-		}
-		
-		@Override
-		public boolean canRead() {
-			if (blowUp) {
-				throw new RuntimeException("COVERAGE");
-			}
-			return false;
-		}
-	}
 
 	@Test
 	public void doTest() {
-		try {
-			Inputs.check(new File(Thread.currentThread().getContextClassLoader().getResource("SamplePackageIgnores.txt").getPath() + "bogus"));
-		} catch (EnforcerException e) {
-			assertTrue(e.getMessage().contains("does not exist"));
-			assertEquals(Errors.FILE_DOES_NOT_EXIST, e.error());
-		}
-		try {
-			Inputs.check(new MockFile(Thread.currentThread().getContextClassLoader().getResource("SampleTarget2.yaml").getPath()));
-		} catch (EnforcerException e) {
-			assertTrue(e.getMessage().contains("cannot read"));
-			assertEquals(Errors.CANNOT_READ_FILE, e.error());
-		}
-		try {
-			Inputs.check(new MockFile(Thread.currentThread().getContextClassLoader().getResource("SampleTarget2.yaml").getPath(), true));
-		} catch (EnforcerException e) {
-			assertTrue(e.getMessage().contains("error validating file"));
-			assertEquals(Errors.ERROR_VALIDATING_FILE, e.error());
-			assertEquals("COVERAGE", e.getCause().getMessage());
-		}
 		Inputs inputs = TestUtils.inputs(false, false, false);
 		inputs.toString();
 		inputs.setIgnores(new File(Thread.currentThread().getContextClassLoader().getResource("SamplePackageIgnores.txt").getPath()));

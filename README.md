@@ -117,13 +117,15 @@ code into projects, this tool should continue to be run in CI/CD.
 
 1. Using one of the provided sample yaml files as a starting point, define the target state for your project. This can take weeks for a large project, but you can start by just defining a few basic layers (for example, data, logic, and UI), then iterate. (It's probably better to start small anyway, instead of trying to boil the ocean in one shot.)
 
-1. Run this tool with at least the first two args specified. You can run this tool from Eclipse or Intellij, or from the command line in the target directory with the command: java -jar architecture-enforcer-1.0-SNAPSHOT.jar.
+1. Run this tool with at least the first three args specified. You can run this tool from Eclipse or Intellij, or from the command line in the target directory with the command: java -jar architecture-enforcer-1.0-SNAPSHOT.jar.
 
 The full set of args is:
 
 > /full/path/to/target/architecture/.yaml
 
 > /full/path/to/pf-CDA/.odem
+
+> /full/path/to/writable/output/directory
 
 > -i/full/path/to/packages/to/ignore
 
@@ -138,6 +140,8 @@ The full set of args is:
 > -d (debug)
 
 The last six args are optional, and can appear in any order (or not at all). For details, see the notes below.
+
+Unresolved types and illegal references are written to the output directory (if strict is not specified).
 
 Notes:
 
@@ -210,7 +214,7 @@ This tool can of course be improved. Below are listed some things we know would 
 * First, and most obviously, having to manually run pf-CDA at the outset is a pain, plus it thwarts automating analysis in CI/CD. The documentation on http:www.dependency-analyzer.org mentions an API that could probably be called by this tool. Or we could investigate https:innig.net/macker, or javaparser.org, or BCEL.
 Alternatively, someone skilled with bytecode analysis could probably replace pf-CDA entirely (we don't need all of its features, just a dump of class-to-class references).
 
-* The current error output isn't very useful. It should be grouped by type of error, illegal references should be ranked by number of times a class is illegally referred to, and the output should be directed to one or more files instead of to the console (with just a general failure error sent to the console).
+* Add optional command-line arguments to specify the names of the output files.
 
 * Provide a way to fail builds if the count of illegal references increases. Note that this is different from enabling strict mode, because in that case builds fail if there are any illegal references, so the previous count is known (it's zero).
 This requires determining that there were N illegal references in the previous build, and now there are N + M illegal references in the current build. One way to do this is to access the previous build in CI/CD using something like the Jenkins API.
@@ -262,7 +266,7 @@ The following table summarizes differences between the two tools:
 |Prescriptive (kinds of components, etc.)|Unrestricted|This tool|
 |Can't split packages across components|Can specify individual classes per component (in addition to packages, or instead of packages)|This tool|
 |Can't handle classes in default package (that is, no package), requires special-casing in code|Can specify individual classes per component, even without any package|This tool|
-|Thousands of lines|~600 lines|This tool|
+|Thousands of lines|Less than 1k lines|This tool|
 |Complex|Simple|This tool|
 |Incompletely unit tested|100% statement and branch coverage|This tool|
 |Requires Maven to run it|Can run as jar with main, or as Maven mojo|This tool|
