@@ -13,19 +13,14 @@
 
 package com.jimandlisa.enforcer;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
 
-public class FlagsTest {
+public class OptionalsTest {
 
 	@Test
 	public void doTest() {
-		Flags flags = new Flags();
-		assertEquals("preserveNestedTypes=false, strict=false, debug=false", flags.toString());
-		flags.setPreserveNestedTypes(true);
-		flags.setStrict(true);
-		flags.setDebug(true);
-		assertEquals("preserveNestedTypes=true, strict=true, debug=true", flags.toString());
+		for (Optionals optional : Optionals.values()) {
+			optional.toString();
+		}
 	}
 }

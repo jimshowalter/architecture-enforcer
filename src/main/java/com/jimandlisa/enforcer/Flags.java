@@ -15,23 +15,32 @@ package com.jimandlisa.enforcer;
 
 public class Flags {
 
-	private final boolean preserveNestedTypes;
-	private final boolean strict;
-	private final boolean debug;
+	private boolean preserveNestedTypes = false;
+	private boolean strict = false;
+	private boolean debug = false;
 	
-	public Flags(final boolean preserveNestedTypes, final boolean strict, final boolean debug) {
+	public Flags() {
 		super();
+	}
+	
+	public void setPreserveNestedTypes(final boolean preserveNestedTypes) {
 		this.preserveNestedTypes = preserveNestedTypes;
-		this.strict = strict;
-		this.debug = debug;
 	}
 	
 	public boolean preserveNestedTypes() {
 		return preserveNestedTypes;
 	}
 	
+	public void setStrict(final boolean strict) {
+		this.strict = strict;
+	}
+	
 	public boolean strict() {
 		return strict;
+	}
+	
+	public void setDebug(final boolean debug) {
+		this.debug = debug;
 	}
 	
 	public boolean debug() {

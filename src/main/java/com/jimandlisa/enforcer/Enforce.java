@@ -22,10 +22,11 @@ import java.util.Set;
 
 public class Enforce {
 
-	// TODO: Add options for preserving nested types, strict, and debug.
-	private static final String USAGE = ": usage: /full/path/to/target/architecture/.yaml /full/path/to/pf-CDA/.odem " + Optionals.IGNORES + "/full/path/to/packages/to/ignore " + Optionals.REFLECTIONS + "/full/path/to/reflection/references " + Optionals.FIX_UNRESOLVEDS + "/full/path/to/fixed/unresolveds [last three args optional and unordered]";
+	private static final String USAGE = ": usage: /full/path/to/target/architecture/.yaml /full/path/to/pf-CDA/.odem " + Optionals.IGNORES + "/full/path/to/packages/to/ignore " + Optionals.REFLECTIONS
+			+ "/full/path/to/reflection/references " + Optionals.FIX_UNRESOLVEDS + "/full/path/to/fixed/unresolveds " + Optionals.PRESERVE_NESTED_TYPES + " (preserves nested types) "
+			+ Optionals.STRICT + " (strict, requires that all types resolve and no illegal references) " + Optionals.DEBUG + " (debug) [last six args optional and unordered]";
 
-	static void parse(String arg, Inputs inputs) {
+	static void parse(String arg, Inputs inputs, Flags flags) {
 		if (arg.startsWith(Optionals.IGNORES.indicator())) {
 			if (inputs.ignores() != null) {
 				throw new EnforcerException("already specified " + Optionals.IGNORES.indicator() + " option" + USAGE, Errors.IGNORES_FILE_ALREADY_SPECIFIED);
@@ -45,6 +46,27 @@ public class Enforce {
 				throw new EnforcerException("already specified " + Optionals.FIX_UNRESOLVEDS.indicator() + " option" + USAGE, Errors.FIX_UNRESOLVEDS_FILE_ALREADY_SPECIFIED);
 			}
 			inputs.setFixUnresolveds(new File(arg.replaceFirst(Optionals.FIX_UNRESOLVEDS.indicator(), "")));
+			return;
+		}
+		if (arg.startsWith(Optionals.PRESERVE_NESTED_TYPES.indicator())) {
+			if (flags.preserveNestedTypes()) {
+				throw new EnforcerException("already specified " + Optionals.PRESERVE_NESTED_TYPES.indicator() + " option" + USAGE, Errors.PRESERVE_NESTED_TYPES_ALREADY_SPECIFIED);
+			}
+			flags.setPreserveNestedTypes(true);
+			return;
+		}
+		if (arg.startsWith(Optionals.STRICT.indicator())) {
+			if (flags.strict()) {
+				throw new EnforcerException("already specified " + Optionals.STRICT.indicator() + " option" + USAGE, Errors.STRICT_ALREADY_SPECIFIED);
+			}
+			flags.setStrict(true);
+			return;
+		}
+		if (arg.startsWith(Optionals.DEBUG.indicator())) {
+			if (flags.debug()) {
+				throw new EnforcerException("already specified " + Optionals.DEBUG.indicator() + " option" + USAGE, Errors.DEBUG_ALREADY_SPECIFIED);
+			}
+			flags.setDebug(true);
 			return;
 		}
 		throw new EnforcerException("unrecognized option " + arg + USAGE, Errors.UNRECOGNIZED_COMMAND_LINE_OPTION);
@@ -84,8 +106,6 @@ public class Enforce {
 		debug(flags.debug(), target, types, rollUp, ps);
 		problems(problems, ps);
 	}
-	
-	static final boolean DEBUG = false;
 
 	public static void mainImpl(String[] args, PrintStream ps) throws Exception {
 		Inputs inputs = null;
@@ -94,20 +114,19 @@ public class Enforce {
 			if (args.length < 2) {
 				throw new EnforcerException("not enough args" + USAGE, Errors.NOT_ENOUGH_ARGS);
 			}
-			if (args.length > 5) {
+			if (args.length > 8) {
 				throw new EnforcerException("too many args" + USAGE, Errors.TOO_MANY_ARGS);
 			}
 			inputs = new Inputs(new File(args[0]), new File(args[1]));
+			flags = new Flags();
 			for (int i = 2; i < args.length; i++) {
-				parse(args[i], inputs);
+				parse(args[i], inputs, flags);
 			}
-			// TODO: Parse options for preserving nested types, strict, and debug, and from them create Flags object to pass to mainImpl.
-			flags = new Flags(false, false, DEBUG);
 		} catch (Throwable t) {
 			ps.println(t.getMessage());
 			return;
 		}
-		ps.println("Analyzing/enforcing architecture with " + inputs.toString());
+		ps.println("Analyzing/enforcing architecture with " + inputs.toString() + ", " + flags.toString());
 		mainImpl(inputs, ps, flags); 
 	}
 }

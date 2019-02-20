@@ -15,13 +15,16 @@ package com.jimandlisa.enforcer;
 
 enum Optionals {
 
-	IGNORES("-i"),
-	REFLECTIONS("-r"),
-	FIX_UNRESOLVEDS("-f");
+	IGNORES("i"),
+	REFLECTIONS("r"),
+	FIX_UNRESOLVEDS("f"),
+	PRESERVE_NESTED_TYPES("p"),
+	STRICT("s"),
+	DEBUG("d");
 	
 	private final String indicator;
 	private Optionals(final String indicator) {
-		this.indicator = indicator;
+		this.indicator = "-" + indicator;
 	}
 	
 	public String indicator() {

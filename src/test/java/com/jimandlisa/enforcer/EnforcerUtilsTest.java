@@ -81,7 +81,7 @@ public class EnforcerUtilsTest {
 		Set<String> ignores = new HashSet<>();
 		Map<String, Type> types = new HashMap<>();
 		Set<Problem> problems = new LinkedHashSet<>();
-		Flags flags = new Flags(false, false, false);
+		Flags flags = new Flags();
 		EnforcerUtils.parse(null, null, null, null, null, false, null);
 		EnforcerUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("TestReflections.txt").getPath()), types, ignores, problems, "reflection", true, flags);
 		try {
@@ -146,7 +146,7 @@ public class EnforcerUtilsTest {
 	public void testResolve() {
 		Map<String, Type> types = new HashMap<>();
 		Set<Problem> problems = new LinkedHashSet<>();
-		Flags flags = new Flags(false, false, false);
+		Flags flags = new Flags();
 		Type type0 = new Type("foo");
 		type0.referenceNames().add("bar");
 		types.put(type0.name(), type0);
@@ -163,7 +163,7 @@ public class EnforcerUtilsTest {
 	public void testCorrelate() {
 		Map<String, Type> types = new HashMap<>();
 		Set<Problem> problems = new LinkedHashSet<>();
-		Flags flags = new Flags(false, false, false);
+		Flags flags = new Flags();
 		Type type1 = new Type("com.foo.bar.Baz");
 		types.put(type1.name(), type1);
 		Type type2 = new Type("com.foo.bar.Baz2");
@@ -185,7 +185,7 @@ public class EnforcerUtilsTest {
 	public void testCorrelateWithClasses() {
 		Map<String, Type> types = new HashMap<>();
 		Set<Problem> problems = new LinkedHashSet<>();
-		Flags flags = new Flags(false, false, false);
+		Flags flags = new Flags();
 		Type type1 = new Type("com.foo.bar.Baz");
 		types.put(type1.name(), type1);
 		Type type2 = new Type("com.foo.bar.Baz2");
@@ -215,7 +215,7 @@ public class EnforcerUtilsTest {
 	public void testFailedCorrelateWithClasses() {
 		Map<String, Type> types = new HashMap<>();
 		Set<Problem> problems = new LinkedHashSet<>();
-		Flags flags = new Flags(false, false, false);
+		Flags flags = new Flags();
 		Type type1 = new Type("com.foo.bar.Baz");
 		types.put(type1.name(), type1);
 		Type type2 = new Type("com.foo.bar.Baz2");
@@ -244,7 +244,7 @@ public class EnforcerUtilsTest {
 	public void testFailedTypeToComponentCorrelate() {
 		Map<String, Type> types = new HashMap<>();
 		Set<Problem> problems = new LinkedHashSet<>();
-		Flags flags = new Flags(false, false, false);
+		Flags flags = new Flags();
 		Type type1 = new Type("com.foo.bar.Baz");
 		types.put(type1.name(), type1);
 		Type type2 = new Type("com.foo.bar.Baz2");
@@ -270,7 +270,7 @@ public class EnforcerUtilsTest {
 	public void testLayerViolationCorrelate() {
 		Map<String, Type> types = new HashMap<>();
 		Set<Problem> problems = new LinkedHashSet<>();
-		Flags flags = new Flags(false, false, false);
+		Flags flags = new Flags();
 		Type type1 = new Type("com.foo.bar.Baz");
 		types.put(type1.name(), type1);
 		Type type2 = new Type("com.foo.bar.Baz2");

@@ -76,7 +76,7 @@ For example, if foo.bar.utils.Utils$Common refers to foo.bar.utils.math.Math$Mul
 
 In many projects this greatly shrinks the number of references that need to be analyzed.
 
-If it is important in your project to track references at the nested-class level, you need to extract nested classes to new source files, or change the Flags object passed into mainImpl to preserve nesting.
+If it is important in your project to track references at the nested-class level, you need to extract nested classes to new source files, or specify the -p option to preserve nested types.
 
 ### Kinds Of References ###
 
@@ -131,7 +131,13 @@ The full set of args is:
 
 > -f/full/path/to/fixed/unresolveds
 
-The last three args are optional, and can appear in any order (or not at all). For details, see the notes below.
+> -p (preserves nested types)
+
+> -s (strict, requires that all types resolve and no illegal references)
+
+> -d (debug)
+
+The last six args are optional, and can appear in any order (or not at all). For details, see the notes below.
 
 Notes:
 
@@ -191,8 +197,6 @@ This tool can of course be improved. Below are listed some things we know would 
 
 * First, and most obviously, having to manually run pf-CDA at the outset is a pain, plus it thwarts automating analysis in CI/CD. The documentation on http:www.dependency-analyzer.org mentions an API that could probably be called by this tool. Or we could investigate https:innig.net/macker, or javaparser.org.
 Alternatively, someone skilled with bytecode analysis could probably replace pf-CDA entirely (we don't need all of its features, just a dump of class-to-class references).
-
-* Various flags are supported by the implementation, but are not currently offered on the command line. They could be added as more optional arguments, parsed, and used to create the Flags object passed to the implementation.
 
 * The current error output isn't very useful. It should be grouped and possibly ranked, and probably should be directed to one or more files.
 
