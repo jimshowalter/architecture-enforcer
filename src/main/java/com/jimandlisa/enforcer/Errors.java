@@ -15,6 +15,7 @@ package com.jimandlisa.enforcer;
 
 public enum Errors {
 
+	MULTIPLE_ERRORS,
 	NULL_STRING_ARG,
 	EMPTY_STRING_ARG,
 	NULL_INTEGER_ARG,

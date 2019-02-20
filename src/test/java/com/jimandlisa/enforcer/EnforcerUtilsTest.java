@@ -102,18 +102,22 @@ public class EnforcerUtilsTest {
 		ignores.add("foo.");
 		EnforcerUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("TestFixUnresolveds.txt").getPath()), types, ignores, problems, "fix-unresolved", false, flags);
 		assertEquals(1, problems.size());
-		assertTrue(problems.iterator().next().description().contains("class is listed as referring but also listed in ignores:"));
+        assertTrue(problems.iterator().next().description().contains("class is listed as referring but also listed in ignores:"));
+		assertEquals(Errors.CLASS_BOTH_REFERRING_AND_IGNORED, problems.iterator().next().error());
 		types.clear();
 		ignores.clear();
 		problems.clear();
 		ignores.add("com.x.");
 		EnforcerUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("TestFixUnresolveds.txt").getPath()), types, ignores, problems, "fix-unresolved", false, flags);
 		assertEquals(1, problems.size());
-		assertTrue(problems.iterator().next().description().contains("class is listed as referred-to but also listed in ignores:"));
+        assertTrue(problems.iterator().next().description().contains("class is listed as referred-to but also listed in ignores:"));
+		assertEquals(Errors.CLASS_BOTH_REFERRED_TO_AND_IGNORED, problems.iterator().next().error());
 	}
 	
 	@Test
 	public void testReport() {
+		assertEquals("S", EnforcerUtils.plural(Errors.MULTIPLE_ERRORS));
+		assertTrue(EnforcerUtils.plural(Errors.CANNOT_READ_FILE).isEmpty());
 		Flags flags = new Flags();
 		Set<Problem> problems = new LinkedHashSet<>();
 		EnforcerUtils.report(problems, flags);
@@ -125,14 +129,16 @@ public class EnforcerUtilsTest {
 		} catch (EnforcerException e) {
 			assertEquals(Errors.CANNOT_READ_FILE, e.error());
 			assertFalse(e.getMessage().contains("COVERAGE0"));
+			assertTrue(e.getMessage().contains("FATAL ERROR:"));
 			assertTrue(e.getMessage().contains("COVERAGE1"));
 		}
 		problems.add(new Problem("COVERAGE2", Errors.CLASS_BOTH_REFERRED_TO_AND_IGNORED));
 		try {
 			EnforcerUtils.report(problems, flags);
 		} catch (EnforcerException e) {
-			assertEquals(Errors.CANNOT_READ_FILE, e.error());
+			assertEquals(Errors.MULTIPLE_ERRORS, e.error());
 			assertFalse(e.getMessage().contains("COVERAGE0"));
+			assertTrue(e.getMessage().contains("FATAL ERRORS:"));
 			assertTrue(e.getMessage().contains("COVERAGE1"));
 			assertTrue(e.getMessage().contains("COVERAGE2"));
 		}
@@ -147,7 +153,8 @@ public class EnforcerUtilsTest {
 		types.put(type0.name(), type0);
 		EnforcerUtils.resolve(types, problems);
 		assertEquals(1, problems.size());
-		assertTrue(problems.iterator().next().description().contains("unresolved:"));
+		assertTrue(problems.iterator().next().description().contains("bar"));
+		assertEquals(Errors.UNRESOLVED_REFERENCE, problems.iterator().next().error());
 		problems.clear();
 		types.put("bar", new Type("bar"));
 		EnforcerUtils.resolve(types, problems);
@@ -286,6 +293,7 @@ public class EnforcerUtilsTest {
 		type3.referenceNames().add("com.foo.bar.Baz");
 		type3.references().add(type1);
 		EnforcerUtils.correlate(types, components, new RollUp(), problems, flags);
-		assertTrue(problems.iterator().next().description().contains("illegal reference:"));
+		assertTrue(problems.iterator().next().description().contains("com.bar.Baz3 in component 'Comp0' in layer 0 refers to component 'Comp1' in layer 1"));
+		assertEquals(Errors.ILLEGAL_REFERENCE, problems.iterator().next().error());
 	}
 }

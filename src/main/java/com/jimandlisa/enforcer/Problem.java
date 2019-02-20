@@ -40,7 +40,7 @@ public class Problem implements Comparable<Problem> {
 
 	@Override
 	public int hashCode() {
-		return description().hashCode();
+		return error().hashCode() + description().hashCode();
 	}
 
 	@Override
@@ -59,11 +59,11 @@ public class Problem implements Comparable<Problem> {
 
 	@Override
 	public int compareTo(Problem other) {
-		return description().compareTo(other.description());
+		return toString().compareTo(other.toString());
 	}
 
 	@Override
 	public String toString() {
-		return description() + ": error=" + error();
+		return  error() + ": " + description();
 	}
 }

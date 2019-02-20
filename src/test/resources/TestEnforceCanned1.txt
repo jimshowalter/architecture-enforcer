@@ -88,6 +88,6 @@ Total outermost types: 9
 		com.jimandlisa.utils.AnotherUnresolved
 		com.jimandlisa.utils.Unresolved
 PROBLEMS:
-	illegal reference: com.jimandlisa.app.one.App1 in component 'App One' in layer 1 refers to component 'App Two' in layer 1: error=ILLEGAL_REFERENCE
-	illegal reference: com.jimandlisa.service.Service2 in component 'App Two' in layer 1 refers to component 'UI One' in layer 2: error=ILLEGAL_REFERENCE
-	unresolved: com.jimandlisa.utils.AnotherUnresolved: error=UNRESOLVED_REFERENCE
+ILLEGAL_REFERENCE: com.jimandlisa.app.one.App1 in component 'App One' in layer 1 refers to component 'App Two' in layer 1
+ILLEGAL_REFERENCE: com.jimandlisa.service.Service2 in component 'App Two' in layer 1 refers to component 'UI One' in layer 2
+UNRESOLVED_REFERENCE: com.jimandlisa.utils.AnotherUnresolved

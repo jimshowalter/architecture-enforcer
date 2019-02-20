@@ -28,13 +28,13 @@ public class ProblemsTest {
 		assertFalse(problem.isFatal(false));
 		assertTrue(problem.isFatal(true));
 		assertEquals(Errors.UNRESOLVED_REFERENCE, problem.error());
-		assertEquals("foo: error=" + Errors.UNRESOLVED_REFERENCE.toString(), problem.toString());
+		assertEquals(Errors.UNRESOLVED_REFERENCE.toString() + ": foo", problem.toString());
 		problem = new Problem("bar", Errors.CANNOT_READ_FILE);
 		assertEquals("bar", problem.description());
 		assertTrue(problem.isFatal(false));
 		assertTrue(problem.isFatal(true));
 		assertEquals(Errors.CANNOT_READ_FILE, problem.error());
-		assertEquals(problem.description().hashCode(), problem.hashCode());
+		assertEquals(problem.error().hashCode() + problem.description().hashCode(), problem.hashCode());
 		assertFalse(problem.equals(null));
 		assertTrue(problem.equals(problem));
 		assertFalse(problem.equals(new Object()));
@@ -42,6 +42,6 @@ public class ProblemsTest {
 		assertTrue(problem.equals(new Problem("bar", Errors.CANNOT_READ_FILE)));
 		assertTrue(problem.equals(new Problem("bar", Errors.CLASS_BOTH_REFERRED_TO_AND_IGNORED)));
 		assertEquals(0, problem.compareTo(new Problem("bar", Errors.CANNOT_READ_FILE)));
-		assertEquals("bar: error=CANNOT_READ_FILE", problem.toString());
+		assertEquals(Errors.CANNOT_READ_FILE.toString() + ": bar", problem.toString());
 	}
 }

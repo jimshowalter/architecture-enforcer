@@ -126,5 +126,12 @@ public class EnforceTest {
 			Enforce.mainImpl(new String[] {Thread.currentThread().getContextClassLoader().getResource("SampleTarget2.yaml").getPath(), Thread.currentThread().getContextClassLoader().getResource("Sample.odem").getPath(), Optionals.IGNORES.indicator() + Thread.currentThread().getContextClassLoader().getResource("SamplePackageIgnores.txt").getPath()}, ps);
 			compare(baos, "TestEnforceCanned4.txt");
 		}
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
+			Enforce.mainImpl(new String[] {Thread.currentThread().getContextClassLoader().getResource("SampleTarget2.yaml").getPath(), Thread.currentThread().getContextClassLoader().getResource("Sample.odem").getPath(), Optionals.IGNORES.indicator() + Thread.currentThread().getContextClassLoader().getResource("SamplePackageIgnores.txt").getPath(), "-s"}, ps);
+		} catch (EnforcerException e) {
+			assertTrue(e.getMessage().contains("FATAL ERRORS:"));
+			assertTrue(e.getMessage().contains("UNRESOLVED_REFERENCE: com.jimandlisa.utils.Unresolved"));
+			assertTrue(e.getMessage().contains("UNRESOLVED_REFERENCE: com.jimandlisa.utils.AnotherUnresolved"));
+		}
 	}
 }

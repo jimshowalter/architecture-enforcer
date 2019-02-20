@@ -135,7 +135,7 @@ public class EnforcerUtils {
 			for (String referenceName : type.referenceNames()) {
 				Type reference = types.get(referenceName);
 				if (reference == null) {
-					problems.add(new Problem("unresolved: " + referenceName, Errors.UNRESOLVED_REFERENCE));
+					problems.add(new Problem(referenceName, Errors.UNRESOLVED_REFERENCE));
 					continue;
 				}
 				type.references().add(reference);
@@ -144,25 +144,31 @@ public class EnforcerUtils {
 	}
 	
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
+	
+	static String plural(Errors error) {
+		if (error == Errors.MULTIPLE_ERRORS) {
+			return "S";
+		}
+		return "";
+	}
 
 	static void report(Set<Problem> problems, Flags flags) {
 		StringBuilder builder = null;
-		Errors firstError = null;
-		boolean multipleErrors = false;
+		Errors error = null;
 		for (Problem problem : problems) {
 			if (problem.isFatal(flags.strict())) {
 				if (builder == null) {
 					builder = new StringBuilder();
-					firstError = problem.error();
+					error = problem.error();
 				} else {
-					multipleErrors = true;
+					error = Errors.MULTIPLE_ERRORS;
 				}
 				builder.append(LINE_SEPARATOR);
-				builder.append(problem.description());
+				builder.append(problem);
 			}
 		}
 		if (builder != null) {
-			throw new EnforcerException("error" + (multipleErrors ? "s" : "") + ":" + builder.toString(), firstError);
+			throw new EnforcerException("FATAL ERROR" + plural(error) + ":" + builder.toString(), error);
 		}
 	}
 	
@@ -237,7 +243,7 @@ public class EnforcerUtils {
 					continue; // Skip intra-component references.
 				}
 				if (type.belongsTo().layer().depth() <= referredTo.belongsTo().layer().depth()) {
-					problems.add(new Problem("illegal reference: " + type + " in component '" + type.belongsTo().name() + "' in layer " + type.belongsTo().layer().depth() + " refers to component '" + referredTo.belongsTo().name() + "' in layer " + referredTo.belongsTo().layer().depth(), Errors.ILLEGAL_REFERENCE));
+					problems.add(new Problem(type + " in component '" + type.belongsTo().name() + "' in layer " + type.belongsTo().layer().depth() + " refers to component '" + referredTo.belongsTo().name() + "' in layer " + referredTo.belongsTo().layer().depth(), Errors.ILLEGAL_REFERENCE));
 				}
 			}
 		}

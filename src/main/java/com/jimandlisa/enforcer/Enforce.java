@@ -87,13 +87,15 @@ public class Enforce {
 		}
 	}
 	
+	// To have gotten here, there can't be any fatal errors. In strict mode, that means we can't get here at all if there are any problems.
+	// In non-strict mode, we can get here, but only if all problems are fatal only when strict is specified. We need to report those errors.
 	static void problems(Set<Problem> problems, PrintStream ps) {
 		if (problems.isEmpty()) {
 			return;
 		}
 		ps.println("PROBLEMS:");
 		for (Problem problem : CollectionUtils.sort(new ArrayList<>(problems))) {
-			ps.println("\t" + problem);
+			ps.println(problem);
 		}
 	}
 	
