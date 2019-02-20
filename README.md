@@ -206,12 +206,6 @@ Alternatively, someone skilled with bytecode analysis could probably replace pf-
 
 We welcome contributions of those and other improvements.
 
-## Implementation Notes ##
-
-This tool is a cleanroom reimplementation of a proprietary tool used for a massive decomposition project.
-
-Only general, well-known refactoring concepts have been reused (layering, encapsulation, APIs, implementation, etc.). Nothing from the proprietary tool's code was used, and this tool differs significantly from how that tool worked.
-
 ## Caveats ##
 
 It's possible this tool can miss some dependencies.
