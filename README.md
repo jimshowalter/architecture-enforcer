@@ -202,7 +202,7 @@ Alternatively, someone skilled with bytecode analysis could probably replace pf-
 
 * Provide a way to fail builds if the count of illegal references increases. (While refactoring, there are often temporary increases in the number of illegal references, so support would also need to be added for whitelisting new illegal references. Access to the whitelist could be restricted to just the team doing decomposition.)
 
-* Add a Maven mojo that calls EnforcerUtils directly (instead of via args in the Enforce main method), and document how to integrate the mojo into builds. (Note that this provides a straightforward solution to automatically fail builds when illegal-reference counts increase.)
+* Add a Maven mojo that calls EnforcerUtils directly (instead of via args in the Enforce main method), and document how to integrate the mojo into builds.
 
 * Provide front-end code that displays a burndown chart based on the count of illegal references, and provide a way to integrate this into CI/CD pipelines.
 
