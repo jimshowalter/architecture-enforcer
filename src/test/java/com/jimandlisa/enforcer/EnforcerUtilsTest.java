@@ -48,6 +48,9 @@ public class EnforcerUtilsTest {
 		ignores.add("foo.");
 		assertTrue(EnforcerUtils.skip("foo.bar", ignores));
 		assertFalse(EnforcerUtils.skip("baz.baz2", ignores));
+		ignores.clear();
+		assertTrue(EnforcerUtils.skip("com.foo.Bar", "com.foo.Bar", ignores));
+		assertFalse(EnforcerUtils.skip("com.foo.Bar", "com.foo.Baz", ignores));
 	}
 	
 	@Test

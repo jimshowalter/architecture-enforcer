@@ -61,6 +61,13 @@ public class EnforcerUtils {
 		return false;
 	}
 	
+	static boolean skip(String referringTypeName, String referredToTypeName, Set<String> ignores) {
+		if (referringTypeName.equals(referredToTypeName)) {
+			return true; // Skip self-references.
+		}
+		return skip(referredToTypeName, ignores);
+	}
+	
 	static String denest(String typeName, boolean preserveNestedTypes) {
 		if (typeName.startsWith("$")) {
 			throw new EnforcerException("malformed class name '" + typeName + "'", Errors.MALFORMED_CLASS_NAME);
@@ -188,12 +195,9 @@ public class EnforcerUtils {
 						continue;
 					}
 					String referredToClass = denest(line.trim().replace("<depends-on name=\"", "").replaceAll("\".*$", ""), flags.preserveNestedTypes());
-					if (skip(referredToClass, ignores)) {
+					if (skip(type.name(), referredToClass, ignores)) {
 						continue;
 					}
-//					if (referredToClass.equals(type.name())) { // Skip self-references. Commented out because pf-CDA seems to filter them for us.
-//						continue;
-//					}
 					type.referenceNames().add(referredToClass);
 				}
 			}
