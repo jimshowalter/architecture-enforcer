@@ -50,7 +50,7 @@ Classes belonging to the default package (that is, not having a package) can be 
 
 All classes must wind up in a component, or the tool fails with an error (the target state must be completely specified).
 
-Layers, domains, and packages referred to by a component must exist, or the tool fails with an error.
+Layers, domains, packages, and classes referred to by a component must exist, or the tool fails with an error.
 
 Components are somewhat analogous to Java 9 modules. We chose not to make them be modules, because large Java codebases tend to be legacy codebases, which tend to be on earlier versions of Java that don't support modules.
 
@@ -189,21 +189,34 @@ Notes:
 
 * Incremental compilation is a nice side effect of this approach. So long as a programmer only changes the code in the implementation of a paired component, recompilation is limited to just that implementation. Once Mavenized (or moved into modules) this can reduce cycle time from minutes to seconds (not counting time to redeploy).
 
+## Error Kinds ##
+
+Errors are either always fatal, or fatal only if strict is specified.
+
+All but two errors are always fatal:
+
+* Unresolved references are permitted when not in strict mode because sometimes the pf-CDA odem file is missing classes that are referred to by other classes in the file. This allows a grace period while the missing types are added to the fix-unresolveds file.
+
+* Illegal references are permitted when not in strict mode so the team working on decomposition can see the report of illegal references without blocking other development.
+
+Once all unresolved and illegal references are fixed, strict mode should be enabled.
+
 ## TODOs And Welcomed Contributions ##
 
 This tool can of course be improved. Below are listed some things we know would make it better, plus some things that might or might not be good ideas. We welcome contributions of these and other improvements.
 
-### TODOs We're Sure Are Good Ideas ###
+### TODOs We Like ###
 
-* First, and most obviously, having to manually run pf-CDA at the outset is a pain, plus it thwarts automating analysis in CI/CD. The documentation on http:www.dependency-analyzer.org mentions an API that could probably be called by this tool. Or we could investigate https:innig.net/macker, or javaparser.org.
+* First, and most obviously, having to manually run pf-CDA at the outset is a pain, plus it thwarts automating analysis in CI/CD. The documentation on http:www.dependency-analyzer.org mentions an API that could probably be called by this tool. Or we could investigate https:innig.net/macker, or javaparser.org, or BCEL.
 Alternatively, someone skilled with bytecode analysis could probably replace pf-CDA entirely (we don't need all of its features, just a dump of class-to-class references).
 
-* The current error output isn't very useful. It should be grouped and possibly ranked, and probably should be directed to one or more files.
+* The current error output isn't very useful. It should be grouped by type of error, illegal references should be ranked by number of times a class is illegally referred to, and the output should be directed to one or more files instead of to the console (with just a general failure error sent to the console).
 
-* Provide a way to fail builds if the count of illegal references increases. The tricky part here is that the previous count has to be "remembered" somewhere in CI/CD.
-Also, while refactoring, there are often temporary increases in the number of illegal references, so support would also need to be added for whitelisting new illegal references (access to the whitelist could be restricted to just the team doing decomposition).
+* Provide a way to fail builds if the count of illegal references increases. Note that this is different from enabling strict mode, because in that case builds fail if there are any illegal references, so the previous count is known (it's zero).
+This requires determining that there were N illegal references in the previous build, and now there are N + M illegal references in the current build. One way to do this is to access the previous build in CI/CD using something like the Jenkins API.
+While refactoring, there are often temporary increases in the number of illegal references, so decomposition teams would need to be able to temporarily whitelist new illegal references (access to the whitelist could be restricted to just that team).
 
-* Add a Maven mojo that calls EnforcerUtils directly (instead of via args in the Enforce main method), and document how to integrate the mojo into builds.
+* Add a Maven mojo that calls EnforcerUtils directly (instead of via args in the Enforce main method), and document how to integrate the mojo into builds. Possibly also provide gradle support.
 
 * Provide front-end code that displays a burndown chart based on the count of illegal references, and provide a way to integrate this into CI/CD pipelines.
 
@@ -211,7 +224,7 @@ Also, while refactoring, there are often temporary increases in the number of il
 
 * Identify reflection references due to Spring, and add those references automatically. (Check if an open-source project exists that can do this analysis.)
 
-### TODOs That Might Not Be Good Ideas ###
+### TODOs We're Unsure About ###
 
 These range from ideas that might be good, but we're not sure have a use, so we're using YAGNI to defer implementation, to ideas that might be awful.
 
