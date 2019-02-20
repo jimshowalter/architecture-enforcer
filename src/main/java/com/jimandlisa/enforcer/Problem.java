@@ -22,8 +22,8 @@ public class Problem implements Comparable<Problem> {
 
 	public Problem(final String description, final Errors error) {
 		super();
-		this.description = description;
-		this.error = error;
+		this.description = ArgUtils.check(description, "description");
+		this.error = ArgUtils.check(error, "error");
 	}
 
 	public String description() {
@@ -34,8 +34,8 @@ public class Problem implements Comparable<Problem> {
 		return error;
 	}
 
-	public boolean isFatal() {
-		return error() != null;
+	public boolean isFatal(boolean strict) {
+		return error().isFatal(strict);
 	}
 
 	@Override

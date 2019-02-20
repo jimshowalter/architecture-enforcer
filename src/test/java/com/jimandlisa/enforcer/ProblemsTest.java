@@ -15,7 +15,6 @@ package com.jimandlisa.enforcer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -24,22 +23,25 @@ public class ProblemsTest {
 
 	@Test
 	public void doTest() {
-		Problem problem = new Problem("foo", null);
+		Problem problem = new Problem("foo", Errors.UNRESOLVED_REFERENCE);
 		assertEquals("foo", problem.description());
-		assertFalse(problem.isFatal());
-		assertNull(problem.error());
-		assertEquals("foo: error=null", problem.toString());
+		assertFalse(problem.isFatal(false));
+		assertTrue(problem.isFatal(true));
+		assertEquals(Errors.UNRESOLVED_REFERENCE, problem.error());
+		assertEquals("foo: error=" + Errors.UNRESOLVED_REFERENCE.toString(), problem.toString());
 		problem = new Problem("bar", Errors.CANNOT_READ_FILE);
 		assertEquals("bar", problem.description());
-		assertTrue(problem.isFatal());
+		assertTrue(problem.isFatal(false));
+		assertTrue(problem.isFatal(true));
 		assertEquals(Errors.CANNOT_READ_FILE, problem.error());
 		assertEquals(problem.description().hashCode(), problem.hashCode());
 		assertFalse(problem.equals(null));
 		assertTrue(problem.equals(problem));
 		assertFalse(problem.equals(new Object()));
-		assertFalse(problem.equals(new Problem("foo", null)));
-		assertTrue(problem.equals(new Problem("bar", null)));
-		assertEquals(0, problem.compareTo(new Problem("bar", null)));
+		assertFalse(problem.equals(new Problem("foo", Errors.CANNOT_READ_FILE)));
+		assertTrue(problem.equals(new Problem("bar", Errors.CANNOT_READ_FILE)));
+		assertTrue(problem.equals(new Problem("bar", Errors.CLASS_BOTH_REFERRED_TO_AND_IGNORED)));
+		assertEquals(0, problem.compareTo(new Problem("bar", Errors.CANNOT_READ_FILE)));
 		assertEquals("bar: error=CANNOT_READ_FILE", problem.toString());
 	}
 }

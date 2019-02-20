@@ -72,8 +72,8 @@ public class Enforce {
 		throw new EnforcerException("unrecognized option " + arg + USAGE, Errors.UNRECOGNIZED_COMMAND_LINE_OPTION);
 	}
 	
-	static void debug(boolean debug, Target target, Map<String, Type> types, RollUp rollUp, PrintStream ps) throws Exception {
-		if (!debug) {
+	static void debug(Target target, Map<String, Type> types, RollUp rollUp, PrintStream ps, Flags flags) throws Exception {
+		if (!flags.debug()) {
 			return;
 		}
 		TargetUtils.dump(target, ps);
@@ -103,7 +103,7 @@ public class Enforce {
 		Map<String, Type> types = EnforcerUtils.resolve(inputs, problems, flags);
 		RollUp rollUp = new RollUp();
 		EnforcerUtils.correlate(types, target.components(), rollUp, problems, flags);
-		debug(flags.debug(), target, types, rollUp, ps);
+		debug(target, types, rollUp, ps, flags);
 		problems(problems, ps);
 	}
 

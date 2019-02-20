@@ -15,7 +15,6 @@ package com.jimandlisa.enforcer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -55,10 +54,12 @@ public class EnforcerUtilsTest {
 	
 	@Test
 	public void testDenest() {
-		assertEquals("com.foo.Bar", EnforcerUtils.denest("com.foo.Bar$Baz", false));
-		assertEquals("com.foo.Bar$Baz", EnforcerUtils.denest("com.foo.Bar$Baz", true));
+		assertEquals("com.foo.Bar", EnforcerUtils.denest("com.foo.Bar$Baz", new Flags()));
+		Flags flags = new Flags();
+		flags.setPreserveNestedTypes(true);
+		assertEquals("com.foo.Bar$Baz", EnforcerUtils.denest("com.foo.Bar$Baz", flags));
 		try {
-			EnforcerUtils.denest("$Foo", false);
+			EnforcerUtils.denest("$Foo", new Flags());
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("malformed class name"));
 			assertEquals(Errors.MALFORMED_CLASS_NAME, e.error());
@@ -113,13 +114,14 @@ public class EnforcerUtilsTest {
 	
 	@Test
 	public void testReport() {
+		Flags flags = new Flags();
 		Set<Problem> problems = new LinkedHashSet<>();
-		EnforcerUtils.report(problems);
-		problems.add(new Problem("COVERAGE0", null));
-		EnforcerUtils.report(problems);
+		EnforcerUtils.report(problems, flags);
+		problems.add(new Problem("COVERAGE0", Errors.UNRESOLVED_REFERENCE));
+		EnforcerUtils.report(problems, flags);
 		problems.add(new Problem("COVERAGE1", Errors.CANNOT_READ_FILE));
 		try {
-			EnforcerUtils.report(problems);
+			EnforcerUtils.report(problems, flags);
 		} catch (EnforcerException e) {
 			assertEquals(Errors.CANNOT_READ_FILE, e.error());
 			assertFalse(e.getMessage().contains("COVERAGE0"));
@@ -127,7 +129,7 @@ public class EnforcerUtilsTest {
 		}
 		problems.add(new Problem("COVERAGE2", Errors.CLASS_BOTH_REFERRED_TO_AND_IGNORED));
 		try {
-			EnforcerUtils.report(problems);
+			EnforcerUtils.report(problems, flags);
 		} catch (EnforcerException e) {
 			assertEquals(Errors.CANNOT_READ_FILE, e.error());
 			assertFalse(e.getMessage().contains("COVERAGE0"));
@@ -137,25 +139,18 @@ public class EnforcerUtilsTest {
 	}
 	
 	@Test
-	public void testErrorMaker() {
-		assertNull(EnforcerUtils.error(Errors.CANNOT_READ_FILE, false));
-		assertEquals(Errors.CANNOT_READ_FILE, EnforcerUtils.error(Errors.CANNOT_READ_FILE, true));
-	}
-	
-	@Test
 	public void testResolve() {
 		Map<String, Type> types = new HashMap<>();
 		Set<Problem> problems = new LinkedHashSet<>();
-		Flags flags = new Flags();
 		Type type0 = new Type("foo");
 		type0.referenceNames().add("bar");
 		types.put(type0.name(), type0);
-		EnforcerUtils.resolve(types, problems, flags);
+		EnforcerUtils.resolve(types, problems);
 		assertEquals(1, problems.size());
 		assertTrue(problems.iterator().next().description().contains("unresolved:"));
 		problems.clear();
 		types.put("bar", new Type("bar"));
-		EnforcerUtils.resolve(types, problems, flags);
+		EnforcerUtils.resolve(types, problems);
 		assertTrue(problems.isEmpty());
 	}
 	

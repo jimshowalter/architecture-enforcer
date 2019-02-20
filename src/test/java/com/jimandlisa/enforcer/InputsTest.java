@@ -55,13 +55,13 @@ public class InputsTest {
 			assertEquals(Errors.FILE_DOES_NOT_EXIST, e.error());
 		}
 		try {
-			Inputs.check(new MockFile(Thread.currentThread().getContextClassLoader().getResource("SampleTarget.yaml").getPath()));
+			Inputs.check(new MockFile(Thread.currentThread().getContextClassLoader().getResource("SampleTarget2.yaml").getPath()));
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("cannot read"));
 			assertEquals(Errors.CANNOT_READ_FILE, e.error());
 		}
 		try {
-			Inputs.check(new MockFile(Thread.currentThread().getContextClassLoader().getResource("SampleTarget.yaml").getPath(), true));
+			Inputs.check(new MockFile(Thread.currentThread().getContextClassLoader().getResource("SampleTarget2.yaml").getPath(), true));
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("error validating file"));
 			assertEquals(Errors.ERROR_VALIDATING_FILE, e.error());

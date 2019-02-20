@@ -112,7 +112,7 @@ public class EnforceTest {
 		} catch (EnforcerException e) {
 			assertEquals(Errors.UNRECOGNIZED_COMMAND_LINE_OPTION, e.error());
 		}
-		Enforce.debug(false, null, null, null, null);
+		Enforce.debug(null, null, null, null, new Flags());
 		Enforce.problems(new HashSet<Problem>(), null);
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
 			Enforce.mainImpl(new String[0], ps);
@@ -123,7 +123,7 @@ public class EnforceTest {
 			TestUtils.compare(baos, "TestEnforceCanned3.txt");
 		}
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
-			Enforce.mainImpl(new String[] {Thread.currentThread().getContextClassLoader().getResource("SampleTarget.yaml").getPath(), Thread.currentThread().getContextClassLoader().getResource("Sample.odem").getPath(), Optionals.IGNORES.indicator() + Thread.currentThread().getContextClassLoader().getResource("SamplePackageIgnores.txt").getPath()}, ps);
+			Enforce.mainImpl(new String[] {Thread.currentThread().getContextClassLoader().getResource("SampleTarget2.yaml").getPath(), Thread.currentThread().getContextClassLoader().getResource("Sample.odem").getPath(), Optionals.IGNORES.indicator() + Thread.currentThread().getContextClassLoader().getResource("SamplePackageIgnores.txt").getPath()}, ps);
 			compare(baos, "TestEnforceCanned4.txt");
 		}
 	}

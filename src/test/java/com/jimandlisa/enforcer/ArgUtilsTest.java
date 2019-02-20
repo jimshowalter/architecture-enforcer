@@ -58,5 +58,12 @@ public class ArgUtilsTest {
 			assertEquals("null name", e.getMessage());
 			assertEquals(Errors.NULL_DOMAIN_ARG, e.error());
 		}
+		assertEquals(Errors.CANNOT_READ_FILE, ArgUtils.check(Errors.CANNOT_READ_FILE, "name"));
+		try {
+			ArgUtils.check((Errors) null, "name");
+		} catch (EnforcerException e) {
+			assertEquals("null name", e.getMessage());
+			assertEquals(Errors.NULL_ERRORS_ARG, e.error());
+		}
 	}
 }

@@ -20,6 +20,7 @@ public enum Errors {
 	NULL_INTEGER_ARG,
 	NULL_LAYER_ARG,
 	NULL_DOMAIN_ARG,
+	NULL_ERRORS_ARG,
 	IGNORES_FILE_ALREADY_SPECIFIED,
 	REFLECTIONS_FILE_ALREADY_SPECIFIED,
 	FIX_UNRESOLVEDS_FILE_ALREADY_SPECIFIED,
@@ -48,6 +49,33 @@ public enum Errors {
 	CLASS_BOTH_REFERRED_TO_AND_IGNORED,
 	CLASS_NOT_RESOLVED_TO_TYPE,
 	TYPE_NOT_RESOLVED_TO_COMPONENT,
-	UNRESOLVED_REFERENCE,
-	ILLEGAL_REFERENCE
+	UNRESOLVED_REFERENCE(Severities.ERROR_IF_STRICT),
+	ILLEGAL_REFERENCE(Severities.ERROR_IF_STRICT);
+	
+	private final Severities severity;
+	
+	private Errors(final Severities severity) {
+		this.severity = severity;
+	}
+	
+	private Errors() {
+		this(Severities.ALWAYS_ERROR);
+	}
+	
+	public Severities severity() {
+		return severity;
+	}
+	
+	public boolean isFatal(boolean strict) {
+//		if (severity() == Severities.WARNING) {
+//			return false;
+//		}
+		if (severity()== Severities.ALWAYS_ERROR) {
+			return true;
+		}
+		if (strict) {
+			return true;
+		}
+		return false;
+	}
 }

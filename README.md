@@ -115,7 +115,7 @@ code into projects, this tool should continue to be run in CI/CD.
 
 1. Sync and build this project.
 
-1. Using the provided example yaml file as a starting point, define the target state for your project. This can take weeks for a large project, but you can start by just defining a few basic layers (for example, data, logic, and UI), then iterate. (It's probably better to start small anyway, instead of trying to boil the ocean in one shot.)
+1. Using one of the provided sample yaml files as a starting point, define the target state for your project. This can take weeks for a large project, but you can start by just defining a few basic layers (for example, data, logic, and UI), then iterate. (It's probably better to start small anyway, instead of trying to boil the ocean in one shot.)
 
 1. Run this tool with at least the first two args specified. You can run this tool from Eclipse or Intellij, or from the command line in the target directory with the command: java -jar architecture-enforcer-1.0-SNAPSHOT.jar.
 

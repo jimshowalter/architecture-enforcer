@@ -39,7 +39,7 @@ public class TestUtils {
 	}
 	
 	public static Inputs inputs(boolean includeIgnores, boolean includeReflections, boolean includeFixUnresolveds) {
-		Inputs inputs = new Inputs(new File(Thread.currentThread().getContextClassLoader().getResource("SampleTarget.yaml").getPath()), new File(Thread.currentThread().getContextClassLoader().getResource("Sample.odem").getPath()));
+		Inputs inputs = new Inputs(new File(Thread.currentThread().getContextClassLoader().getResource("SampleTarget2.yaml").getPath()), new File(Thread.currentThread().getContextClassLoader().getResource("Sample.odem").getPath()));
 		if (includeIgnores) {
 			inputs.setIgnores(new File(Thread.currentThread().getContextClassLoader().getResource("SamplePackageIgnores.txt").getPath()));
 		}

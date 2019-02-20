@@ -13,44 +13,9 @@
 
 package com.jimandlisa.enforcer;
 
-public class ArgUtils {
+public enum Severities {
 
-	public static String check(String val, String name) {
-		if (val == null) {
-			throw new EnforcerException("null " + name, Errors.NULL_STRING_ARG);
-		}
-		String trimmed = val.trim();
-		if (trimmed.isEmpty()) {
-			throw new EnforcerException("empty " + name, Errors.EMPTY_STRING_ARG);
-		}
-		return trimmed;
-	}
-	
-	public static Integer check(Integer val, String name) {
-		if (val == null) {
-			throw new EnforcerException("null " + name, Errors.NULL_INTEGER_ARG);
-		}
-		return val;
-	}
-	
-	public static Layer check(Layer val, String name) {
-		if (val == null) {
-			throw new EnforcerException("null " + name, Errors.NULL_LAYER_ARG);
-		}
-		return val;
-	}
-	
-	public static Domain check(Domain val, String name) {
-		if (val == null) {
-			throw new EnforcerException("null " + name, Errors.NULL_DOMAIN_ARG);
-		}
-		return val;
-	}
-	
-	public static Errors check(Errors val, String name) {
-		if (val == null) {
-			throw new EnforcerException("null " + name, Errors.NULL_ERRORS_ARG);
-		}
-		return val;
-	}
+//	WARNING,
+	ERROR_IF_STRICT,
+	ALWAYS_ERROR
 }

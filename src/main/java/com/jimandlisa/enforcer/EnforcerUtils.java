@@ -68,11 +68,11 @@ public class EnforcerUtils {
 		return skip(referredToTypeName, ignores);
 	}
 	
-	static String denest(String typeName, boolean preserveNestedTypes) {
+	static String denest(String typeName, Flags flags) {
 		if (typeName.startsWith("$")) {
 			throw new EnforcerException("malformed class name '" + typeName + "'", Errors.MALFORMED_CLASS_NAME);
 		}
-		if (preserveNestedTypes) {
+		if (flags.preserveNestedTypes()) {
 			return typeName;
 		}
 		return typeName.replaceAll("[$].*$", "");
@@ -111,7 +111,7 @@ public class EnforcerUtils {
 						throw new EnforcerException("invalid " + entryName + " entry in " + file + ": " + line, Errors.MISSING_REFERRED_TO_CLASS);
 					}
 				}
-				String referringClass = denest(segments[0], flags.preserveNestedTypes());
+				String referringClass = denest(segments[0], flags);
 				if (skip(referringClass, ignores)) {
 					problems.add(new Problem(entryName.toUpperCase() + " class is listed as referring but also listed in ignores: " + referringClass, Errors.CLASS_BOTH_REFERRING_AND_IGNORED));
 					continue;
@@ -119,7 +119,7 @@ public class EnforcerUtils {
 				type = get(referringClass, types);
 				String[] segments2 = segments[1].split(",");
 				for (String segment : segments2) {
-					String referredToClass = denest(segment, flags.preserveNestedTypes());
+					String referredToClass = denest(segment, flags);
 					if (skip(referredToClass, ignores)) {
 						problems.add(new Problem(entryName.toUpperCase() + " class is listed as referred-to but also listed in ignores: " + referringClass, Errors.CLASS_BOTH_REFERRED_TO_AND_IGNORED));
 						continue;
@@ -130,19 +130,12 @@ public class EnforcerUtils {
 		}
 	}
 	
-	static Errors error(Errors error, boolean strict) {
-		if (strict) {
-			return error;
-		}
-		return null;
-	}
-	
-	static void resolve(Map<String, Type> types, Set<Problem> problems, Flags flags) {
+	static void resolve(Map<String, Type> types, Set<Problem> problems) {
 		for (Type type : types.values()) {
 			for (String referenceName : type.referenceNames()) {
 				Type reference = types.get(referenceName);
 				if (reference == null) {
-					problems.add(new Problem("unresolved: " + referenceName, error(Errors.UNRESOLVED_REFERENCE, flags.strict())));
+					problems.add(new Problem("unresolved: " + referenceName, Errors.UNRESOLVED_REFERENCE));
 					continue;
 				}
 				type.references().add(reference);
@@ -152,12 +145,12 @@ public class EnforcerUtils {
 	
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
-	static void report(Set<Problem> problems) {
+	static void report(Set<Problem> problems, Flags flags) {
 		StringBuilder builder = null;
 		Errors firstError = null;
 		boolean multipleErrors = false;
 		for (Problem problem : problems) {
-			if (problem.isFatal()) {
+			if (problem.isFatal(flags.strict())) {
 				if (builder == null) {
 					builder = new StringBuilder();
 					firstError = problem.error();
@@ -182,7 +175,7 @@ public class EnforcerUtils {
 			Type type = null;
 			while ((line = reader.readLine()) != null) {
 				if (line.trim().startsWith("<type name=\"")) {
-					String referringClass = denest(line.trim().replace("<type name=\"", "").replaceAll("\".*$", ""), flags.preserveNestedTypes());
+					String referringClass = denest(line.trim().replace("<type name=\"", "").replaceAll("\".*$", ""), flags);
 					if (skip(referringClass, ignores)) {
 						type = null;
 						continue;
@@ -194,7 +187,7 @@ public class EnforcerUtils {
 					if (type == null) {
 						continue;
 					}
-					String referredToClass = denest(line.trim().replace("<depends-on name=\"", "").replaceAll("\".*$", ""), flags.preserveNestedTypes());
+					String referredToClass = denest(line.trim().replace("<depends-on name=\"", "").replaceAll("\".*$", ""), flags);
 					if (skip(type.name(), referredToClass, ignores)) {
 						continue;
 					}
@@ -204,9 +197,9 @@ public class EnforcerUtils {
 		}
 		parse(inputs.reflections(), types, ignores, problems, "reflection", true, flags); // Get reflection-based referring and referred-to classes from reflections file.
 		parse(inputs.fixUnresolveds(), types, ignores, problems, "fix-unresolved", false, flags); // Get referring and referred-to classes from fix-unresolveds file.
-		report(problems);
-		resolve(types, problems, flags);
-		report(problems);
+		report(problems, flags);
+		resolve(types, problems);
+		report(problems, flags);
 		return types;
 	}
 	
@@ -222,7 +215,7 @@ public class EnforcerUtils {
 				type.setBelongsTo(component);
 			}
 		}
-		report(problems);
+		report(problems, flags);
 		rollUp.add(components.values());
 		for (Type type : types.values()) {
 			if (type.belongsTo() != null) {
@@ -237,17 +230,17 @@ public class EnforcerUtils {
 			component.add(type);
 			type.setBelongsTo(component);
 		}
-		report(problems);
+		report(problems, flags);
 		for (Type type : types.values()) {
 			for (Type referredTo : type.references()) {
 				if (type.belongsTo() == referredTo.belongsTo()) {
 					continue; // Skip intra-component references.
 				}
 				if (type.belongsTo().layer().depth() <= referredTo.belongsTo().layer().depth()) {
-					problems.add(new Problem("illegal reference: " + type + " in component '" + type.belongsTo().name() + "' in layer " + type.belongsTo().layer().depth() + " refers to component '" + referredTo.belongsTo().name() + "' in layer " + referredTo.belongsTo().layer().depth(), error(Errors.ILLEGAL_REFERENCE, flags.strict())));
+					problems.add(new Problem("illegal reference: " + type + " in component '" + type.belongsTo().name() + "' in layer " + type.belongsTo().layer().depth() + " refers to component '" + referredTo.belongsTo().name() + "' in layer " + referredTo.belongsTo().layer().depth(), Errors.ILLEGAL_REFERENCE));
 				}
 			}
 		}
-		report(problems);
+		report(problems, flags);
 	}
 }

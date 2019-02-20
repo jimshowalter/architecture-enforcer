@@ -13,44 +13,28 @@
 
 package com.jimandlisa.enforcer;
 
-public class ArgUtils {
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-	public static String check(String val, String name) {
-		if (val == null) {
-			throw new EnforcerException("null " + name, Errors.NULL_STRING_ARG);
+import org.junit.Test;
+
+public class ErrorsTest {
+
+	@Test
+	public void doTest() {
+		for (Errors error : Errors.values()) {
+//			if (error.severity() == Severities.WARNING) {
+//				assertFalse(error.isFatal(false));
+//				assertFalse(error.isFatal(true));
+//				continue;
+//			}
+			if (error.severity() == Severities.ALWAYS_ERROR) {
+				assertTrue(error.isFatal(false));
+				assertTrue(error.isFatal(true));
+				continue;
+			}
+			assertFalse(error.isFatal(false));
+			assertTrue(error.isFatal(true));
 		}
-		String trimmed = val.trim();
-		if (trimmed.isEmpty()) {
-			throw new EnforcerException("empty " + name, Errors.EMPTY_STRING_ARG);
-		}
-		return trimmed;
-	}
-	
-	public static Integer check(Integer val, String name) {
-		if (val == null) {
-			throw new EnforcerException("null " + name, Errors.NULL_INTEGER_ARG);
-		}
-		return val;
-	}
-	
-	public static Layer check(Layer val, String name) {
-		if (val == null) {
-			throw new EnforcerException("null " + name, Errors.NULL_LAYER_ARG);
-		}
-		return val;
-	}
-	
-	public static Domain check(Domain val, String name) {
-		if (val == null) {
-			throw new EnforcerException("null " + name, Errors.NULL_DOMAIN_ARG);
-		}
-		return val;
-	}
-	
-	public static Errors check(Errors val, String name) {
-		if (val == null) {
-			throw new EnforcerException("null " + name, Errors.NULL_ERRORS_ARG);
-		}
-		return val;
 	}
 }
