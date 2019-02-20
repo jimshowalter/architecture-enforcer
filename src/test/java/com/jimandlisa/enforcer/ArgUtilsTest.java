@@ -35,6 +35,13 @@ public class ArgUtilsTest {
 			assertEquals("empty name", e.getMessage());
 			assertEquals(Errors.EMPTY_STRING_ARG, e.error());
 		}
+		ArgUtils.checkName("This is a Very_Fine0-name", "name");
+		try {
+			ArgUtils.checkName("$S()*@##$", "name");
+		} catch (EnforcerException e) {
+			assertEquals("invalid name 'name'", e.getMessage());
+			assertEquals(Errors.INVALID_NAME_ARG, e.error());
+		}
 		assertEquals((Integer) 123, ArgUtils.check(123, "name"));
 		try {
 			ArgUtils.check((Integer) null, "name");

@@ -21,6 +21,7 @@ import java.util.Set;
 public class Component {
 
 	private final String name;
+	private final String quotedName;
 	private final Layer layer;
 	private final Domain domain;
 	private final String description;
@@ -30,14 +31,19 @@ public class Component {
 	
 	public Component(final String name, final Layer layer, final Domain domain, final String description) {
 		super();
-		this.name = ArgUtils.check(name, "name");
-		this.layer = ArgUtils.check(layer, "layer for component '" + name() + "' (check if layer is defined)");
-		this.domain = domain == null ? null : ArgUtils.check(domain, "domain for component '" + name() + "' (check if domain is defined)");
+		this.name = ArgUtils.checkName(name, "name");
+		this.quotedName = "'" + this.name + "'";
+		this.layer = ArgUtils.check(layer, "layer for component " + quotedName + " (check if layer is defined)");
+		this.domain = domain == null ? null : ArgUtils.check(domain, "domain for component " + quotedName + " (check if domain is defined)");
 		this.description = description == null ? null : description.trim();
 	}
 	
 	public String name() {
 		return name;
+	}
+	
+	public String quotedName() {
+		return quotedName;
 	}
 	
 	public Layer layer() {
@@ -70,6 +76,6 @@ public class Component {
 
 	@Override
 	public String toString() {
-		return "name='" + name() + "', layer='" + layer().name() + "', depth=" + layer().depth() + ", domain=" + (domain() == null ? null : "'" + domain.name() + "'");
+		return "name=" + quotedName() + ", layer=" + layer().quotedName() + ", depth=" + layer().depth() + ", domain=" + (domain() == null ? null : domain.quotedName());
 	}
 }

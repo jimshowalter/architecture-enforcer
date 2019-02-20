@@ -243,7 +243,12 @@ public class EnforcerUtils {
 					continue; // Skip intra-component references.
 				}
 				if (type.belongsTo().layer().depth() <= referredTo.belongsTo().layer().depth()) {
-					problems.add(new Problem(type + " in component '" + type.belongsTo().name() + "' in layer " + type.belongsTo().layer().depth() + " refers to component '" + referredTo.belongsTo().name() + "' in layer " + referredTo.belongsTo().layer().depth(), Errors.ILLEGAL_REFERENCE));
+					String parseableDescription = type.name() + "!" + type.belongsTo().name() + "!" + type.belongsTo().layer().name() + "!" + type.belongsTo().layer().depth() + "|" + referredTo.name()
+							+ "!" + referredTo.belongsTo().name() + "!" + referredTo.belongsTo().layer().name() + "!" + referredTo.belongsTo().layer().depth();
+					String humanReadableDescription = "type " + type.name() + " in component " + type.belongsTo().quotedName() + " in layer " + type.belongsTo().layer().quotedName() + " depth "
+							+ type.belongsTo().layer().depth() + " refers to type " + referredTo.name() + " in component " + referredTo.belongsTo().quotedName() + " in layer "
+							+ referredTo.belongsTo().layer().quotedName() + " depth " + referredTo.belongsTo().layer().depth();
+					problems.add(new Problem(parseableDescription, Errors.ILLEGAL_REFERENCE, humanReadableDescription));
 				}
 			}
 		}

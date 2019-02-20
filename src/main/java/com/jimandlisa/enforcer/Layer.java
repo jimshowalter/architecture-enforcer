@@ -19,19 +19,25 @@ import java.util.Map;
 public class Layer {
 
 	private final String name;
+	private final String quotedName;
 	private final int depth;
 	private final String description;
 	private final Map<String, Component> components = new HashMap<>();
 	
 	public Layer(final String name, final Integer depth, final String description) {
 		super();
-		this.name = ArgUtils.check(name, "name");
+		this.name = ArgUtils.checkName(name, "name");
+		this.quotedName = "'" + this.name + "'";
 		this.depth = ArgUtils.check(depth, "depth");
 		this.description = description == null ? null : description.trim();
 	}
 	
 	public String name() {
 		return name;
+	}
+	
+	public String quotedName() {
+		return quotedName;
 	}
 	
 	public int depth() {
@@ -48,6 +54,6 @@ public class Layer {
 	
 	@Override
 	public String toString() {
-		return "name='" + name() + "', depth=" + depth();
+		return "name=" + quotedName() + ", depth=" + depth();
 	}
 }

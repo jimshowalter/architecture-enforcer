@@ -13,6 +13,8 @@
 
 package com.jimandlisa.enforcer;
 
+import java.util.regex.Pattern;
+
 public class ArgUtils {
 
 	public static String check(String val, String name) {
@@ -22,6 +24,16 @@ public class ArgUtils {
 		String trimmed = val.trim();
 		if (trimmed.isEmpty()) {
 			throw new EnforcerException("empty " + name, Errors.EMPTY_STRING_ARG);
+		}
+		return trimmed;
+	}
+	
+	private static Pattern NAME_PATTERN = Pattern.compile("^[0-9A-Za-z][0-9A-Za-z_ -]*$");
+	
+	public static String checkName(String val, String name) {
+		String trimmed = check(val, name);
+		if (!NAME_PATTERN.matcher(trimmed).matches()) {
+			throw new EnforcerException("invalid name '" + name + "'", Errors.INVALID_NAME_ARG);
 		}
 		return trimmed;
 	}

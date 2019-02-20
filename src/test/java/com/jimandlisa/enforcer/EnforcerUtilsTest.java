@@ -293,7 +293,8 @@ public class EnforcerUtilsTest {
 		type3.referenceNames().add("com.foo.bar.Baz");
 		type3.references().add(type1);
 		EnforcerUtils.correlate(types, components, new RollUp(), problems, flags);
-		assertTrue(problems.iterator().next().description().contains("com.bar.Baz3 in component 'Comp0' in layer 0 refers to component 'Comp1' in layer 1"));
+		assertTrue(problems.iterator().next().description().contains("com.bar.Baz3!Comp0!L0!0|com.foo.bar.Baz!Comp1!L1!1"));
+		assertTrue(problems.iterator().next().detail().contains("type com.bar.Baz3 in component 'Comp0' in layer 'L0' depth 0 refers to type com.foo.bar.Baz in component 'Comp1' in layer 'L1' depth 1"));
 		assertEquals(Errors.ILLEGAL_REFERENCE, problems.iterator().next().error());
 	}
 }

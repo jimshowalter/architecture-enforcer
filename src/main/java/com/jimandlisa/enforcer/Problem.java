@@ -19,11 +19,17 @@ public class Problem implements Comparable<Problem> {
 
 	private final String description;
 	private final Errors error;
+	private final String detail;
 
-	public Problem(final String description, final Errors error) {
+	public Problem(final String description, final Errors error, final String detail) {
 		super();
 		this.description = ArgUtils.check(description, "description");
 		this.error = ArgUtils.check(error, "error");
+		this.detail = detail;
+	}
+	
+	Problem(final String description, final Errors error) {
+		this(description, error, null);
 	}
 
 	public String description() {
@@ -32,6 +38,10 @@ public class Problem implements Comparable<Problem> {
 
 	public Errors error() {
 		return error;
+	}
+	
+	public String detail() {
+		return detail;
 	}
 
 	public boolean isFatal(boolean strict) {

@@ -19,17 +19,23 @@ import java.util.Map;
 public class Domain {
 
 	private final String name;
+	private final String quotedName;
 	private final String description;
 	private final Map<String, Component> components = new HashMap<>();
 	
 	public Domain(final String name, final String description) {
 		super();
-		this.name = ArgUtils.check(name, "name");
+		this.name = ArgUtils.checkName(name, "name");
+		this.quotedName = "'" + this.name + "'";
 		this.description = description == null ? null : description.trim();
 	}
 	
 	public String name() {
 		return name;
+	}
+	
+	public String quotedName() {
+		return quotedName;
 	}
 	
 	public String description() {
@@ -42,6 +48,6 @@ public class Domain {
 
 	@Override
 	public String toString() {
-		return "name='" + name() + "'";
+		return "name=" + quotedName();
 	}
 }

@@ -135,7 +135,7 @@ public class TargetUtils {
 			}
 			depths.add(layer.depth());
 			if (target.layers().containsKey(layer.name())) {
-				throw new EnforcerException("duplicate layer name '" + layer.name() + "'", Errors.DUPLICATE_LAYER_NAME);
+				throw new EnforcerException("duplicate layer name " + layer.quotedName(), Errors.DUPLICATE_LAYER_NAME);
 			}
 			target.add(layer);
 		}
@@ -145,7 +145,7 @@ public class TargetUtils {
 				validate(map, ALLOWED_DOMAIN_KEYS);
 				Domain domain = new Domain(get(map, "name"), get(map, "description"));
 				if (target.domains().containsKey(domain.name())) {
-					throw new EnforcerException("duplicate domain name '" + domain.name() + "'", Errors.DUPLICATE_DOMAIN_NAME);
+					throw new EnforcerException("duplicate domain name " + domain.quotedName(), Errors.DUPLICATE_DOMAIN_NAME);
 				}
 				target.add(domain);
 			}
@@ -158,7 +158,7 @@ public class TargetUtils {
 			validate(map, ALLOWED_COMPONENT_KEYS);
 			Component component = new Component(get(map, "name"), layer(target.layers(), get(map, "layer")), (requireDomains ? domain(target.domains(), get(map, "domain")) : null), get(map, "description"));
 			if (target.components().containsKey(component.name())) {
-				throw new EnforcerException("duplicate component name '" + component.name() + "'", Errors.DUPLICATE_COMPONENT_NAME);
+				throw new EnforcerException("duplicate component name " + component.quotedName(), Errors.DUPLICATE_COMPONENT_NAME);
 			}
 			component.layer().components().put(component.name(), component);
 			if (component.domain() != null) {
@@ -170,7 +170,7 @@ public class TargetUtils {
 					String normalized = pkg.replaceAll("[.]+$", "");
 					Component other = allPackages.get(normalized);
 					if (other != null) {
-						throw new EnforcerException("duplicate package name used in " + other.name() + " and " + component.name(), Errors.DUPLICATE_PACKAGE_NAME);
+						throw new EnforcerException("duplicate package name used in " + other.quotedName() + " and " + component.quotedName(), Errors.DUPLICATE_PACKAGE_NAME);
 					}
 					component.packages().add(normalized);
 					allPackages.put(normalized, component);
@@ -182,7 +182,7 @@ public class TargetUtils {
 					String normalized = clazz.trim();
 					Component other = allClasses.get(normalized);
 					if (other != null) {
-						throw new EnforcerException("duplicate class name used in " + other.name() + " and " + component.name(), Errors.DUPLICATE_CLASS_NAME);
+						throw new EnforcerException("duplicate class name used in " + other.quotedName() + " and " + component.quotedName(), Errors.DUPLICATE_CLASS_NAME);
 					}
 					component.classes().add(normalized);
 					allClasses.put(normalized, component);
