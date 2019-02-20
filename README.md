@@ -143,6 +143,20 @@ The last six args are optional, and can appear in any order (or not at all). For
 
 Unresolved types and illegal references are written to the output directory (if strict is not specified).
 
+Unresolved types are written as the fully-qualified type name, one type per line.
+
+Illegal references are written in a format designed to be easy to machine read:
+
+referringType!referringComponent!referringLayer!referringDepth!referredToType!referredToComponent!referredToLayer!referredToDepth
+
+For example:
+
+com.jimandlisa.app.one.App1!App One!App!1|com.jimandlisa.app.two.App2!App Two!App!1
+
+The Problem objects for illegal references have a detail field that presents the same information in a more human-readable format:
+
+type com.jimandlisa.app.one.App1 in component 'App One' in layer 'App' depth 1 refers to type com.jimandlisa.app.two.App2 in component 'App Two' in layer 'App' depth 1
+
 Notes:
 
 * Typically a project uses a bunch of third-party classes, and/or classes from inside your company but outside the project being decomposed. List packages to ignore in a file you specify with the -i command-line argument.
