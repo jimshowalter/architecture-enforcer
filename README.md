@@ -200,7 +200,8 @@ Alternatively, someone skilled with bytecode analysis could probably replace pf-
 
 * The current error output isn't very useful. It should be grouped and possibly ranked, and probably should be directed to one or more files.
 
-* Provide a way to fail builds if the count of illegal references increases. (While refactoring, there are often temporary increases in the number of illegal references, so support would also need to be added for whitelisting new illegal references. Access to the whitelist could be restricted to just the team doing decomposition.)
+* Provide a way to fail builds if the count of illegal references increases. The tricky part here is that the previous count has to be "remembered" somewhere in CI/CD.
+Also, while refactoring, there are often temporary increases in the number of illegal references, so support would also need to be added for whitelisting new illegal references (access to the whitelist could be restricted to just the team doing decomposition).
 
 * Add a Maven mojo that calls EnforcerUtils directly (instead of via args in the Enforce main method), and document how to integrate the mojo into builds.
 
