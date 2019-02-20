@@ -149,7 +149,7 @@ you don't need to add any referred-to classes (and you don't need a colon after 
 * Adding a referred-to class to the reflections or fix-unresolveds files can introduce new unresolved classes. When that happens, you need to keep entering classes until all classes are defined.
 
 * pf-CDA is smart enough to add references on its own for simple Class.forName calls where the string name of the class is directly specified, as in Class.forName("com.foo.bar.Baz"), but it can't follow complicated string concatenations, strings returned by functions, etc.,
-for example Class.forName(someStringFromAVariable + SomeClass.someFunction(some args from somewhere) + SOME_STRING_CONSTANT + ".foo"). That's why you have to add them manually. Also, pf-CDA doesn't parse reflection references in JSP files, Spring, etc.
+for example Class.forName(someStringFromAVariable + SomeClass.someFunction(some args from somewhere) + SOME\_STRING\_CONSTANT + ".foo"). That's why you have to add them manually. Also, pf-CDA doesn't parse reflection references in JSP files, Spring, etc.
 
 * Sample files are located in the test resources directory. They start with "Sample".
 
@@ -215,6 +215,31 @@ For example, pf-CDA determines dependencies from bytecode, and static constants 
 In addition, the reflection-based references and unresolved fixes, being entered manually, are only as good as your team's ability to find them all.
 
 But overall, this tool can probably get it > 95% correct, which is close enough to start trying to actually move the decomposed code, at which point some gotchas will likely pop up that need to be dealt with.
+
+## Implementation Notes ##
+
+This tool is a cleanroom reimplementation of a proprietary tool used for a massive decomposition project.
+
+Only general, well-known refactoring concepts have been reused (layering, encapsulation, APIs, implementation, etc.). Nothing from the proprietary tool's code was used, and this tool differs significantly from how that tool worked.
+
+The following table summarizes differences between the two tools:
+
+|Proprietary Tool|This Tool|Advantage|
+|----------------|---------|---------|
+|Proprietary|Open-source|This tool|
+|Parses source files and POMs|Uses compiled bytecode|This tool|
+|Files/directories|Classes/packages|This tool|
+|Prescriptive (kinds of components, etc.)|Unrestricted|This tool|
+|Can't split packages across components|Can specify individual classes per component (in addition to packages, or instead of packages)|This tool|
+|Can't handle classes in default package (that is, no package), requires special-casing in code|Can specify individual classes per component, even without any package|This tool|
+|Thousands of lines|~600 lines|This tool|
+|Complex|Simple|This tool|
+|Incompletely unit tested|100% statement and branch coverage|This tool|
+|Requires Maven to run it|Can run as jar with main, or as Maven mojo|This tool|
+|Code full of special-casing for particular company|No company-specific special-casing|This tool|
+|Parses string-based references (reflection) in Java (Class.forName), in JSP files, and in other kinds of files, plus supports manual entry of hard-to-parse cases|Requires manual entry of all cases|Proprietary tool|
+|Includes line numbers and text of code on line in output of illegal references|Only outputs classes and components|Proprietary tool|
+|Fast|Fast|Tie|
 
 ## Copyright ##
 
