@@ -225,7 +225,7 @@ Only general, well-known refactoring concepts have been reused (layering, encaps
 The following table summarizes differences between the two tools:
 
 |Proprietary Tool|This Tool|Advantage|
-|----------------|---------|---------|
+|:---------------|:--------|:--------|
 |Proprietary|Open-source|This tool|
 |Parses source files and POMs|Uses compiled bytecode|This tool|
 |Files/directories|Classes/packages|This tool|
