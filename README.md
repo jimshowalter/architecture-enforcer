@@ -185,16 +185,16 @@ Notes:
 
 ## TODOs And Welcomed Contributions ##
 
-This tool can of course be improved. Here are some things we know would make it better:
+This tool can of course be improved. Below are listed some things we know would make it better, plus some things that might or might not be good ideas. We welcome contributions of these and other improvements.
+
+### TODOs We're Sure Are Good Ideas ###
 
 * First, and most obviously, having to manually run pf-CDA at the outset is a pain, plus it thwarts automating analysis in CI/CD. The documentation on http:www.dependency-analyzer.org mentions an API that could probably be called by this tool. Or we could investigate https:innig.net/macker, or javaparser.org.
 Alternatively, someone skilled with bytecode analysis could probably replace pf-CDA entirely (we don't need all of its features, just a dump of class-to-class references).
 
 * Various flags are supported by the implementation, but are not currently offered on the command line. They could be added as more optional arguments, parsed, and used to create the Flags object passed to the implementation.
 
-* Parse Class.forName calls in JSP pages and add those references automatically, instead of requiring manual bookkeeping in the reflection-references file.
-
-* Identify reflection references due to Spring, and add those references automatically.
+* The current error output isn't very useful. It should be grouped and possibly ranked, and probably should be directed to one or more files.
 
 * Provide a way to fail builds if the count of illegal references increases. (While refactoring, there are often temporary increases in the number of illegal references, so support would also need to be added for whitelisting new illegal references. Access to the whitelist could be restricted to just the team doing decomposition.)
 
@@ -202,9 +202,21 @@ Alternatively, someone skilled with bytecode analysis could probably replace pf-
 
 * Provide front-end code that displays a burndown chart based on the count of illegal references, and provide a way to integrate this into CI/CD pipelines.
 
-* Support regular expressions where currently individual packages or classes have to be specified. Important note: This will break how we roll up to the nearest enclosing package, plus more than one pattern might resolve to the same classes, which would need to be reported as an error; so this might be a bad idea.
+* Parse Class.forName calls in JSP pages and add those references automatically, instead of requiring manual bookkeeping in the reflection-references file.
 
-We welcome contributions of those and other improvements.
+* Identify reflection references due to Spring, and add those references automatically. (Check if an open-source project exists that can do this analysis.)
+
+### TODOs That Might Not Be Good Ideas ###
+
+These range from ideas that might be good, but we're not sure have a use, so we're using YAGNI to defer implementation, to ideas that might be awful.
+
+* For teams that want things to be more prescriptive, add component keywords "simple", "api", and "impl", and provide a way to pair related apis and impls.
+
+* For teams that need to support multiple implementation layers, add a "private" component keyword, so implementations in layer N + 1 can't call implementations in layer N, even though N + 1 is higher.
+
+* For teams that want to use domains more for tagging/labeling than for grouping, allow components to belong to multiple domains.
+
+* Support regular expressions where currently individual packages or classes have to be specified. Important note: This will break how we roll up to the nearest enclosing package, plus more than one pattern might resolve to the same classes, which would need to be reported as an error; so this might be a bad idea.
 
 ## Caveats ##
 
