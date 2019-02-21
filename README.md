@@ -299,6 +299,8 @@ The following table summarizes differences between the two tools:
 
 https://github.com/jimshowalter/architecture-enforcer-sample
 
+http://www.dependency-analyzer.org
+
 ## Copyright ##
 
 All files in this github except for the pf-CDA zip are subject to the following MIT license:
