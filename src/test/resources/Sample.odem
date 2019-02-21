@@ -113,11 +113,13 @@
           </dependencies>
         </type>
         <type name="com.jimandlisa.utils.Utils" classification="class" visibility="public">
-          <dependencies count="6">
+          <dependencies count="8">
             <depends-on name="java.lang.Object" classification="extends" />
             <depends-on name="java.lang.String" classification="uses" />
             <depends-on name="java.lang.Class" classification="uses" />
             <depends-on name="java.io.PrintStream" classification="uses" />
+            <depends-on name="com.jimandlisa.utils.Unresolved" classification="uses" />
+            <depends-on name="com.jimandlisa.utils.AnotherUnresolved" classification="uses" />
             <depends-on name="java.lang.StringBuilder" classification="uses" />
             <depends-on name="com.jimandlisa.utils.Utils$Nested" classification="uses" />
           </dependencies>
