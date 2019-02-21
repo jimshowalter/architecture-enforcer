@@ -16,9 +16,9 @@ public class ProgrammaticPfCDA {
 			workset.addClasspathPartDefinition(partDefinition);
 			System.out.println("Analyzing " + args[0] + "...");
 			WorksetInitializer wsInitializer = new WorksetInitializer(workset);
-			wsInitializer.initializeWorksetAndWait(null);
+			wsInitializer.initializeWorksetAndWait(null); // TODO: Instead of creating the entire graph and then ignoring, see if there's a way to pass in a filter.
 			for (ClassInformation classInfo : workset.getAllContainedClasses()) {
-				System.out.println(classInfo);
+				System.out.println(classInfo.getName());
 				for (IType type : classInfo.getDirectReferredTypes()) {
 					System.out.println("\t" + type.getName());
 				}
