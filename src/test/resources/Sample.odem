@@ -8,16 +8,17 @@
       <provider>Manfred Duchrow Consulting &amp; Software</provider>
     </created-by>
   </header>
-  <context name="A">
+  <context name="Sample">
     <container name="/some/path/architecture-enforcer-sample-1.0-SNAPSHOT.war" classification="war">
     </container>
     <container name="/some/path/architecture-enforcer-sample-1.0-SNAPSHOT.war/WEB-INF/classes" classification="dir">
       <namespace name="com.jimandlisa.app.one">
         <type name="com.jimandlisa.app.one.App1" classification="class" visibility="public">
-          <dependencies count="6">
+          <dependencies count="7">
             <depends-on name="java.lang.Object" classification="extends" />
             <depends-on name="java.lang.Class" classification="uses" />
             <depends-on name="java.lang.String" classification="uses" />
+            <depends-on name="java.io.PrintStream" classification="uses" />
             <depends-on name="com.jimandlisa.utils.Utils" classification="uses" />
             <depends-on name="com.jimandlisa.data.Data" classification="uses" />
             <depends-on name="com.jimandlisa.app.two.App2" classification="uses" />
@@ -26,10 +27,12 @@
       </namespace>
       <namespace name="com.jimandlisa.app.two">
         <type name="com.jimandlisa.app.two.App2" classification="class" visibility="public">
-          <dependencies count="5">
+          <dependencies count="7">
             <depends-on name="java.lang.Object" classification="extends" />
             <depends-on name="java.lang.Class" classification="uses" />
             <depends-on name="java.lang.String" classification="uses" />
+            <depends-on name="java.io.PrintStream" classification="uses" />
+            <depends-on name="com.jimandlisa.utils.Utils$Nested" classification="uses" />
             <depends-on name="com.jimandlisa.utils.Utils" classification="uses" />
             <depends-on name="com.jimandlisa.data.Data" classification="uses" />
           </dependencies>
@@ -37,20 +40,22 @@
       </namespace>
       <namespace name="com.jimandlisa.data">
         <type name="com.jimandlisa.data.Data" classification="class" visibility="public">
-          <dependencies count="4">
+          <dependencies count="5">
             <depends-on name="java.lang.Object" classification="extends" />
             <depends-on name="java.lang.Class" classification="uses" />
             <depends-on name="java.lang.String" classification="uses" />
+            <depends-on name="java.io.PrintStream" classification="uses" />
             <depends-on name="com.jimandlisa.utils.Utils" classification="uses" />
           </dependencies>
         </type>
       </namespace>
       <namespace name="com.jimandlisa.service">
         <type name="com.jimandlisa.service.Service2" classification="class" visibility="public">
-          <dependencies count="10">
+          <dependencies count="11">
             <depends-on name="java.lang.Object" classification="extends" />
             <depends-on name="java.lang.String" classification="uses" />
             <depends-on name="java.lang.Class" classification="uses" />
+            <depends-on name="java.io.PrintStream" classification="uses" />
             <depends-on name="java.lang.reflect.Method" classification="uses" />
             <depends-on name="java.lang.StringBuilder" classification="uses" />
             <depends-on name="java.lang.Exception" classification="uses" />
@@ -63,10 +68,11 @@
       </namespace>
       <namespace name="com.jimandlisa.service.one">
         <type name="com.jimandlisa.service.one.Service1" classification="class" visibility="public">
-          <dependencies count="6">
+          <dependencies count="7">
             <depends-on name="java.lang.Object" classification="extends" />
             <depends-on name="java.lang.Class" classification="uses" />
             <depends-on name="java.lang.String" classification="uses" />
+            <depends-on name="java.io.PrintStream" classification="uses" />
             <depends-on name="java.lang.Exception" classification="uses" />
             <depends-on name="com.jimandlisa.utils.Utils" classification="uses" />
             <depends-on name="com.jimandlisa.app.one.App1" classification="uses" />
@@ -75,10 +81,11 @@
       </namespace>
       <namespace name="com.jimandlisa.ui.one">
         <type name="com.jimandlisa.ui.one.UI1" classification="class" visibility="public">
-          <dependencies count="6">
+          <dependencies count="7">
             <depends-on name="java.lang.Object" classification="extends" />
             <depends-on name="java.lang.Class" classification="uses" />
             <depends-on name="java.lang.String" classification="uses" />
+            <depends-on name="java.io.PrintStream" classification="uses" />
             <depends-on name="java.lang.Exception" classification="uses" />
             <depends-on name="com.jimandlisa.utils.Utils" classification="uses" />
             <depends-on name="com.jimandlisa.service.one.Service1" classification="uses" />
@@ -87,10 +94,11 @@
       </namespace>
       <namespace name="com.jimandlisa.ui.two">
         <type name="com.jimandlisa.ui.two.UI2" classification="class" visibility="public">
-          <dependencies count="6">
+          <dependencies count="7">
             <depends-on name="java.lang.Object" classification="extends" />
             <depends-on name="java.lang.Class" classification="uses" />
             <depends-on name="java.lang.String" classification="uses" />
+            <depends-on name="java.io.PrintStream" classification="uses" />
             <depends-on name="java.lang.Exception" classification="uses" />
             <depends-on name="com.jimandlisa.utils.Utils" classification="uses" />
             <depends-on name="com.jimandlisa.service.Service2" classification="uses" />
@@ -98,16 +106,20 @@
         </type>
       </namespace>
       <namespace name="com.jimandlisa.utils">
+        <type name="com.jimandlisa.utils.Utils$Nested" classification="class" visibility="public">
+          <dependencies count="2">
+            <depends-on name="java.lang.Object" classification="extends" />
+            <depends-on name="com.jimandlisa.utils.Utils" classification="uses" />
+          </dependencies>
+        </type>
         <type name="com.jimandlisa.utils.Utils" classification="class" visibility="public">
-          <dependencies count="8">
+          <dependencies count="6">
             <depends-on name="java.lang.Object" classification="extends" />
             <depends-on name="java.lang.String" classification="uses" />
             <depends-on name="java.lang.Class" classification="uses" />
-            <depends-on name="java.lang.StringBuilder" classification="uses" />
-            <depends-on name="java.lang.System" classification="uses" />
             <depends-on name="java.io.PrintStream" classification="uses" />
-            <depends-on name="com.jimandlisa.utils.Unresolved" classification="uses" />
-            <depends-on name="com.jimandlisa.utils.AnotherUnresolved" classification="uses" />
+            <depends-on name="java.lang.StringBuilder" classification="uses" />
+            <depends-on name="com.jimandlisa.utils.Utils$Nested" classification="uses" />
           </dependencies>
         </type>
       </namespace>
