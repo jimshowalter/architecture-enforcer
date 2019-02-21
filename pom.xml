@@ -83,6 +83,13 @@
     </dependency>
     <dependency>
       <groupId>pf-cda</groupId>
+      <artifactId>reflect</artifactId>
+      <version>4.1.0</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/cda/pf-reflect-4.1.0.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>pf-cda</groupId>
       <artifactId>settings</artifactId>
       <version>4.1.0</version>
       <scope>system</scope>
