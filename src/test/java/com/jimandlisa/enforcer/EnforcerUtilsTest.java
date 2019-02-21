@@ -17,7 +17,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -25,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.Test;
+import org.pfsw.tools.cda.base.model.Workset;
 
 public class EnforcerUtilsTest {
 	
@@ -37,7 +37,7 @@ public class EnforcerUtilsTest {
 	public void testIgnores() throws Exception {
 		Set<String> ignores = EnforcerUtils.ignores(null);
 		assertTrue(ignores.isEmpty());
-		ignores = EnforcerUtils.ignores(new File(Thread.currentThread().getContextClassLoader().getResource("TestIgnores.txt").getPath()));
+		ignores = EnforcerUtils.ignores(TestUtils.testClassesFile("TestIgnores.txt"));
 		assertEquals(3, ignores.size());
 		ignores.remove("foo");
 		ignores.remove("bar.");
@@ -84,23 +84,23 @@ public class EnforcerUtilsTest {
 		Set<Problem> problems = new LinkedHashSet<>();
 		Flags flags = new Flags();
 		EnforcerUtils.parse(null, null, null, null, null, false, null);
-		EnforcerUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("TestReflections.txt").getPath()), types, ignores, problems, "reflection", true, flags);
+		EnforcerUtils.parse(TestUtils.testClassesFile("TestReflections.txt"), types, ignores, problems, "reflection", true, flags);
 		try {
-			EnforcerUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("BadReflections.txt").getPath()), types, ignores, problems, "reflection", true, flags);
+			EnforcerUtils.parse(TestUtils.testClassesFile("BadReflections.txt"), types, ignores, problems, "reflection", true, flags);
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("invalid reflection entry in"));
 			assertEquals(Errors.MISSING_REFERRED_TO_CLASS, e.error());
 		}
 		try {
-			EnforcerUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("BadFixUnresolveds.txt").getPath()), types, ignores, problems, "fix-unresolved", false, flags);
+			EnforcerUtils.parse(TestUtils.testClassesFile("BadFixUnresolveds.txt"), types, ignores, problems, "fix-unresolved", false, flags);
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("invalid fix-unresolved entry in"));
 			assertEquals(Errors.MALFORMED_CLASS_TO_CLASS_REFERENCE, e.error());
 		}
-		EnforcerUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("TestFixUnresolveds.txt").getPath()), types, ignores, problems, "fix-unresolved", false, flags);
+		EnforcerUtils.parse(TestUtils.testClassesFile("TestFixUnresolveds.txt"), types, ignores, problems, "fix-unresolved", false, flags);
 		assertTrue(problems.isEmpty());
 		ignores.add("foo.");
-		EnforcerUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("TestFixUnresolveds.txt").getPath()), types, ignores, problems, "fix-unresolved", false, flags);
+		EnforcerUtils.parse(TestUtils.testClassesFile("TestFixUnresolveds.txt"), types, ignores, problems, "fix-unresolved", false, flags);
 		assertEquals(1, problems.size());
         assertTrue(problems.iterator().next().description().contains("class is listed as referring but also listed in ignores:"));
 		assertEquals(Errors.CLASS_BOTH_REFERRING_AND_IGNORED, problems.iterator().next().error());
@@ -108,7 +108,7 @@ public class EnforcerUtilsTest {
 		ignores.clear();
 		problems.clear();
 		ignores.add("com.x.");
-		EnforcerUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("TestFixUnresolveds.txt").getPath()), types, ignores, problems, "fix-unresolved", false, flags);
+		EnforcerUtils.parse(TestUtils.testClassesFile("TestFixUnresolveds.txt"), types, ignores, problems, "fix-unresolved", false, flags);
 		assertEquals(1, problems.size());
         assertTrue(problems.iterator().next().description().contains("class is listed as referred-to but also listed in ignores:"));
 		assertEquals(Errors.CLASS_BOTH_REFERRED_TO_AND_IGNORED, problems.iterator().next().error());
@@ -142,6 +142,29 @@ public class EnforcerUtilsTest {
 			assertTrue(e.getMessage().contains("COVERAGE1"));
 			assertTrue(e.getMessage().contains("COVERAGE2"));
 		}
+	}
+	
+	private static class MockWorkset extends Workset { // TODO: Replace with mockito.
+
+		public MockWorkset(String worksetName) {
+			super(worksetName);
+		}
+		
+		@Override
+		public void release() {
+			throw new RuntimeException("COVERAGE");
+		}
+	}
+	
+	@Test
+	public void testRelease() {
+		EnforcerUtils.release(null, null);
+		Set<Problem> problems = new HashSet<>();
+		EnforcerUtils.release(new Workset("COVERAGE"), problems);
+		assertTrue(problems.isEmpty());
+		EnforcerUtils.release(new MockWorkset("COVERAGE"), problems);
+		assertTrue(problems.iterator().next().description().contains("unable to release workset COVERAGE"));
+		assertTrue(problems.iterator().next().error() == Errors.UNABLE_TO_RELEASE_WORKSET);
 	}
 	
 	@Test

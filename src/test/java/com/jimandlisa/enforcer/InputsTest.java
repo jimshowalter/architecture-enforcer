@@ -26,11 +26,11 @@ public class InputsTest {
 	public void doTest() {
 		Inputs inputs = TestUtils.inputs(false, false, false);
 		inputs.toString();
-		inputs.setIgnores(new File(Thread.currentThread().getContextClassLoader().getResource("SamplePackageIgnores.txt").getPath()));
+		inputs.setIgnores(TestUtils.testClassesFile("SamplePackageIgnores.txt"));
 		inputs.toString();
-		inputs.setReflections(new File(Thread.currentThread().getContextClassLoader().getResource("SampleReflections.txt").getPath()));
+		inputs.setReflections(TestUtils.testClassesFile("SampleReflections.txt"));
 		inputs.toString();
-		inputs.setFixUnresolveds(new File(Thread.currentThread().getContextClassLoader().getResource("SampleFixUnresolveds.txt").getPath()));
+		inputs.setFixUnresolveds(TestUtils.testClassesFile("SampleFixUnresolveds.txt"));
 		inputs.toString();
 		inputs = TestUtils.inputs(true, true, true);
 		inputs.toString();

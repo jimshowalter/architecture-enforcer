@@ -49,7 +49,7 @@ public class RollUpTest {
 		assertEquals("Comp2", rollUp.get("com.other.XYZ"));
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
 			rollUp.dump(ps);
-			TestUtils.compare(baos, "RollUpCanned.txt");
+			TestUtils.compareTestClassesFile(baos, "RollUpCanned.txt");
 		}
 	}
 }

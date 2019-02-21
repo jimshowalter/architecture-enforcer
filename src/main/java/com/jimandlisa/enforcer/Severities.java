@@ -15,7 +15,7 @@ package com.jimandlisa.enforcer;
 
 public enum Severities {
 
-//	WARNING,
+	WARNING,
 	ERROR_IF_STRICT,
 	ALWAYS_ERROR
 }

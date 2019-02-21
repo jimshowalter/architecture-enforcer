@@ -55,33 +55,33 @@ public class FileUtilsTest {
 	@Test
 	public void doTest() {
 		new FileUtils();
-		File file = FileUtils.checkReadFile(new File(Thread.currentThread().getContextClassLoader().getResource("SamplePackageIgnores.txt").getPath()));
+		File file = FileUtils.checkReadFile(TestUtils.testClassesFile("SamplePackageIgnores.txt"));
 		assertNotNull(file);
 		assertTrue(file.isFile());
 		try {
-			FileUtils.checkReadFile(new File(Thread.currentThread().getContextClassLoader().getResource("SamplePackageIgnores.txt").getPath() + "bogus"));
+			FileUtils.checkReadFile(new File(TestUtils.testClassesPath("SamplePackageIgnores.txt") + "bogus"));
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("does not exist"));
 			assertEquals(Errors.FILE_DOES_NOT_EXIST, e.error());
 		}
 		try {
-			FileUtils.checkReadFile(new MockFile(Thread.currentThread().getContextClassLoader().getResource("SampleTarget2.yaml").getPath()));
+			FileUtils.checkReadFile(new MockFile(TestUtils.testClassesPath("SampleTarget2.yaml").toString()));
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("cannot read"));
 			assertEquals(Errors.CANNOT_READ_FILE, e.error());
 		}
 		try {
-			FileUtils.checkReadFile(new MockFile(Thread.currentThread().getContextClassLoader().getResource("SampleTarget2.yaml").getPath(), true));
+			FileUtils.checkReadFile(new MockFile(TestUtils.testClassesPath("SampleTarget2.yaml").toString(), true));
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("error validating file"));
 			assertEquals(Errors.ERROR_VALIDATING_FILE, e.error());
 			assertEquals("COVERAGE", e.getCause().getMessage());
 		}
-		File dir = FileUtils.checkWriteDir(new File(Thread.currentThread().getContextClassLoader().getResource("SampleTarget2.yaml").getPath()).getParentFile());
+		File dir = FileUtils.checkWriteDir(TestUtils.testClassesFile("SampleTarget2.yaml").getParentFile());
 		assertNotNull(dir);
 		assertTrue(dir.isDirectory());
 		try {
-			FileUtils.checkWriteDir(new MockFile(new File(Thread.currentThread().getContextClassLoader().getResource("SampleTarget2.yaml").getPath()).getParentFile().getPath()));
+			FileUtils.checkWriteDir(new MockFile(TestUtils.testClassesFile("SampleTarget2.yaml").getParentFile().getPath()));
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("cannot write"));
 			assertEquals(Errors.CANNOT_WRITE_TO_DIRECTORY, e.error());

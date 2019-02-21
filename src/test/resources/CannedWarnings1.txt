@@ -1,0 +1,2 @@
+WARNINGS:
+foo

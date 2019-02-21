@@ -43,5 +43,9 @@ public class ProblemsTest {
 		assertTrue(problem.equals(new Problem("bar", Errors.CLASS_BOTH_REFERRED_TO_AND_IGNORED)));
 		assertEquals(0, problem.compareTo(new Problem("bar", Errors.CANNOT_READ_FILE)));
 		assertEquals(Errors.CANNOT_READ_FILE.toString() + ": bar", problem.toString());
+		problem = new Problem("foo", Errors.UNABLE_TO_RELEASE_WORKSET);
+		assertEquals("foo", problem.description());
+		assertFalse(problem.isFatal(false));
+		assertFalse(problem.isFatal(true));
 	}
 }

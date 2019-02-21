@@ -55,6 +55,7 @@ public enum Errors {
 	CLASS_BOTH_REFERRED_TO_AND_IGNORED,
 	CLASS_NOT_RESOLVED_TO_TYPE,
 	TYPE_NOT_RESOLVED_TO_COMPONENT,
+	UNABLE_TO_RELEASE_WORKSET(Severities.WARNING),
 	UNRESOLVED_REFERENCE(Severities.ERROR_IF_STRICT),
 	ILLEGAL_REFERENCE(Severities.ERROR_IF_STRICT);
 	
@@ -73,9 +74,9 @@ public enum Errors {
 	}
 	
 	public boolean isFatal(boolean strict) {
-//		if (severity() == Severities.WARNING) {
-//			return false;
-//		}
+		if (severity() == Severities.WARNING) {
+			return false;
+		}
 		if (severity()== Severities.ALWAYS_ERROR) {
 			return true;
 		}

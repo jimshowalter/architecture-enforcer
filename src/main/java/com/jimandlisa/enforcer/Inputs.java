@@ -18,23 +18,23 @@ import java.io.File;
 public class Inputs {
 
 	private final File target;
-	private final File odem;
+	private final File war;
 	private File ignores = null;
 	private File reflections = null;
 	private File fixUnresolveds = null;
 
-	public Inputs(final File target, final File odem) {
+	public Inputs(final File target, final File war) {
 		super();
 		this.target = FileUtils.checkReadFile(target);
-		this.odem = FileUtils.checkReadFile(odem);
+		this.war = FileUtils.checkReadFile(war);
 	}
 
 	public final File target() {
 		return target;
 	}
 
-	public final File odem() {
-		return odem;
+	public final File war() {
+		return war;
 	}
 
 	public final void setIgnores(File ignores) {
@@ -72,6 +72,6 @@ public class Inputs {
 
 	@Override
 	public String toString() {
-		return "target=" + target() + ", ODEM=" + odem() + ", ignores=" + ignores() + ", reflections=" + reflections() + ", fix-unresolveds=" + fixUnresolveds();
+		return "target=" + target() + ", war=" + war() + ", ignores=" + ignores() + ", reflections=" + reflections() + ", fix-unresolveds=" + fixUnresolveds();
 	}
 }

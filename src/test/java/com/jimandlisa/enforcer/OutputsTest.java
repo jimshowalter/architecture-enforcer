@@ -22,8 +22,8 @@ public class OutputsTest {
 
 	@Test
 	public void doTest() {
-		Outputs outputs = new Outputs(TestUtils.targetDir().toFile());
-		assertEquals(TestUtils.targetDir().toFile(), outputs.outputDirectory());
+		Outputs outputs = new Outputs(TestUtils.targetDir());
+		assertEquals(TestUtils.targetDir(), outputs.outputDirectory());
 		outputs.setIllegalReferences(Outputs.ILLEGAL_REFERENCES_DEFAULT_FILE_NAME);
 		outputs.setUnresolvedTypes(Outputs.UNRESOLVED_TYPES_DEFAULT_FILE_NAME);
 		assertEquals(Outputs.ILLEGAL_REFERENCES_DEFAULT_FILE_NAME, outputs.illegalReferences().getName());

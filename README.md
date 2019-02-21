@@ -99,19 +99,7 @@ code into projects, this tool should continue to be run in CI/CD.
 
 ## Getting Started ##
 
-1. Download the pf-CDA zip from http://www.dependency-analyzer.org, and unpack it into some temp directory. The pf-CDA tool is free to use in binary form (the source is not available). In case the developer changes the licensing or takes down his site, the latest free version is checked into this github.
-
 1. Create a war file for your project. This is necessary even if your project isn't deployed as a war, because pf-CDA requires a war (or at least works best when pointed at a war).
-
-1. Run pf-CDA on your project's war file:
-
-	1. cd to the directory into which you unpacked the zip.
-	1. Run ./cda.sh or ./cda.bat, depending on your command line and/or OS.
-	1. Select File -> New workset...
-	1. On the Classpath tab, click Add, navigate to the war for your project, select it, and click OK.
-	1. On the General tab, give the workset a name, check "Reload this workset automatically at next start", and click Save.
-	1. When pf-CDA finishes analyzing your project, right-click on the analysis, select Export Model -> XML/ODEM File, give the ODEM file a name, and click Save.
-	1. Shut down pf-CDA.
 
 1. Sync and build this project.
 
@@ -123,7 +111,7 @@ The full set of args is:
 
 > /full/path/to/target/architecture/.yaml
 
-> /full/path/to/pf-CDA/.odem
+> /full/path/to/.war
 
 > /full/path/to/writable/output/directory
 
@@ -167,13 +155,15 @@ By default, the unresolved-types output file name is "unresolved_types.txt", and
 
 Notes:
 
+* For large codebases, the tool requires lots of memory. Make sure you provide enough.
+
 * Typically a project uses a bunch of third-party classes, and/or classes from inside your company but outside the project being decomposed. List packages to ignore in a file you specify with the -i command-line argument.
 The syntax is full.name.of.package, without a dot at the end. The tool appends dots for you. In some cases you need to suppress dots due to some issues with pf-CDA, in which case end the package name with a !.
 
 * If your project uses reflection, you should add outermost class-to-class dependencies to a file you specify with the -r command-line argument. The syntax is: full.name.of.referring.class.Foo:full.name.of.referred.to.class.Bar,full.name.of.referred.to.class.Baz....,
 where the referred-to classes are classes to which the referring class refers by reflection. At least one referred-to class is required. If there are too many referred-to classes to fit cleanly on one line, you can start multiple lines with the referring class.
 
-* Sometimes the pf-CDA odem file is missing classes that are referred to by other classes in the file. To fix these, you should add the missing classes to a file you specify with the -f command-line argument.
+* Sometimes pf-CDA misses classes that are referred to by other classes in the war. To fix these, you should add the missing classes to a file you specify with the -f command-line argument.
 The syntax is: full.name.of.missing.class.Foo:full.name.of.referred.to.class.Bar,full.name.of.referred.to.class.Baz..., where the referred-to classes are classes to which the missing class refers.
 If there are too many referred-to classes to fit cleanly on one line, you can start multiple lines with the referring class. If the unresolved class you are adding does not refer to other classes in your project,
 you don't need to add any referred-to classes (and you don't need a colon after the referring class on the line).
@@ -183,7 +173,7 @@ you don't need to add any referred-to classes (and you don't need a colon after 
 * pf-CDA is smart enough to add references on its own for simple Class.forName calls where the string name of the class is directly specified, as in Class.forName("com.foo.bar.Baz"), but it can't follow complicated string concatenations, strings returned by functions, etc.,
 for example Class.forName(someStringFromAVariable + SomeClass.someFunction(some args from somewhere) + SOME\_STRING\_CONSTANT + ".foo"). That's why you have to add them manually. Also, pf-CDA doesn't parse reflection references in JSP files, Spring, etc.
 
-* Sample files are located in the test resources directory. They start with "Sample".
+* Sample files are located in the src/test/resources directory. They start with "Sample".
 
 ## Useful Patterns ##
 
@@ -221,7 +211,7 @@ Errors are either always fatal, or fatal only if strict is specified.
 
 All but two errors are always fatal:
 
-* Unresolved references are permitted when not in strict mode because sometimes the pf-CDA odem file is missing classes that are referred to by other classes in the file. This allows a grace period while the missing types are added to the fix-unresolveds file.
+* Unresolved references are permitted when not in strict mode because sometimes pf-CDA misses classes that are referred to by other classes in the war. This allows a grace period while the missing types are added to the fix-unresolveds file.
 
 * Illegal references are permitted when not in strict mode so the team working on decomposition can see the report of illegal references without blocking other development.
 
@@ -233,8 +223,7 @@ This tool can of course be improved. Below are listed some things we know would 
 
 ### TODOs We Like ###
 
-* First, and most obviously, having to manually run pf-CDA at the outset is a pain, plus it thwarts automating analysis in CI/CD. The documentation on http:www.dependency-analyzer.org mentions an API that could probably be called by this tool. Or we could investigate https:innig.net/macker, or javaparser.org, or BCEL.
-Alternatively, someone skilled with bytecode analysis could probably replace pf-CDA entirely (we don't need all of its features, just a dump of class-to-class references).
+* Instead of creating the entire graph with pf-CDA (which can be gigantic for large codebases) and then ignoring a bunch of classes, see if there's a way to pass in a filter when initializing the pf-CDA workspace.
 
 * Provide a way to fail builds if the count of illegal references increases. Note that this is different from enabling strict mode, because in that case builds fail if there are any illegal references, so the previous count is known (it's zero).
 This requires determining that there were N illegal references in the previous build, and now there are N + M illegal references in the current build. One way to do this is to access the previous build in CI/CD using something like the Jenkins API.
@@ -301,9 +290,11 @@ https://github.com/jimshowalter/architecture-enforcer-sample
 
 http://www.dependency-analyzer.org
 
-## Copyright ##
+## Copyright/Licensing ##
 
-All files in this github except for the pf-CDA zip are subject to the following MIT license:
+The pf-CDA tool is free to use in binary form (the source is not available). In case the developer changes the licensing or takes down his site, the latest free version is checked into this github, along with individual jars from the zip.
+
+All files in this github except for the pf-CDA zip and jars are subject to the following MIT license:
 
   Copyright 2019 jimandlisa.com.
 

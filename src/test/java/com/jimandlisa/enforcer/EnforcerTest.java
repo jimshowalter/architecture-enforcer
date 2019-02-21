@@ -27,7 +27,7 @@ public class EnforcerTest {
 			Flags flags = new Flags();
 			flags.enableDebug();
 			Enforce.mainImpl(TestUtils.inputs(true, true, true), TestUtils.outputs(), ps, flags);
-			TestUtils.compare(baos, "TestEnforceCanned1.txt");
+			TestUtils.compareTestClassesFile(baos, "TestEnforceCanned1.txt");
 		}
 	}
 }

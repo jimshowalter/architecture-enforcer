@@ -17,7 +17,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
@@ -39,10 +38,10 @@ public class TargetUtilsTest {
 	@Test
 	public void doTest() throws Exception {
 		new TargetUtils();
-		Target target = TargetUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("TestTarget.yaml").getPath()));
+		Target target = TargetUtils.parse(TestUtils.testClassesFile("TestTarget.yaml"));
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
 			TargetUtils.dump(target, ps);
-			TestUtils.compare(baos, "TestTargetCanned.txt");
+			TestUtils.compareTestClassesFile(baos, "TestTargetCanned.txt");
 		}
 		Map<String, Object> map = new HashMap<>();
 		map.put("foo", "bar");
@@ -84,43 +83,43 @@ public class TargetUtilsTest {
 			assertEquals(Errors.UNRECOGNIZED_COMPONENT_KEY, e.error());
 		}
 		try {
-			TargetUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("BadTarget1.yaml").getPath()));
+			TargetUtils.parse(TestUtils.testClassesFile("BadTarget1.yaml"));
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("duplicate layer depth"));
 			assertEquals(Errors.DUPLICATE_LAYER_DEPTH, e.error());
 		}
 		try {
-			TargetUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("BadTarget2.yaml").getPath()));
+			TargetUtils.parse(TestUtils.testClassesFile("BadTarget2.yaml"));
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("duplicate layer name"));
 			assertEquals(Errors.DUPLICATE_LAYER_NAME, e.error());
 		}
 		try {
-			TargetUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("BadTarget3.yaml").getPath()));
+			TargetUtils.parse(TestUtils.testClassesFile("BadTarget3.yaml"));
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("duplicate domain name"));
 			assertEquals(Errors.DUPLICATE_DOMAIN_NAME, e.error());
 		}
 		try {
-			TargetUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("BadTarget4.yaml").getPath()));
+			TargetUtils.parse(TestUtils.testClassesFile("BadTarget4.yaml"));
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("duplicate component name"));
 			assertEquals(Errors.DUPLICATE_COMPONENT_NAME, e.error());
 		}
 		try {
-			TargetUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("BadTarget5.yaml").getPath()));
+			TargetUtils.parse(TestUtils.testClassesFile("BadTarget5.yaml"));
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("null domain name"));
 			assertEquals(Errors.NULL_STRING_ARG, e.error());
 		}
 		try {
-			TargetUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("BadTarget6.yaml").getPath()));
+			TargetUtils.parse(TestUtils.testClassesFile("BadTarget6.yaml"));
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("duplicate package name"));
 			assertEquals(Errors.DUPLICATE_PACKAGE_NAME, e.error());
 		}
 		try {
-			TargetUtils.parse(new File(Thread.currentThread().getContextClassLoader().getResource("BadTarget7.yaml").getPath()));
+			TargetUtils.parse(TestUtils.testClassesFile("BadTarget7.yaml"));
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("duplicate class name"));
 			assertEquals(Errors.DUPLICATE_CLASS_NAME, e.error());

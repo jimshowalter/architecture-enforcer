@@ -24,7 +24,7 @@ import java.util.Set;
 
 public class Enforce {
 
-	private static final String USAGE = ": usage: /full/path/to/target/architecture/.yaml /full/path/to/pf-CDA/.odem /full/path/to/output/directory " + Optionals.UNRESOLVED_TYPES_OUTPUT_FILE
+	private static final String USAGE = ": usage: /full/path/to/target/architecture/.yaml /full/path/to/war/file /full/path/to/output/directory " + Optionals.UNRESOLVED_TYPES_OUTPUT_FILE
 			+ "unresolvedTypesOutputFileSimpleName " + Optionals.ILLEGAL_REFERENCES_OUTPUT_FILE + "illegalReferencesOutputFileSimpleName " + Optionals.IGNORES + "/full/path/to/packages/to/ignore "
 			+ Optionals.REFLECTIONS + "/full/path/to/reflection/references " + Optionals.FIX_UNRESOLVEDS + "/full/path/to/fixed/unresolveds " + Optionals.PRESERVE_NESTED_TYPES
 			+ " (preserves nested types) " + Optionals.STRICT + " (strict, requires that all types resolve and no illegal references) " + Optionals.DEBUG
@@ -97,23 +97,22 @@ public class Enforce {
 	}
 	
 	// To have gotten here, there can't be any fatal errors. In strict mode, that means we can't get here at all if there are any problems.
-	// In non-strict mode, we can get here, but only if all problems are fatal only when strict is specified. We need to report those errors.
+	// In non-strict mode, we can get here, but only if all problems are fatal only when strict is specified. We need to report those problems.
 	static void reportProblems(Set<Problem> problems, PrintStream ps, Outputs outputs) throws Exception {
 		boolean foundUnresolvedTypes = false;
 		boolean foundIllegalReferences = false;
+		boolean foundWarnings = false;
 		for (Problem problem : problems) {
 			if (problem.error() == Errors.UNRESOLVED_REFERENCE) {
 				foundUnresolvedTypes = true;
-				if (foundIllegalReferences) {
-					break;
-				}
-				continue;
-			}
-			if (problem.error() == Errors.ILLEGAL_REFERENCE) {
+			} else if (problem.error() == Errors.ILLEGAL_REFERENCE) {
 				foundIllegalReferences = true;
-				if (foundUnresolvedTypes) {
-					break;
+			} else {
+				if (!foundWarnings) {
+					ps.println("WARNINGS:");
+					foundWarnings = true;
 				}
+				ps.println(problem.description());
 			}
 		}
 		if (!foundUnresolvedTypes && !foundIllegalReferences) {
@@ -167,7 +166,7 @@ public class Enforce {
 			ps.println(t.getMessage());
 			return;
 		}
-		ps.println("Analyzing/enforcing architecture with " + inputs.toString() + ", " + outputs.toString() + ", " + flags.toString());
+		ps.println("Analyzing/enforcing architecture with " + inputs.toString() + ", " + outputs.toString() + ", " + flags.toString() + " (may take 30+ seconds...)");
 		mainImpl(inputs, outputs, ps, flags); 
 	}
 }

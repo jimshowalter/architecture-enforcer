@@ -21,6 +21,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.pfsw.odem.IType;
+import org.pfsw.tools.cda.base.model.ClassInformation;
+import org.pfsw.tools.cda.base.model.Workset;
+import org.pfsw.tools.cda.base.model.workset.ClasspathPartDefinition;
+import org.pfsw.tools.cda.core.init.WorksetInitializer;
+
 public class EnforcerUtils {
 	
 	static Set<String> ignores(File ignoresFile) throws Exception {
@@ -70,6 +76,7 @@ public class EnforcerUtils {
 	
 	static String denest(String typeName, Flags flags) {
 		if (typeName.startsWith("$")) {
+			// TODO: Classes can start with dollar signs, so this is a problem. See if pf-CDA provides a way to determine if a class is nested, and, if so, to get its outermost class.
 			throw new EnforcerException("malformed class name '" + typeName + "'", Errors.MALFORMED_CLASS_NAME);
 		}
 		if (flags.preserveNestedTypes()) {
@@ -172,34 +179,44 @@ public class EnforcerUtils {
 		}
 	}
 	
+	static void release(Workset workset, Set<Problem> problems) {
+		if (workset == null) {
+			return;
+		}
+		try {
+			workset.release();
+		} catch (Throwable t) {
+			problems.add(new Problem("unable to release workset " + workset.getName() + ": " + t.getMessage(), Errors.UNABLE_TO_RELEASE_WORKSET));
+		}
+	}
+	
 	public static Map<String, Type> resolve(Inputs inputs, Set<Problem> problems, Flags flags) throws Exception {
 		Set<String> ignores = ignores(inputs.ignores());
 		Map<String, Type> types = new HashMap<>();
-		// Get referring and referred-to classes from pf-CDA output.
-		try (BufferedReader reader = new BufferedReader(new FileReader(inputs.odem()))) {
-			String line = null;
-			Type type = null;
-			while ((line = reader.readLine()) != null) {
-				if (line.trim().startsWith("<type name=\"")) {
-					String referringClass = denest(line.trim().replace("<type name=\"", "").replaceAll("\".*$", ""), flags);
-					if (skip(referringClass, ignores)) {
-						type = null;
-						continue;
-					}
-					type = get(referringClass, types);
+		Workset workset = null;
+		try {
+			workset = new Workset("ArchitectureEnforcer");
+			ClasspathPartDefinition partDefinition = new ClasspathPartDefinition(inputs.war().getAbsolutePath());
+			workset.addClasspathPartDefinition(partDefinition);
+			WorksetInitializer wsInitializer = new WorksetInitializer(workset);
+			wsInitializer.initializeWorksetAndWait(null);
+			for (ClassInformation classInfo : workset.getAllContainedClasses()) {
+				String referringClass = denest(classInfo.getName().trim(), flags);
+				// TODO: Instead of creating the entire graph and then ignoring, see if there's a way to pass in a filter when initializing the workspace.
+				if (skip(referringClass, ignores)) {
 					continue;
 				}
-				if (line.trim().startsWith("<depends-on name=\"")) {
-					if (type == null) {
-						continue;
-					}
-					String referredToClass = denest(line.trim().replace("<depends-on name=\"", "").replaceAll("\".*$", ""), flags);
+				Type type = get(referringClass, types);
+				for (IType dependency : classInfo.getDirectReferredTypes()) {
+					String referredToClass = denest(dependency.getName().trim(), flags);
 					if (skip(type.name(), referredToClass, ignores)) {
 						continue;
 					}
 					type.referenceNames().add(referredToClass);
 				}
 			}
+		} finally {
+			release(workset, problems);
 		}
 		parse(inputs.reflections(), types, ignores, problems, "reflection", true, flags); // Get reflection-based referring and referred-to classes from reflections file.
 		parse(inputs.fixUnresolveds(), types, ignores, problems, "fix-unresolved", false, flags); // Get referring and referred-to classes from fix-unresolveds file.

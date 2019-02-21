@@ -24,50 +24,62 @@ import java.nio.file.Paths;
 
 public class TestUtils {
 	
-	public static Path targetDir() {
-		return Paths.get(System.getProperty("user.dir"), "target");
+	public static File targetDir() {
+		return Paths.get(System.getProperty("user.dir"), "target").toFile();
 	}
 	
-	public static Path path(String file) {
-		return Paths.get(targetDir().toString(), "test-classes", file);
+	public static File targetFile(String file) {
+		return Paths.get(targetDir().toString(), file).toFile();
 	}
 	
-	public static String read(String file) throws Exception {
-		return new String(Files.readAllBytes(path(file)), StandardCharsets.UTF_8.name());
+	public static String readTargetFile(String file) throws Exception {
+		return new String(Files.readAllBytes(targetFile(file).toPath()), StandardCharsets.UTF_8.name());
 	}
 	
-	public static String readTarget(String file) throws Exception {
-		return new String(Files.readAllBytes(Paths.get(targetDir().toString(), file)), StandardCharsets.UTF_8.name());
-	}
-	
-	public static void compare(ByteArrayOutputStream baos, String canned) throws Exception {
-		String out = new String(baos.toByteArray(), StandardCharsets.UTF_8).trim().replaceAll("\r\n\r\n", "\r\n");
-		String cannedOut = read(canned).trim().replaceAll("\r\n\r\n", "\r\n");
-		assertEquals(out, cannedOut);
-	}
-	
-	public static void compareTarget(String file, String canned) throws Exception {
-		String s1 = readTarget(file).trim().replaceAll("\r\n\r\n", "\r\n");
-		String s2 = read(canned).trim().replaceAll("\r\n\r\n", "\r\n");
+	public static void compareTargetFile(String file, String canned) throws Exception {
+		String s1 = readTargetFile(file).trim().replaceAll("\r\n\r\n", "\r\n");
+		String s2 = readTestClassesFile(canned).trim().replaceAll("\r\n\r\n", "\r\n");
 		assertEquals(s1, s2);
 	}
 	
+	public static Path testClassesPath(String file) {
+		return Paths.get(targetDir().toString(), "test-classes", file);
+	}
+	
+	public static File testClassesFile(String file) {
+		return testClassesPath(file).toFile();
+	}
+	
+	public static File sampleWar() {
+		return testClassesFile("architecture-enforcer-sample-1.0-SNAPSHOT.war");
+	}
+	
+	public static String readTestClassesFile(String file) throws Exception {
+		return new String(Files.readAllBytes(testClassesPath(file)), StandardCharsets.UTF_8.name());
+	}
+	
+	public static void compareTestClassesFile(ByteArrayOutputStream baos, String canned) throws Exception {
+		String out = new String(baos.toByteArray(), StandardCharsets.UTF_8).trim().replaceAll("\r\n\r\n", "\r\n");
+		String cannedOut = readTestClassesFile(canned).trim().replaceAll("\r\n\r\n", "\r\n");
+		assertEquals(out, cannedOut);
+	}
+	
 	public static Inputs inputs(boolean includeIgnores, boolean includeReflections, boolean includeFixUnresolveds) {
-		Inputs inputs = new Inputs(new File(Thread.currentThread().getContextClassLoader().getResource("SampleTarget2.yaml").getPath()), new File(Thread.currentThread().getContextClassLoader().getResource("Sample.odem").getPath()));
+		Inputs inputs = new Inputs(testClassesFile("SampleTarget2.yaml"), sampleWar());
 		if (includeIgnores) {
-			inputs.setIgnores(new File(Thread.currentThread().getContextClassLoader().getResource("SamplePackageIgnores.txt").getPath()));
+			inputs.setIgnores(testClassesFile("SamplePackageIgnores.txt"));
 		}
 		if (includeReflections) {
-			inputs.setReflections(new File(Thread.currentThread().getContextClassLoader().getResource("SampleReflections.txt").getPath()));
+			inputs.setReflections(testClassesFile("SampleReflections.txt"));
 		}
 		if (includeFixUnresolveds) {
-			inputs.setFixUnresolveds(new File(Thread.currentThread().getContextClassLoader().getResource("SampleFixUnresolveds.txt").getPath()));
+			inputs.setFixUnresolveds(testClassesFile("SampleFixUnresolveds.txt"));
 		}
 		return inputs;
 	}
 	
 	public static Outputs outputs() {
-		Outputs outputs = new Outputs(targetDir().toFile());
+		Outputs outputs = new Outputs(targetDir());
 		outputs.setUnresolvedTypes(Outputs.UNRESOLVED_TYPES_DEFAULT_FILE_NAME);
 		outputs.setIllegalReferences(Outputs.ILLEGAL_REFERENCES_DEFAULT_FILE_NAME);
 		return outputs;

@@ -23,11 +23,11 @@ public class ErrorsTest {
 	@Test
 	public void doTest() {
 		for (Errors error : Errors.values()) {
-//			if (error.severity() == Severities.WARNING) {
-//				assertFalse(error.isFatal(false));
-//				assertFalse(error.isFatal(true));
-//				continue;
-//			}
+			if (error.severity() == Severities.WARNING) {
+				assertFalse(error.isFatal(false));
+				assertFalse(error.isFatal(true));
+				continue;
+			}
 			if (error.severity() == Severities.ALWAYS_ERROR) {
 				assertTrue(error.isFatal(false));
 				assertTrue(error.isFatal(true));

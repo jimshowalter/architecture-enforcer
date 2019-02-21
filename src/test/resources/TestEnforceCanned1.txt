@@ -85,8 +85,5 @@ Total outermost types: 9
 	com.jimandlisa.utils.Unresolved
 		com.jimandlisa.utils.Utils
 	com.jimandlisa.utils.Utils
-		com.jimandlisa.utils.AnotherUnresolved
-		com.jimandlisa.utils.Unresolved
 PROBLEMS FOUND, SEE OUTPUT FILES:
-unresolved_types.txt
 illegal_references.txt
