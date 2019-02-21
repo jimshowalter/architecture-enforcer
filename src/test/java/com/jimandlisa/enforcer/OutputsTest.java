@@ -14,6 +14,7 @@
 package com.jimandlisa.enforcer;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -22,7 +23,22 @@ public class OutputsTest {
 	@Test
 	public void doTest() {
 		Outputs outputs = new Outputs(TestUtils.targetDir().toFile());
+		assertEquals(TestUtils.targetDir().toFile(), outputs.outputDirectory());
+		outputs.setIllegalReferences(Outputs.ILLEGAL_REFERENCES_DEFAULT_FILE_NAME);
+		outputs.setUnresolvedTypes(Outputs.UNRESOLVED_TYPES_DEFAULT_FILE_NAME);
 		assertEquals(Outputs.ILLEGAL_REFERENCES_DEFAULT_FILE_NAME, outputs.illegalReferences().getName());
 		assertEquals(Outputs.UNRESOLVED_TYPES_DEFAULT_FILE_NAME, outputs.unresolvedTypes().getName());
+		try {
+			outputs.setIllegalReferences("foo");
+		} catch (EnforcerException e) {
+			assertTrue(e.getMessage().contains("illegal references output file already set"));
+			assertEquals(Errors.ILLEGAL_REFERENCES_OUTPUT_FILE_ALREADY_SPECIFIED, e.error());
+		}
+		try {
+			outputs.setUnresolvedTypes("foo");
+		} catch (EnforcerException e) {
+			assertTrue(e.getMessage().contains("unresolved types output file already set"));
+			assertEquals(Errors.UNRESOLVED_TYPES_OUTPUT_FILE_ALREADY_SPECIFIED, e.error());
+		}
 	}
 }

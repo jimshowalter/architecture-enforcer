@@ -56,7 +56,7 @@ public class EnforcerUtilsTest {
 	public void testDenest() {
 		assertEquals("com.foo.Bar", EnforcerUtils.denest("com.foo.Bar$Baz", new Flags()));
 		Flags flags = new Flags();
-		flags.setPreserveNestedTypes(true);
+		flags.enablePreserveNestedTypes();
 		assertEquals("com.foo.Bar$Baz", EnforcerUtils.denest("com.foo.Bar$Baz", flags));
 		try {
 			EnforcerUtils.denest("$Foo", new Flags());

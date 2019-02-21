@@ -23,24 +23,33 @@ public class Flags {
 		super();
 	}
 	
-	public void setPreserveNestedTypes(final boolean preserveNestedTypes) {
-		this.preserveNestedTypes = preserveNestedTypes;
+	public void enablePreserveNestedTypes() {
+		if (preserveNestedTypes()) {
+			throw new EnforcerException("preserve nested types already set", Errors.PRESERVE_NESTED_TYPES_ALREADY_SPECIFIED);
+		}
+		this.preserveNestedTypes = true;
 	}
 	
 	public boolean preserveNestedTypes() {
 		return preserveNestedTypes;
 	}
 	
-	public void setStrict(final boolean strict) {
-		this.strict = strict;
+	public void enableStrict() {
+		if (strict()) {
+			throw new EnforcerException("strict already set", Errors.STRICT_ALREADY_SPECIFIED);
+		}
+		this.strict = true;
 	}
 	
 	public boolean strict() {
 		return strict;
 	}
 	
-	public void setDebug(final boolean debug) {
-		this.debug = debug;
+	public void enableDebug() {
+		if (debug()) {
+			throw new EnforcerException("debug already set", Errors.DEBUG_ALREADY_SPECIFIED);
+		}
+		this.debug = true;
 	}
 	
 	public boolean debug() {

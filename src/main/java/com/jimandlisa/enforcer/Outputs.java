@@ -18,32 +18,44 @@ import java.nio.file.Paths;
 
 public class Outputs {
 
-	public static final String UNRESOLVED_TYPES_DEFAULT_FILE_NAME = "unresolved_types.txt"; // TODO: Allow overriding this from command line.
-	public static final String ILLEGAL_REFERENCES_DEFAULT_FILE_NAME = "illegal_references.txt"; // TODO: Allow overriding this from command line.
-	
+	public static final String UNRESOLVED_TYPES_DEFAULT_FILE_NAME = "unresolved_types.txt";
+	public static final String ILLEGAL_REFERENCES_DEFAULT_FILE_NAME = "illegal_references.txt";
+
 	private final File outputDirectory;
-	private final File unresolvedTypes;
-	private final File illegalReferences;
-	
+	private File unresolvedTypes;
+	private File illegalReferences;
+
 	public Outputs(final File outputDirectory) {
 		super();
 		this.outputDirectory = FileUtils.checkWriteDir(outputDirectory);
-		this.unresolvedTypes = Paths.get(outputDirectory.getAbsolutePath(), UNRESOLVED_TYPES_DEFAULT_FILE_NAME).toFile();
-		this.illegalReferences = Paths.get(outputDirectory.getAbsolutePath(), ILLEGAL_REFERENCES_DEFAULT_FILE_NAME).toFile();
 	}
-	
+
 	public File outputDirectory() {
 		return outputDirectory;
 	}
 	
+	public void setUnresolvedTypes(String name) {
+		if (unresolvedTypes() != null) {
+			throw new EnforcerException("unresolved types output file already set", Errors.UNRESOLVED_TYPES_OUTPUT_FILE_ALREADY_SPECIFIED);
+		}
+		unresolvedTypes = Paths.get(outputDirectory.getAbsolutePath(), ArgUtils.check(name, "name")).toFile();
+	}
+
 	public File unresolvedTypes() {
 		return unresolvedTypes;
 	}
 	
+	public void setIllegalReferences(String name) {
+		if (illegalReferences() != null) {
+			throw new EnforcerException("illegal references output file already set", Errors.ILLEGAL_REFERENCES_OUTPUT_FILE_ALREADY_SPECIFIED);
+		}
+		illegalReferences = Paths.get(outputDirectory.getAbsolutePath(), ArgUtils.check(name, "name")).toFile();
+	}
+
 	public File illegalReferences() {
 		return illegalReferences;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "unresolvedTypes=" + unresolvedTypes() + ", illegalReferences=" + illegalReferences();

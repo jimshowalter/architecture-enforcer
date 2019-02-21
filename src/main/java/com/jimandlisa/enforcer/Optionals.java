@@ -15,6 +15,8 @@ package com.jimandlisa.enforcer;
 
 enum Optionals {
 
+	UNRESOLVED_TYPES_OUTPUT_FILE("U"),
+	ILLEGAL_REFERENCES_OUTPUT_FILE("I"),
 	IGNORES("i"),
 	REFLECTIONS("r"),
 	FIX_UNRESOLVEDS("f"),

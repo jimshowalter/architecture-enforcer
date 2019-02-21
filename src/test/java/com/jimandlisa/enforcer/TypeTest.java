@@ -13,21 +13,32 @@
 
 package com.jimandlisa.enforcer;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-public class EnforcerTest {
+public class TypeTest {
 
 	@Test
-	public void doTest() throws Exception {
-		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
-			Flags flags = new Flags();
-			flags.enableDebug();
-			Enforce.mainImpl(TestUtils.inputs(true, true, true), TestUtils.outputs(), ps, flags);
-			TestUtils.compare(baos, "TestEnforceCanned1.txt");
-		}
+	public void doTest() {
+		Type type = new Type("foo");
+		assertEquals("foo", type.name());
+		assertEquals("foo", type.toString());
+		assertNull(type.belongsTo());
+		assertTrue(type.referenceNames().isEmpty());
+		assertTrue(type.references().isEmpty());
+		Layer layer = new Layer("Layer1", 0, null);
+		Component comp1 = new Component("Comp1", layer, null, null);
+		type.setBelongsTo(comp1);
+		assertEquals(comp1, type.belongsTo());
+		type.referenceNames().add("bar");
+		assertTrue(type.referenceNames().size() == 1);
+		assertEquals("bar", type.referenceNames().iterator().next());
+		Type type2 = new Type("bar");
+		type.references().add(type2);
+		assertTrue(type.references().size() == 1);
+		assertEquals(type2, type.references().iterator().next());
 	}
 }

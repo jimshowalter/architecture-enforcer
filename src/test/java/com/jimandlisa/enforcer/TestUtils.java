@@ -67,6 +67,9 @@ public class TestUtils {
 	}
 	
 	public static Outputs outputs() {
-		return new Outputs(targetDir().toFile());
+		Outputs outputs = new Outputs(targetDir().toFile());
+		outputs.setUnresolvedTypes(Outputs.UNRESOLVED_TYPES_DEFAULT_FILE_NAME);
+		outputs.setIllegalReferences(Outputs.ILLEGAL_REFERENCES_DEFAULT_FILE_NAME);
+		return outputs;
 	}
 }

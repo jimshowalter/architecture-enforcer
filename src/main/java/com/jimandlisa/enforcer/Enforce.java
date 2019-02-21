@@ -24,52 +24,48 @@ import java.util.Set;
 
 public class Enforce {
 
-	private static final String USAGE = ": usage: /full/path/to/target/architecture/.yaml /full/path/to/pf-CDA/.odem /full/path/to/output/directory " + Optionals.IGNORES + "/full/path/to/packages/to/ignore " + Optionals.REFLECTIONS
-			+ "/full/path/to/reflection/references " + Optionals.FIX_UNRESOLVEDS + "/full/path/to/fixed/unresolveds " + Optionals.PRESERVE_NESTED_TYPES + " (preserves nested types) "
-			+ Optionals.STRICT + " (strict, requires that all types resolve and no illegal references) " + Optionals.DEBUG + " (debug) [last six args optional and unordered]";
+	private static final String USAGE = ": usage: /full/path/to/target/architecture/.yaml /full/path/to/pf-CDA/.odem /full/path/to/output/directory " + Optionals.UNRESOLVED_TYPES_OUTPUT_FILE
+			+ "unresolvedTypesOutputFileSimpleName " + Optionals.ILLEGAL_REFERENCES_OUTPUT_FILE + "illegalReferencesOutputFileSimpleName " + Optionals.IGNORES + "/full/path/to/packages/to/ignore "
+			+ Optionals.REFLECTIONS + "/full/path/to/reflection/references " + Optionals.FIX_UNRESOLVEDS + "/full/path/to/fixed/unresolveds " + Optionals.PRESERVE_NESTED_TYPES
+			+ " (preserves nested types) " + Optionals.STRICT + " (strict, requires that all types resolve and no illegal references) " + Optionals.DEBUG
+			+ " (debug) [last eight args optional and unordered]";
 
-	static void parse(String arg, Inputs inputs, Flags flags) {
-		if (arg.startsWith(Optionals.IGNORES.indicator())) {
-			if (inputs.ignores() != null) {
-				throw new EnforcerException("already specified " + Optionals.IGNORES.indicator() + " option" + USAGE, Errors.IGNORES_FILE_ALREADY_SPECIFIED);
+	static void parseArgs(String arg, Inputs inputs, Outputs outputs, Flags flags) {
+		try {
+			if (arg.startsWith(Optionals.UNRESOLVED_TYPES_OUTPUT_FILE.indicator())) {
+				outputs.setUnresolvedTypes(arg.replaceFirst(Optionals.UNRESOLVED_TYPES_OUTPUT_FILE.indicator(), ""));
+				return;
 			}
-			inputs.setIgnores(new File(arg.replaceFirst(Optionals.IGNORES.indicator(), "")));
-			return;
-		}
-		if (arg.startsWith(Optionals.REFLECTIONS.indicator())) {
-			if (inputs.reflections() != null) {
-				throw new EnforcerException("already specified " + Optionals.REFLECTIONS.indicator() + " option" + USAGE, Errors.REFLECTIONS_FILE_ALREADY_SPECIFIED);
+			if (arg.startsWith(Optionals.ILLEGAL_REFERENCES_OUTPUT_FILE.indicator())) {
+				outputs.setIllegalReferences(arg.replaceFirst(Optionals.ILLEGAL_REFERENCES_OUTPUT_FILE.indicator(), ""));
+				return;
 			}
-			inputs.setReflections(new File(arg.replaceFirst(Optionals.REFLECTIONS.indicator(), "")));
-			return;
-		}
-		if (arg.startsWith(Optionals.FIX_UNRESOLVEDS.indicator())) {
-			if (inputs.fixUnresolveds() != null) {
-				throw new EnforcerException("already specified " + Optionals.FIX_UNRESOLVEDS.indicator() + " option" + USAGE, Errors.FIX_UNRESOLVEDS_FILE_ALREADY_SPECIFIED);
+			if (arg.startsWith(Optionals.IGNORES.indicator())) {
+				inputs.setIgnores(new File(arg.replaceFirst(Optionals.IGNORES.indicator(), "")));
+				return;
 			}
-			inputs.setFixUnresolveds(new File(arg.replaceFirst(Optionals.FIX_UNRESOLVEDS.indicator(), "")));
-			return;
-		}
-		if (arg.startsWith(Optionals.PRESERVE_NESTED_TYPES.indicator())) {
-			if (flags.preserveNestedTypes()) {
-				throw new EnforcerException("already specified " + Optionals.PRESERVE_NESTED_TYPES.indicator() + " option" + USAGE, Errors.PRESERVE_NESTED_TYPES_ALREADY_SPECIFIED);
+			if (arg.startsWith(Optionals.REFLECTIONS.indicator())) {
+				inputs.setReflections(new File(arg.replaceFirst(Optionals.REFLECTIONS.indicator(), "")));
+				return;
 			}
-			flags.setPreserveNestedTypes(true);
-			return;
-		}
-		if (arg.startsWith(Optionals.STRICT.indicator())) {
-			if (flags.strict()) {
-				throw new EnforcerException("already specified " + Optionals.STRICT.indicator() + " option" + USAGE, Errors.STRICT_ALREADY_SPECIFIED);
+			if (arg.startsWith(Optionals.FIX_UNRESOLVEDS.indicator())) {
+				inputs.setFixUnresolveds(new File(arg.replaceFirst(Optionals.FIX_UNRESOLVEDS.indicator(), "")));
+				return;
 			}
-			flags.setStrict(true);
-			return;
-		}
-		if (arg.startsWith(Optionals.DEBUG.indicator())) {
-			if (flags.debug()) {
-				throw new EnforcerException("already specified " + Optionals.DEBUG.indicator() + " option" + USAGE, Errors.DEBUG_ALREADY_SPECIFIED);
+			if (arg.startsWith(Optionals.PRESERVE_NESTED_TYPES.indicator())) {
+				flags.enablePreserveNestedTypes();
+				return;
 			}
-			flags.setDebug(true);
-			return;
+			if (arg.startsWith(Optionals.STRICT.indicator())) {
+				flags.enableStrict();
+				return;
+			}
+			if (arg.startsWith(Optionals.DEBUG.indicator())) {
+				flags.enableDebug();
+				return;
+			}
+		} catch (EnforcerException e) {
+			throw new EnforcerException(e.getMessage() + USAGE, e.error());
 		}
 		throw new EnforcerException("unrecognized option " + arg + USAGE, Errors.UNRECOGNIZED_COMMAND_LINE_OPTION);
 	}
@@ -152,14 +148,20 @@ public class Enforce {
 			if (args.length < 3) {
 				throw new EnforcerException("not enough args" + USAGE, Errors.NOT_ENOUGH_ARGS);
 			}
-			if (args.length > 9) {
+			if (args.length > 11) {
 				throw new EnforcerException("too many args" + USAGE, Errors.TOO_MANY_ARGS);
 			}
 			inputs = new Inputs(new File(args[0]), new File(args[1]));
 			outputs = new Outputs(new File(args[2]));
 			flags = new Flags();
 			for (int i = 3; i < args.length; i++) {
-				parse(args[i], inputs, flags);
+				parseArgs(args[i], inputs, outputs, flags);
+			}
+			if (outputs.unresolvedTypes() == null) {
+				outputs.setUnresolvedTypes(Outputs.UNRESOLVED_TYPES_DEFAULT_FILE_NAME);
+			}
+			if (outputs.illegalReferences() == null) {
+				outputs.setIllegalReferences(Outputs.ILLEGAL_REFERENCES_DEFAULT_FILE_NAME);
 			}
 		} catch (Throwable t) {
 			ps.println(t.getMessage());

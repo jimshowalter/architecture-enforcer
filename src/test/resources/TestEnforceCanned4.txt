@@ -1,4 +1,4 @@
-Analyzing/enforcing architecture with target=/architecture-enforcer/target/test-classes/SampleTarget2.yaml, ODEM=/architecture-enforcer/target/test-classes/Sample.odem, ignores=/architecture-enforcer/target/test-classes/SamplePackageIgnores.txt, reflections=null, fix-unresolveds=null, unresolvedTypes=C:/Users/Jim/Decomposition/architecture-enforcer/target/unresolved_types.txt, illegalReferences=C:/Users/Jim/Decomposition/architecture-enforcer/target/illegal_references.txt, preserveNestedTypes=false, strict=false, debug=false
+Analyzing/enforcing architecture with target=/architecture-enforcer/target/test-classes/SampleTarget2.yaml, ODEM=/architecture-enforcer/target/test-classes/Sample.odem, ignores=/architecture-enforcer/target/test-classes/SamplePackageIgnores.txt, reflections=null, fix-unresolveds=null, unresolvedTypes=/architecture-enforcer/target/unresolved_types.txt, illegalReferences=/architecture-enforcer/target/illegal_references.txt, preserveNestedTypes=false, strict=false, debug=false
 PROBLEMS FOUND, SEE FILES IN TARGET DIRECTORY:
 unresolved_types.txt
 illegal_references.txt

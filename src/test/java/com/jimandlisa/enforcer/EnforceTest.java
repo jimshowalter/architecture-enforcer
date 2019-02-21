@@ -40,12 +40,12 @@ public class EnforceTest {
 	}
 
 	private static void compare(ByteArrayOutputStream baos, String canned) throws Exception {
-		String out = new String(baos.toByteArray(), StandardCharsets.UTF_8).trim().replaceAll("\r\n\r\n", "\r\n").replace("\\", "/").replaceAll("=[^=]+/architecture-enforcer/target/test-classes/",
-				"=/architecture-enforcer/target/test-classes/");
+		String out = new String(baos.toByteArray(), StandardCharsets.UTF_8).trim().replaceAll("\r\n\r\n", "\r\n").replace("\\", "/").replaceAll("=[^=]+/architecture-enforcer/target/",
+				"=/architecture-enforcer/target/");
 		String cannedOut = TestUtils.read(canned).trim().replaceAll("\r\n\r\n", "\r\n");
 		assertEquals(out, cannedOut);
 	}
-	
+
 	@Test
 	public void testMisc() {
 		new Enforce();
@@ -53,70 +53,85 @@ public class EnforceTest {
 	
 	@Test
 	public void testArgs() {
-		Inputs inputs = null;
-		Flags flags = null;
-		inputs = TestUtils.inputs(false, false, false);
-		flags = new Flags();
-		Enforce.parse(Optionals.IGNORES.indicator() + Thread.currentThread().getContextClassLoader().getResource("SamplePackageIgnores.txt").getPath(), inputs, flags);
+		Inputs inputs = TestUtils.inputs(false, false, false);
+		Outputs outputs = new Outputs(TestUtils.targetDir().toFile());
+		Flags flags = new Flags();
+		Enforce.parseArgs(Optionals.UNRESOLVED_TYPES_OUTPUT_FILE.indicator() + "somefile1.txt", inputs, outputs, flags);
+		assertEquals("somefile1.txt", outputs.unresolvedTypes().getName());
+		try {
+			Enforce.parseArgs(Optionals.UNRESOLVED_TYPES_OUTPUT_FILE.indicator() + "anotherfile.txt", inputs, outputs, flags);
+			Assert.fail();
+		} catch (EnforcerException e) {
+			assertEquals(Errors.UNRESOLVED_TYPES_OUTPUT_FILE_ALREADY_SPECIFIED, e.error());
+		}
+		Enforce.parseArgs(Optionals.ILLEGAL_REFERENCES_OUTPUT_FILE.indicator() + "somefile2.txt", inputs, outputs, flags);
+		assertEquals("somefile2.txt", outputs.illegalReferences().getName());
+		try {
+			Enforce.parseArgs(Optionals.ILLEGAL_REFERENCES_OUTPUT_FILE.indicator() + "anotherfile.txt", inputs, outputs, flags);
+			Assert.fail();
+		} catch (EnforcerException e) {
+			assertEquals(Errors.ILLEGAL_REFERENCES_OUTPUT_FILE_ALREADY_SPECIFIED, e.error());
+		}
+		Enforce.parseArgs(Optionals.IGNORES.indicator() + Thread.currentThread().getContextClassLoader().getResource("SamplePackageIgnores.txt").getPath(), inputs, outputs, flags);
 		assertEquals(Thread.currentThread().getContextClassLoader().getResource("SamplePackageIgnores.txt").getPath(), normalize(inputs.ignores().toPath()));
 		try {
-			Enforce.parse(Optionals.IGNORES.indicator() + "foo", TestUtils.inputs(true, false, false), flags);
+			Enforce.parseArgs(Optionals.IGNORES.indicator() + "foo", TestUtils.inputs(true, false, false), outputs, flags);
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertEquals(Errors.IGNORES_FILE_ALREADY_SPECIFIED, e.error());
 		}
 		inputs = TestUtils.inputs(false, false, false);
 		flags = new Flags();
-		Enforce.parse(Optionals.REFLECTIONS.indicator() + Thread.currentThread().getContextClassLoader().getResource("SampleReflections.txt").getPath(), inputs, flags);
+		Enforce.parseArgs(Optionals.REFLECTIONS.indicator() + Thread.currentThread().getContextClassLoader().getResource("SampleReflections.txt").getPath(), inputs, outputs, flags);
 		assertEquals(Thread.currentThread().getContextClassLoader().getResource("SampleReflections.txt").getPath(), normalize(inputs.reflections().toPath()));
 		try {
-			Enforce.parse(Optionals.REFLECTIONS.indicator() + "foo", TestUtils.inputs(false, true, false), flags);
+			Enforce.parseArgs(Optionals.REFLECTIONS.indicator() + "foo", TestUtils.inputs(false, true, false), outputs, flags);
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertEquals(Errors.REFLECTIONS_FILE_ALREADY_SPECIFIED, e.error());
 		}
 		inputs = TestUtils.inputs(false, false, false);
 		flags = new Flags();
-		Enforce.parse(Optionals.FIX_UNRESOLVEDS.indicator() + Thread.currentThread().getContextClassLoader().getResource("SampleFixUnresolveds.txt").getPath(), inputs, flags);
+		Enforce.parseArgs(Optionals.FIX_UNRESOLVEDS.indicator() + Thread.currentThread().getContextClassLoader().getResource("SampleFixUnresolveds.txt").getPath(), inputs, outputs, flags);
 		assertEquals(Thread.currentThread().getContextClassLoader().getResource("SampleFixUnresolveds.txt").getPath(), normalize(inputs.fixUnresolveds().toPath()));
 		try {
-			Enforce.parse(Optionals.FIX_UNRESOLVEDS.indicator() + "foo", TestUtils.inputs(false, false, true), flags);
+			Enforce.parseArgs(Optionals.FIX_UNRESOLVEDS.indicator() + "foo", TestUtils.inputs(false, false, true), outputs, flags);
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertEquals(Errors.FIX_UNRESOLVEDS_FILE_ALREADY_SPECIFIED, e.error());
 		}
 		inputs = TestUtils.inputs(false, false, false);
 		flags = new Flags();
-		Enforce.parse(Optionals.PRESERVE_NESTED_TYPES.indicator(), inputs, flags);
+		Enforce.parseArgs(Optionals.PRESERVE_NESTED_TYPES.indicator(), inputs, outputs, flags);
 		assertTrue(flags.preserveNestedTypes());
 		try {
-			Enforce.parse(Optionals.PRESERVE_NESTED_TYPES.indicator(), inputs, flags);
+			Enforce.parseArgs(Optionals.PRESERVE_NESTED_TYPES.indicator(), inputs, outputs, flags);
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertEquals(Errors.PRESERVE_NESTED_TYPES_ALREADY_SPECIFIED, e.error());
 		}
 		inputs = TestUtils.inputs(false, false, false);
 		flags = new Flags();
-		Enforce.parse(Optionals.STRICT.indicator(), inputs, flags);
+		Enforce.parseArgs(Optionals.STRICT.indicator(), inputs, outputs, flags);
 		assertTrue(flags.strict());
 		try {
-			Enforce.parse(Optionals.STRICT.indicator(), inputs, flags);
+			Enforce.parseArgs(Optionals.STRICT.indicator(), inputs, outputs, flags);
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertEquals(Errors.STRICT_ALREADY_SPECIFIED, e.error());
 		}
 		inputs = TestUtils.inputs(false, false, false);
 		flags = new Flags();
-		Enforce.parse(Optionals.DEBUG.indicator(), inputs, flags);
+		Enforce.parseArgs(Optionals.DEBUG.indicator(), inputs, outputs, flags);
 		assertTrue(flags.debug());
 		try {
-			Enforce.parse(Optionals.DEBUG.indicator(), inputs, flags);
+			Enforce.parseArgs(Optionals.DEBUG.indicator(), inputs, outputs, flags);
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertEquals(Errors.DEBUG_ALREADY_SPECIFIED, e.error());
 		}
 		try {
-			Enforce.parse("foo", TestUtils.inputs(false, false, false), flags);
+			Enforce.parseArgs("foo", TestUtils.inputs(false, false, false), outputs, flags);
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertEquals(Errors.UNRECOGNIZED_COMMAND_LINE_OPTION, e.error());
@@ -129,14 +144,14 @@ public class EnforceTest {
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
 			Target target = new Target();
 			Flags flags = new Flags();
-			flags.setDebug(true);
+			flags.enableDebug();
 			Enforce.debug(target, new HashMap<String, Type>(), new RollUp(), ps, flags);
 			TestUtils.compare(baos, "TestDebugCanned1.txt");
 		}
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
 			Target target = new Target();
 			Flags flags = new Flags();
-			flags.setDebug(true);
+			flags.enableDebug();
 			Map<String, Type> types = new HashMap<>();
 			types.put("foo", new Type("foo"));
 			Enforce.debug(target, types, new RollUp(), ps, flags);
@@ -145,7 +160,7 @@ public class EnforceTest {
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
 			Target target = new Target();
 			Flags flags = new Flags();
-			flags.setDebug(true);
+			flags.enableDebug();
 			Map<String, Type> types = new HashMap<>();
 			Type type = new Type("foo");
 			type.referenceNames().add("bar");
@@ -161,6 +176,8 @@ public class EnforceTest {
 			Set<Problem> problems = new LinkedHashSet<Problem>();
 			problems.add(new Problem("foo", Errors.ILLEGAL_REFERENCE));
 			Outputs outputs = new Outputs(Paths.get(TestUtils.targetDir().toString(), "reports").toFile());
+			outputs.setUnresolvedTypes(Outputs.UNRESOLVED_TYPES_DEFAULT_FILE_NAME);
+			outputs.setIllegalReferences(Outputs.ILLEGAL_REFERENCES_DEFAULT_FILE_NAME);
 			outputs.unresolvedTypes().delete();
 			outputs.illegalReferences().delete();
 			Enforce.reportProblems(problems, ps, outputs);
@@ -172,6 +189,8 @@ public class EnforceTest {
 			Set<Problem> problems = new LinkedHashSet<Problem>();
 			problems.add(new Problem("bar", Errors.UNRESOLVED_REFERENCE));
 			Outputs outputs = new Outputs(Paths.get(TestUtils.targetDir().toString(), "reports").toFile());
+			outputs.setUnresolvedTypes(Outputs.UNRESOLVED_TYPES_DEFAULT_FILE_NAME);
+			outputs.setIllegalReferences(Outputs.ILLEGAL_REFERENCES_DEFAULT_FILE_NAME);
 			outputs.unresolvedTypes().delete();
 			outputs.illegalReferences().delete();
 			Enforce.reportProblems(problems, ps, outputs);
@@ -184,6 +203,8 @@ public class EnforceTest {
 			problems.add(new Problem("foo", Errors.ILLEGAL_REFERENCE));
 			problems.add(new Problem("bar", Errors.UNRESOLVED_REFERENCE));
 			Outputs outputs = new Outputs(Paths.get(TestUtils.targetDir().toString(), "reports").toFile());
+			outputs.setUnresolvedTypes(Outputs.UNRESOLVED_TYPES_DEFAULT_FILE_NAME);
+			outputs.setIllegalReferences(Outputs.ILLEGAL_REFERENCES_DEFAULT_FILE_NAME);
 			outputs.unresolvedTypes().delete();
 			outputs.illegalReferences().delete();
 			Enforce.reportProblems(problems, ps, outputs);
@@ -197,6 +218,8 @@ public class EnforceTest {
 			problems.add(new Problem("bar", Errors.UNRESOLVED_REFERENCE));
 			problems.add(new Problem("foo", Errors.ILLEGAL_REFERENCE));
 			Outputs outputs = new Outputs(Paths.get(TestUtils.targetDir().toString(), "reports").toFile());
+			outputs.setUnresolvedTypes(Outputs.UNRESOLVED_TYPES_DEFAULT_FILE_NAME);
+			outputs.setIllegalReferences(Outputs.ILLEGAL_REFERENCES_DEFAULT_FILE_NAME);
 			outputs.unresolvedTypes().delete();
 			outputs.illegalReferences().delete();
 			Enforce.reportProblems(problems, ps, outputs);
@@ -209,6 +232,8 @@ public class EnforceTest {
 			Set<Problem> problems = new LinkedHashSet<Problem>();
 			problems.add(new Problem("foo", Errors.CANNOT_READ_FILE)); // Won't happen, but need to do this to force a codepath.
 			Outputs outputs = new Outputs(Paths.get(TestUtils.targetDir().toString(), "reports").toFile());
+			outputs.setUnresolvedTypes(Outputs.UNRESOLVED_TYPES_DEFAULT_FILE_NAME);
+			outputs.setIllegalReferences(Outputs.ILLEGAL_REFERENCES_DEFAULT_FILE_NAME);
 			outputs.unresolvedTypes().delete();
 			outputs.illegalReferences().delete();
 			Enforce.reportProblems(problems, ps, outputs);
@@ -224,7 +249,7 @@ public class EnforceTest {
 			TestUtils.compare(baos, "TestEnforceCanned2.txt");
 		}
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
-			Enforce.mainImpl(new String[] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" }, ps);
+			Enforce.mainImpl(new String[] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l" }, ps);
 			TestUtils.compare(baos, "TestEnforceCanned3.txt");
 		}
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
@@ -236,6 +261,17 @@ public class EnforceTest {
 		}
 		TestUtils.compareTarget(Outputs.UNRESOLVED_TYPES_DEFAULT_FILE_NAME, "TestUnresolvedsOutputCanned.txt");
 		TestUtils.compareTarget(Outputs.ILLEGAL_REFERENCES_DEFAULT_FILE_NAME, "TestIllegalReferencesOutputCanned.txt");
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
+			Enforce.mainImpl(new String[] { Thread.currentThread().getContextClassLoader().getResource("SampleTarget2.yaml").getPath(),
+					Thread.currentThread().getContextClassLoader().getResource("Sample.odem").getPath(),
+					TestUtils.targetDir().toString(),
+					Optionals.UNRESOLVED_TYPES_OUTPUT_FILE + "file1.txt",
+					Optionals.ILLEGAL_REFERENCES_OUTPUT_FILE + "file2.txt",
+					Optionals.IGNORES.indicator() + Thread.currentThread().getContextClassLoader().getResource("SamplePackageIgnores.txt").getPath() }, ps);
+			compare(baos, "TestEnforceCanned5.txt");
+		}
+		TestUtils.compareTarget("file1.txt", "TestUnresolvedsOutputCanned.txt");
+		TestUtils.compareTarget("file2.txt", "TestIllegalReferencesOutputCanned.txt");
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
 			Enforce.mainImpl(new String[] { Thread.currentThread().getContextClassLoader().getResource("SampleTarget2.yaml").getPath(),
 					Thread.currentThread().getContextClassLoader().getResource("Sample.odem").getPath(),
