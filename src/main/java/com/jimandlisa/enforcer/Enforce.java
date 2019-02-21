@@ -119,7 +119,7 @@ public class Enforce {
 		if (!foundUnresolvedTypes && !foundIllegalReferences) {
 			return;
 		}
-		ps.println("PROBLEMS FOUND, SEE FILES IN TARGET DIRECTORY:");
+		ps.println("PROBLEMS FOUND, SEE OUTPUT FILES:");
 		if (foundUnresolvedTypes) {
 			reportProblems(problems, Errors.UNRESOLVED_REFERENCE, ps, outputs.unresolvedTypes());
 			ps.println(outputs.unresolvedTypes().getName());

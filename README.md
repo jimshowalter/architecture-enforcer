@@ -127,6 +127,10 @@ The full set of args is:
 
 > /full/path/to/writable/output/directory
 
+> -UunresolvedTypesOutputFileSimpleName
+
+> -IillegalReferencesOutputFileSimpleName
+
 > -i/full/path/to/packages/to/ignore
 
 > -r/full/path/to/reflection/references
@@ -139,7 +143,9 @@ The full set of args is:
 
 > -d (debug)
 
-The last six args are optional, and can appear in any order (or not at all). For details, see the notes below.
+The first two args specify input files. The third arg specifies the directory where output files go.
+
+The last eight args are optional, and can appear in any order (or not at all). For details, see the notes below.
 
 Unresolved types and illegal references are written to the output directory (if strict is not specified).
 
@@ -156,6 +162,8 @@ com.jimandlisa.app.one.App1!App One!App!1|com.jimandlisa.app.two.App2!App Two!Ap
 The Problem objects for illegal references have a detail field that presents the same information in a more human-readable format:
 
 type com.jimandlisa.app.one.App1 in component 'App One' in layer 'App' depth 1 refers to type com.jimandlisa.app.two.App2 in component 'App Two' in layer 'App' depth 1
+
+By default, the unresolved-types output file name is "unresolved_types.txt", and the illegal-references output file name is "illegal_references.txt". These can be overridden with the -U and -I options, respectively.
 
 Notes:
 
