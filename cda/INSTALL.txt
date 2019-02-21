@@ -1,0 +1,13 @@
+mvn install:install-file -Dpackaging=jar -DgroupId=pf-cda -DartifactId=application -Dversion=3.1.0 -Dfile=pf-application-3.1.0.jar
+mvn install:install-file -Dpackaging=jar -DgroupId=pf-cda -DartifactId=bif -Dversion=4.1.0 -Dfile=pf-bif-4.1.0.jar
+mvn install:install-file -Dpackaging=jar -DgroupId=pf-cda -DartifactId=base -Dversion=2.2.0 -Dfile=pf-cda-base-2.2.0.jar
+mvn install:install-file -Dpackaging=jar -DgroupId=pf-cda -DartifactId=core -Dversion=2.2.0 -Dfile=pf-cda-core-2.2.0.jar
+mvn install:install-file -Dpackaging=jar -DgroupId=pf-cda -DartifactId=file -Dversion=6.1.0 -Dfile=pf-file-6.1.0.jar
+mvn install:install-file -Dpackaging=jar -DgroupId=pf-cda -DartifactId=logging -Dversion=3.1.0 -Dfile=pf-logging-3.1.0.jar
+mvn install:install-file -Dpackaging=jar -DgroupId=pf-cda -DartifactId=nls -Dversion=3.1.0 -Dfile=pf-nls-3.1.0.jar
+mvn install:install-file -Dpackaging=jar -DgroupId=pf-cda -DartifactId=odem -Dversion=1.2.0 -Dfile=pf-odem-1.2.0.jar
+mvn install:install-file -Dpackaging=jar -DgroupId=pf-cda -DartifactId=reflect -Dversion=4.1.0 -Dfile=pf-reflect-4.1.0.jar
+mvn install:install-file -Dpackaging=jar -DgroupId=pf-cda -DartifactId=settings -Dversion=4.1.0 -Dfile=pf-settings-4.1.0.jar
+mvn install:install-file -Dpackaging=jar -DgroupId=pf-cda -DartifactId=text -Dversion=4.1.0 -Dfile=pf-textx-4.1.0.jar
+mvn install:install-file -Dpackaging=jar -DgroupId=pf-cda -DartifactId=textx -Dversion=8.1.0 -Dfile=pf-text-8.1.0.jar
+mvn install:install-file -Dpackaging=jar -DgroupId=pf-cda -DartifactId=utilities -Dversion=6.1.0 -Dfile=pf-utilities-6.1.0.jar

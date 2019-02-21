@@ -26,7 +26,7 @@ public class InputsTest {
 	public void doTest() {
 		Inputs inputs = TestUtils.inputs(false, false, false);
 		inputs.toString();
-		inputs.setIgnores(TestUtils.testClassesFile("SamplePackageIgnores.txt"));
+		inputs.setIgnores(TestUtils.testClassesFile("SampleIgnores.txt"));
 		inputs.toString();
 		inputs.setReflections(TestUtils.testClassesFile("SampleReflections.txt"));
 		inputs.toString();

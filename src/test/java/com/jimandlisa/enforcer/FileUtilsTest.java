@@ -55,11 +55,11 @@ public class FileUtilsTest {
 	@Test
 	public void doTest() {
 		new FileUtils();
-		File file = FileUtils.checkReadFile(TestUtils.testClassesFile("SamplePackageIgnores.txt"));
+		File file = FileUtils.checkReadFile(TestUtils.testClassesFile("SampleIgnores.txt"));
 		assertNotNull(file);
 		assertTrue(file.isFile());
 		try {
-			FileUtils.checkReadFile(new File(TestUtils.testClassesPath("SamplePackageIgnores.txt") + "bogus"));
+			FileUtils.checkReadFile(new File(TestUtils.testClassesPath("SampleIgnores.txt") + "bogus"));
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("does not exist"));
 			assertEquals(Errors.FILE_DOES_NOT_EXIST, e.error());

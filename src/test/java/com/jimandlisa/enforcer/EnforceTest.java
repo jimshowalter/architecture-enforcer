@@ -74,8 +74,8 @@ public class EnforceTest {
 		} catch (EnforcerException e) {
 			assertEquals(Errors.ILLEGAL_REFERENCES_OUTPUT_FILE_ALREADY_SPECIFIED, e.error());
 		}
-		Enforce.parseArgs(Optionals.IGNORES.indicator() + TestUtils.testClassesFile("SamplePackageIgnores.txt").getAbsolutePath(), inputs, outputs, flags);
-		assertEquals(normalize(TestUtils.testClassesFile("SamplePackageIgnores.txt").toPath()), normalize(inputs.ignores().toPath()));
+		Enforce.parseArgs(Optionals.IGNORES.indicator() + TestUtils.testClassesFile("SampleIgnores.txt").getAbsolutePath(), inputs, outputs, flags);
+		assertEquals(normalize(TestUtils.testClassesFile("SampleIgnores.txt").toPath()), normalize(inputs.ignores().toPath()));
 		try {
 			Enforce.parseArgs(Optionals.IGNORES.indicator() + "foo", TestUtils.inputs(true, false, false), outputs, flags);
 			Assert.fail();
@@ -291,7 +291,7 @@ public class EnforceTest {
 		assertTrue(!illegalReferencesOutputFile.exists());
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
 			Enforce.mainImpl(new String[] { TestUtils.testClassesFile("SampleTarget2.yaml").getAbsolutePath(), TestUtils.sampleWar().getAbsolutePath(), TestUtils.targetDir().getAbsolutePath(),
-					Optionals.IGNORES.indicator() + TestUtils.testClassesFile("SamplePackageIgnores.txt").getAbsolutePath() }, ps);
+					Optionals.IGNORES.indicator() + TestUtils.testClassesFile("SampleIgnores.txt").getAbsolutePath() }, ps);
 			compare(baos, "TestEnforceCanned4.txt");
 		}
 		assertTrue(!unresolvedTypesOutputFile.exists());
@@ -305,7 +305,7 @@ public class EnforceTest {
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
 			Enforce.mainImpl(new String[] { TestUtils.testClassesFile("SampleTarget2.yaml").getAbsolutePath(), TestUtils.sampleWar().getAbsolutePath(), TestUtils.targetDir().getAbsolutePath(),
 					Optionals.UNRESOLVED_TYPES_OUTPUT_FILE + "file1.txt", Optionals.ILLEGAL_REFERENCES_OUTPUT_FILE + "file2.txt",
-					Optionals.IGNORES.indicator() + TestUtils.testClassesFile("SamplePackageIgnores.txt").getAbsolutePath() }, ps);
+					Optionals.IGNORES.indicator() + TestUtils.testClassesFile("SampleIgnores.txt").getAbsolutePath() }, ps);
 			compare(baos, "TestEnforceCanned5.txt");
 		}
 		assertTrue(!file1.exists());
@@ -314,7 +314,7 @@ public class EnforceTest {
 		file2.delete();
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
 			Enforce.mainImpl(new String[] { TestUtils.testClassesFile("SampleTarget2.yaml").getAbsolutePath(), TestUtils.sampleWar().getAbsolutePath(),
-					Optionals.IGNORES.indicator() + TestUtils.testClassesFile("SamplePackageIgnores.txt").getAbsolutePath(), "-s" }, ps);
+					Optionals.IGNORES.indicator() + TestUtils.testClassesFile("SampleIgnores.txt").getAbsolutePath(), "-s" }, ps);
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("FATAL ERRORS:"));
 			assertTrue(e.getMessage().contains("UNRESOLVED_REFERENCE: com.jimandlisa.utils.Unresolved"));

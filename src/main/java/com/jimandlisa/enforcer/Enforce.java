@@ -24,10 +24,10 @@ import java.util.Set;
 
 public class Enforce {
 
-	private static final String USAGE = ": usage: /full/path/to/target/architecture/.yaml /full/path/to/war/file /full/path/to/output/directory " + Optionals.UNRESOLVED_TYPES_OUTPUT_FILE
-			+ "unresolvedTypesOutputFileSimpleName " + Optionals.ILLEGAL_REFERENCES_OUTPUT_FILE + "illegalReferencesOutputFileSimpleName " + Optionals.IGNORES + "/full/path/to/packages/to/ignore "
-			+ Optionals.REFLECTIONS + "/full/path/to/reflection/references " + Optionals.FIX_UNRESOLVEDS + "/full/path/to/fixed/unresolveds " + Optionals.PRESERVE_NESTED_TYPES
-			+ " (preserves nested types) " + Optionals.STRICT + " (strict, requires that all types resolve and no illegal references) " + Optionals.DEBUG
+	private static final String USAGE = ": usage: /full/path/to/target/architecture/.yaml /full/path/to/.war /full/path/to/writable/output/directory " + Optionals.UNRESOLVED_TYPES_OUTPUT_FILE
+			+ "unresolvedTypesOutputFileSimpleName " + Optionals.ILLEGAL_REFERENCES_OUTPUT_FILE + "illegalReferencesOutputFileSimpleName " + Optionals.IGNORES
+			+ "/full/path/to/packages/and/classes/to/ignore " + Optionals.REFLECTIONS + "/full/path/to/reflection/references " + Optionals.FIX_UNRESOLVEDS + "/full/path/to/fixed/unresolveds "
+			+ Optionals.PRESERVE_NESTED_TYPES + " (preserves nested types) " + Optionals.STRICT + " (strict, requires that all types resolve and no illegal references) " + Optionals.DEBUG
 			+ " (debug) [last eight args optional and unordered]";
 
 	static void parseArgs(String arg, Inputs inputs, Outputs outputs, Flags flags) {
@@ -69,7 +69,7 @@ public class Enforce {
 		}
 		throw new EnforcerException("unrecognized option " + arg + USAGE, Errors.UNRECOGNIZED_COMMAND_LINE_OPTION);
 	}
-	
+
 	static void debug(Target target, Map<String, Type> types, RollUp rollUp, PrintStream ps, Flags flags) throws Exception {
 		if (!flags.debug()) {
 			return;
@@ -84,10 +84,10 @@ public class Enforce {
 			}
 		}
 	}
-	
+
 	static void reportProblems(Set<Problem> problems, Errors error, PrintStream ps, File out) throws Exception {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(out))) {
-			for (Problem problem :  CollectionUtils.sort(new ArrayList<>(problems))) {
+			for (Problem problem : CollectionUtils.sort(new ArrayList<>(problems))) {
 				if (problem.error() == error) {
 					writer.append(problem.description());
 					writer.newLine();
@@ -95,9 +95,11 @@ public class Enforce {
 			}
 		}
 	}
-	
-	// To have gotten here, there can't be any fatal errors. In strict mode, that means we can't get here at all if there are any problems.
-	// In non-strict mode, we can get here, but only if all problems are fatal only when strict is specified. We need to report those problems.
+
+	// To have gotten here, there can't be any fatal errors. In strict mode, that
+	// means we can't get here at all if there are any problems.
+	// In non-strict mode, we can get here, but only if all problems are fatal only
+	// when strict is specified. We need to report those problems.
 	static void reportProblems(Set<Problem> problems, PrintStream ps, Outputs outputs) throws Exception {
 		boolean foundUnresolvedTypes = false;
 		boolean foundIllegalReferences = false;
@@ -128,7 +130,7 @@ public class Enforce {
 			ps.println(outputs.illegalReferences().getName());
 		}
 	}
-	
+
 	static void mainImpl(Inputs inputs, Outputs outputs, PrintStream ps, Flags flags) throws Exception {
 		Target target = TargetUtils.parse(inputs.target());
 		Set<Problem> problems = new LinkedHashSet<>();
@@ -167,6 +169,6 @@ public class Enforce {
 			return;
 		}
 		ps.println("Analyzing/enforcing architecture with " + inputs.toString() + ", " + outputs.toString() + ", " + flags.toString() + " (may take 30+ seconds...)");
-		mainImpl(inputs, outputs, ps, flags); 
+		mainImpl(inputs, outputs, ps, flags);
 	}
 }

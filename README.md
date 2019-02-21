@@ -101,11 +101,22 @@ code into projects, this tool should continue to be run in CI/CD.
 
 1. Create a war file for your project. This is necessary even if your project isn't deployed as a war, because pf-CDA requires a war (or at least works best when pointed at a war).
 
+1. From the cda directory, run the commands in INSTALL.txt to put the jars in the cda directory in your local repo. This is needed because the cda jars aren't in a Maven repo anywhere online.
+
 1. Sync and build this project.
 
-1. Using one of the provided sample yaml files as a starting point, define the target state for your project. This can take weeks for a large project, but you can start by just defining a few basic layers (for example, data, logic, and UI), then iterate. (It's probably better to start small anyway, instead of trying to boil the ocean in one shot.)
+1. Verify that the project works, by running this command (adjusted for your environment):
 
-1. Run this tool with at least the first three args specified. You can run this tool from Eclipse or Intellij, or from the command line in the target directory with the command: java -jar architecture-enforcer-1.0-SNAPSHOT.jar.
+java -jar architecture-enforcer-1.0-SNAPSHOT.jar /path/to/architecture-enforcer/src/test/resources/SampleTarget2.yaml /path/to/architecture-enforcer/target/test-classes/architecture-enforcer-sample-1.0-SNAPSHOT.war /path/to/architecture-enforcer/target -i/path/to/architecture-enforcer/target/test-classes/SampleIgnores.txt
+
+1. (Optional) Run the tool from Eclipse or IntelliJ.
+
+1. Using one of the provided sample yaml files as a starting point, define the target state for your project. This can take weeks for a large project, but you can start by just defining a few basic layers (for example, data, logic, and UI), then iterate.
+(It's probably better to start small anyway, instead of trying to boil the ocean in one shot.)
+
+## Command-line Arguments ###
+
+1. Run this tool with at least the first three args specified.
 
 The full set of args is:
 
@@ -119,7 +130,9 @@ The full set of args is:
 
 > -IillegalReferencesOutputFileSimpleName
 
-> -i/full/path/to/packages/to/ignore
+> -RallReferencesOutputFileSimpleName
+
+> -i/full/path/to/packages/and/classes/to/ignore
 
 > -r/full/path/to/reflection/references
 
@@ -133,13 +146,17 @@ The full set of args is:
 
 The first two args specify input files. The third arg specifies the directory where output files go.
 
-The last eight args are optional, and can appear in any order (or not at all). For details, see the notes below.
+The last eight args are optional, and can appear in any order (or not at all).
 
 Unresolved types and illegal references are written to the output directory (if strict is not specified).
 
 Unresolved types are written as the fully-qualified type name, one type per line.
 
-Illegal references are written in a format designed to be easy to machine read:
+By default, the unresolved-types output file name is "unresolved_types.txt", and the illegal-references output file name is "illegal_references.txt". These can be overridden with the -U and -I options, respectively.
+
+If -R is specified, all references (not just illegal references) are written to the specified file. 
+
+References are written in a format designed to be easy to machine read:
 
 referringType!referringComponent!referringLayer!referringDepth!referredToType!referredToComponent!referredToLayer!referredToDepth
 
@@ -151,27 +168,28 @@ The Problem objects for illegal references have a detail field that presents the
 
 type com.jimandlisa.app.one.App1 in component 'App One' in layer 'App' depth 1 refers to type com.jimandlisa.app.two.App2 in component 'App Two' in layer 'App' depth 1
 
-By default, the unresolved-types output file name is "unresolved_types.txt", and the illegal-references output file name is "illegal_references.txt". These can be overridden with the -U and -I options, respectively.
-
 Notes:
 
 * For large codebases, the tool requires lots of memory. Make sure you provide enough.
 
-* Typically a project uses a bunch of third-party classes, and/or classes from inside your company but outside the project being decomposed. List packages to ignore in a file you specify with the -i command-line argument.
-The syntax is full.name.of.package, without a dot at the end. The tool appends dots for you. In some cases you need to suppress dots due to some issues with pf-CDA, in which case end the package name with a !.
+* Typically a project uses a bunch of third-party classes, and/or classes from inside your company but outside the project being decomposed. List packages and classes to ignore in a file you specify with the -i command-line argument.
+The syntax is full.name.of.package(.AndOptionallyTheClass). By default, the tool appends dots for you. In some cases you need to suppress dots due to some issues with pf-CDA, in which case end the package or class name with a !.
+In other cases, you need to ignore a class in the default package (that is, no package), in which case just list the class name, ending with a !.
 
-* If your project uses reflection, you should add outermost class-to-class dependencies to a file you specify with the -r command-line argument. The syntax is: full.name.of.referring.class.Foo:full.name.of.referred.to.class.Bar,full.name.of.referred.to.class.Baz....,
+* If your project uses reflection, you should add class-to-class dependencies to a file you specify with the -r command-line argument. The syntax is: full.name.of.referring.class.Foo:full.name.of.referred.to.class.Bar,full.name.of.referred.to.class.Baz....,
 where the referred-to classes are classes to which the referring class refers by reflection. At least one referred-to class is required. If there are too many referred-to classes to fit cleanly on one line, you can start multiple lines with the referring class.
+If you preserve nested types in your analysis, and you have instances of reflection references from or two nested types, include $TheNestedType in the names.
 
 * Sometimes pf-CDA misses classes that are referred to by other classes in the war. To fix these, you should add the missing classes to a file you specify with the -f command-line argument.
 The syntax is: full.name.of.missing.class.Foo:full.name.of.referred.to.class.Bar,full.name.of.referred.to.class.Baz..., where the referred-to classes are classes to which the missing class refers.
 If there are too many referred-to classes to fit cleanly on one line, you can start multiple lines with the referring class. If the unresolved class you are adding does not refer to other classes in your project,
-you don't need to add any referred-to classes (and you don't need a colon after the referring class on the line).
+you don't need to add any referred-to classes (and you don't need a colon after the referring class on the line). If you preserve nested types in your analysis, and you have instances of unresolved types from or two nested types,
+include $TheNestedType in the names.
 
 * Adding a referred-to class to the reflections or fix-unresolveds files can introduce new unresolved classes. When that happens, you need to keep entering classes until all classes are defined.
 
 * pf-CDA is smart enough to add references on its own for simple Class.forName calls where the string name of the class is directly specified, as in Class.forName("com.foo.bar.Baz"), but it can't follow complicated string concatenations, strings returned by functions, etc.,
-for example Class.forName(someStringFromAVariable + SomeClass.someFunction(some args from somewhere) + SOME\_STRING\_CONSTANT + ".foo"). That's why you have to add them manually. Also, pf-CDA doesn't parse reflection references in JSP files, Spring, etc.
+for example Class.forName(someStringFromAVariable + SomeClass.someFunction(some args from somewhere) + SOME\_STRING\_CONSTANT + ".Foo"). That's why you have to add them manually. Also, pf-CDA doesn't parse reflection references in JSP files, Spring, etc.
 
 * Sample files are located in the src/test/resources directory. They start with "Sample".
 
@@ -203,9 +221,14 @@ Notes:
 
 * Teams that wish to avoid the tedium of specifying N low-level simple components can just define a single component that contains all shared types, utilities, etc. However, depending on the codebase, this can create a single component containing a million lines (or more) of code.
 
-* Incremental compilation is a nice side effect of this approach. So long as a programmer only changes the code in the implementation of a paired component, recompilation is limited to just that implementation. Once Mavenized (or moved into modules) this can reduce cycle time from minutes to seconds (not counting time to redeploy).
+* Incremental compilation is a nice side effect of this approach. So long as a programmer only changes the code in the implementation of a paired component, recompilation is limited to just that implementation.
+Once Mavenized (or moved into modules) this can reduce cycle time from minutes to seconds (not counting time to redeploy).
 
-## Error Kinds ##
+## Problem Kinds ##
+
+Problems are either warnings, or errors.
+
+Warnings are never fatal.
 
 Errors are either always fatal, or fatal only if strict is specified.
 
@@ -213,7 +236,7 @@ All but two errors are always fatal:
 
 * Unresolved references are permitted when not in strict mode because sometimes pf-CDA misses classes that are referred to by other classes in the war. This allows a grace period while the missing types are added to the fix-unresolveds file.
 
-* Illegal references are permitted when not in strict mode so the team working on decomposition can see the report of illegal references without blocking other development.
+* Illegal references are permitted when not in strict mode, so the team working on decomposition can see the report of illegal references without blocking other development.
 
 Once all unresolved and illegal references are fixed, strict mode should be enabled.
 
@@ -222,6 +245,12 @@ Once all unresolved and illegal references are fixed, strict mode should be enab
 This tool can of course be improved. Below are listed some things we know would make it better, plus some things that might or might not be good ideas. We welcome contributions of these and other improvements.
 
 ### TODOs We Like ###
+
+* Jacoco excludes in the pom aren't working for the pf-CDA classes, possibly due to the shaded jar. Because excludes aren't working, we can't enable the check for 100% statement and branch coverage.
+
+* Some of the tests use mock classes instead of simply using Mockito. They should be updated to use Mockito.
+
+* There is repetitive code in the architecture-enforcer-sample project that probably could be simplified via aspects.
 
 * Instead of creating the entire graph with pf-CDA (which can be gigantic for large codebases) and then ignoring a bunch of classes, see if there's a way to pass in a filter when initializing the pf-CDA workspace.
 

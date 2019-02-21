@@ -11,110 +11,75 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <dependencies>
-    <!--
-    <dependency>
-      <groupId>org.apache.bcel</groupId>
-      <artifactId>bcel</artifactId>
-      <version>6.2</version>
-    </dependency>
-    -->
     <dependency>
       <groupId>pf-cda</groupId>
       <artifactId>application</artifactId>
       <version>3.1.0</version>
-      <scope>system</scope>
-      <systemPath>${basedir}/cda/pf-application-3.1.0.jar</systemPath>
-    </dependency>
-    <dependency>
-      <groupId>pf-cda</groupId>
-      <artifactId>bcel</artifactId>
-      <version>6.2</version>
-      <scope>system</scope>
-      <systemPath>${basedir}/cda/bcel-6.2.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>pf-cda</groupId>
       <artifactId>bif</artifactId>
       <version>4.1.0</version>
-      <scope>system</scope>
-      <systemPath>${basedir}/cda/pf-bif-4.1.0.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>pf-cda</groupId>
       <artifactId>base</artifactId>
       <version>2.2.0</version>
-      <scope>system</scope>
-      <systemPath>${basedir}/cda/pf-cda-base-2.2.0.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>pf-cda</groupId>
       <artifactId>core</artifactId>
       <version>2.2.0</version>
-      <scope>system</scope>
-      <systemPath>${basedir}/cda/pf-cda-core-2.2.0.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>pf-cda</groupId>
       <artifactId>file</artifactId>
       <version>6.1.0</version>
-      <scope>system</scope>
-      <systemPath>${basedir}/cda/pf-file-6.1.0.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>pf-cda</groupId>
       <artifactId>logging</artifactId>
       <version>3.1.0</version>
-      <scope>system</scope>
-      <systemPath>${basedir}/cda/pf-logging-3.1.0.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>pf-cda</groupId>
       <artifactId>nls</artifactId>
       <version>3.1.0</version>
-      <scope>system</scope>
-      <systemPath>${basedir}/cda/pf-nls-3.1.0.jar</systemPath>
-    </dependency>    
+    </dependency>
     <dependency>
       <groupId>pf-cda</groupId>
       <artifactId>odem</artifactId>
       <version>1.2.0</version>
-      <scope>system</scope>
-      <systemPath>${basedir}/cda/pf-odem-1.2.0.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>pf-cda</groupId>
       <artifactId>reflect</artifactId>
       <version>4.1.0</version>
-      <scope>system</scope>
-      <systemPath>${basedir}/cda/pf-reflect-4.1.0.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>pf-cda</groupId>
       <artifactId>settings</artifactId>
       <version>4.1.0</version>
-      <scope>system</scope>
-      <systemPath>${basedir}/cda/pf-settings-4.1.0.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>pf-cda</groupId>
       <artifactId>text</artifactId>
       <version>4.1.0</version>
-      <scope>system</scope>
-      <systemPath>${basedir}/cda/pf-textx-4.1.0.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>pf-cda</groupId>
       <artifactId>textx</artifactId>
       <version>8.1.0</version>
-      <scope>system</scope>
-      <systemPath>${basedir}/cda/pf-text-8.1.0.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>pf-cda</groupId>
       <artifactId>utilities</artifactId>
       <version>6.1.0</version>
-      <scope>system</scope>
-      <systemPath>${basedir}/cda/pf-utilities-6.1.0.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.bcel</groupId>
+      <artifactId>bcel</artifactId>
+      <version>6.2</version>
     </dependency>
     <dependency>
       <groupId>org.yaml</groupId>
@@ -134,6 +99,14 @@
     </dependency>
   </dependencies>
   <build>
+    <resources>
+      <resource>
+        <directory>${project.basedir}</directory>
+        <includes>
+          <include>cda/*.jar</include>
+        </includes>
+      </resource>
+    </resources>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -169,22 +142,68 @@
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
         <version>0.8.3</version>
-        <configuration>
-          <excludes>
-            <exclude>**/*Main.*</exclude>
-          </excludes>
-        </configuration>
         <executions>
           <execution>
             <goals>
               <goal>prepare-agent</goal>
             </goals>
           </execution>
+          <!-- Uncommenting this causes the build to fail on all pfsw classes, which should be ignored but aren't.
+          <execution>
+            <id>check</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <configuration>
+              <excludes>
+                <exclude>**/Main.class</exclude>
+                <exclude>org/pfsw/*</exclude>
+              </excludes>
+              <rules>
+                <rule>
+                  <element>CLASS</element>
+                  <limits>
+                    <limit>
+                      <counter>LINE</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>1.0</minimum>
+                    </limit>
+                    <limit>
+                      <counter>BRANCH</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>1.0</minimum>
+                    </limit>
+                  </limits>
+                </rule>
+              </rules>
+            </configuration>
+          </execution>
+          -->
           <execution>
             <id>report</id>
             <phase>prepare-package</phase>
             <goals>
               <goal>report</goal>
+            </goals>
+            <configuration>
+              <excludes>
+                <exclude>**/Main.class</exclude>
+                <exclude>org/pfsw/*</exclude>  <!-- TODO: These should be ignored but aren't. -->
+              </excludes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.2.1</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
             </goals>
           </execution>
         </executions>

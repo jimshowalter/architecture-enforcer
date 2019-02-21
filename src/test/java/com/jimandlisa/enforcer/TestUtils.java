@@ -67,7 +67,7 @@ public class TestUtils {
 	public static Inputs inputs(boolean includeIgnores, boolean includeReflections, boolean includeFixUnresolveds) {
 		Inputs inputs = new Inputs(testClassesFile("SampleTarget2.yaml"), sampleWar());
 		if (includeIgnores) {
-			inputs.setIgnores(testClassesFile("SamplePackageIgnores.txt"));
+			inputs.setIgnores(testClassesFile("SampleIgnores.txt"));
 		}
 		if (includeReflections) {
 			inputs.setReflections(testClassesFile("SampleReflections.txt"));
