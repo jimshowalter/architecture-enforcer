@@ -295,6 +295,10 @@ The following table summarizes differences between the two tools:
 |Includes line numbers and text of code on line in output of illegal references|Only outputs classes and components|Proprietary tool|
 |Fast|Fast|Tie|
 
+## See Also ##
+
+https://github.com/jimshowalter/architecture-enforcer-sample
+
 ## Copyright ##
 
 All files in this github except for the pf-CDA zip are subject to the following MIT license:
