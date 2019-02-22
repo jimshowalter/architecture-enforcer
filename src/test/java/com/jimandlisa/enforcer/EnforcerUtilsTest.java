@@ -202,6 +202,11 @@ public class EnforcerUtilsTest {
 	}
 	
 	@Test
+	public void testResolve2() throws Exception {
+		EnforcerUtils.resolve(TestUtils.inputs(true, true, true), new HashSet<>(), new Flags());
+	}
+	
+	@Test
 	public void testCorrelate() {
 		Map<String, Type> types = new HashMap<>();
 		Set<Problem> problems = new LinkedHashSet<>();
