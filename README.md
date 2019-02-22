@@ -130,7 +130,7 @@ The full set of args is:
 
 > -IillegalReferencesOutputFileSimpleName
 
-> -RallReferencesOutputFileSimpleName
+> -AallReferencesOutputFileSimpleName
 
 > -i/full/path/to/packages/and/classes/to/ignore
 
@@ -146,7 +146,7 @@ The full set of args is:
 
 The first two args specify input files. The third arg specifies the directory where output files go.
 
-The last eight args are optional, and can appear in any order (or not at all).
+The remaining nine args are optional, and can appear in any order (or not at all).
 
 Unresolved types and illegal references are written to the output directory (if strict is not specified).
 
@@ -158,7 +158,7 @@ If -R is specified, all references (not just illegal references) are written to 
 
 References are written in a format designed to be easy to machine read:
 
-referringType!referringComponent!referringLayer!referringDepth!referredToType!referredToComponent!referredToLayer!referredToDepth
+referringType!referringComponent!referringLayer!referringDepth!referredToType!referredToComponent!referredToLayer!referredToDepth(!ILLEGAL)?
 
 For example:
 
@@ -249,6 +249,8 @@ This tool can of course be improved. Below are listed some things we know would 
 * Jacoco excludes in the pom aren't working for the pf-CDA classes, possibly due to the shaded jar. Because excludes aren't working, we can't enable the check for 100% statement and branch coverage.
 
 * Some of the tests use mock classes instead of simply using Mockito. They should be updated to use Mockito.
+
+* Classes can start with dollar signs, so the current approach to denesting is erroneous. See if pf-CDA provides a way to determine if a class is nested, and, if so, to get its outermost class.
 
 * There is repetitive code in the architecture-enforcer-sample project that probably could be simplified via aspects.
 

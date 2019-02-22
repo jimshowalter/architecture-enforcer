@@ -6,3 +6,9 @@ Packages and components:
 Total outermost types: 1
 	foo
 		bar
+Target-state specification:
+	LAYERS:
+	DOMAINS:
+	COMPONENTS:
+Packages and components:
+Total outermost types: 1

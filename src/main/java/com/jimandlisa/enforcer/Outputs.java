@@ -20,10 +20,12 @@ public class Outputs {
 
 	public static final String UNRESOLVED_TYPES_DEFAULT_FILE_NAME = "unresolved_types.txt";
 	public static final String ILLEGAL_REFERENCES_DEFAULT_FILE_NAME = "illegal_references.txt";
+	public static final String ALL_REFERENCES_DEFAULT_FILE_NAME = "all_references.txt";
 
 	private final File outputDirectory;
 	private File unresolvedTypes;
 	private File illegalReferences;
+	private File allReferences;
 
 	public Outputs(final File outputDirectory) {
 		super();
@@ -55,9 +57,20 @@ public class Outputs {
 	public File illegalReferences() {
 		return illegalReferences;
 	}
+	
+	public void setAllReferences(String name) {
+		if (allReferences() != null) {
+			throw new EnforcerException("all references output file already set", Errors.ALL_REFERENCES_OUTPUT_FILE_ALREADY_SPECIFIED);
+		}
+		allReferences = Paths.get(outputDirectory.getAbsolutePath(), ArgUtils.check(name, "name")).toFile();
+	}
+
+	public File allReferences() {
+		return allReferences;
+	}
 
 	@Override
 	public String toString() {
-		return "unresolvedTypes=" + unresolvedTypes() + ", illegalReferences=" + illegalReferences();
+		return "unresolvedTypes=" + unresolvedTypes() + ", illegalReferences=" + illegalReferences() + ", allReferences=" + allReferences();
 	}
 }

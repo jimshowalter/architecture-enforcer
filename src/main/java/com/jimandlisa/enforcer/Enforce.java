@@ -13,24 +13,24 @@
 
 package com.jimandlisa.enforcer;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class Enforce {
 
 	private static final String USAGE = ": usage: /full/path/to/target/architecture/.yaml /full/path/to/.war /full/path/to/writable/output/directory " + Optionals.UNRESOLVED_TYPES_OUTPUT_FILE
-			+ "unresolvedTypesOutputFileSimpleName " + Optionals.ILLEGAL_REFERENCES_OUTPUT_FILE + "illegalReferencesOutputFileSimpleName " + Optionals.IGNORES
-			+ "/full/path/to/packages/and/classes/to/ignore " + Optionals.REFLECTIONS + "/full/path/to/reflection/references " + Optionals.FIX_UNRESOLVEDS + "/full/path/to/fixed/unresolveds "
-			+ Optionals.PRESERVE_NESTED_TYPES + " (preserves nested types) " + Optionals.STRICT + " (strict, requires that all types resolve and no illegal references) " + Optionals.DEBUG
-			+ " (debug) [last eight args optional and unordered]";
+			+ "unresolvedTypesOutputFileSimpleName " + Optionals.ILLEGAL_REFERENCES_OUTPUT_FILE + "illegalReferencesOutputFileSimpleName " + Optionals.ALL_REFERENCES_OUTPUT_FILE
+			+ "allReferencesOutputFileSimpleName " + Optionals.IGNORES + "/full/path/to/packages/and/classes/to/ignore " + Optionals.REFLECTIONS + "/full/path/to/reflection/references "
+			+ Optionals.FIX_UNRESOLVEDS + "/full/path/to/fixed/unresolveds " + Optionals.PRESERVE_NESTED_TYPES + " (preserves nested types) " + Optionals.STRICT
+			+ " (strict, requires that all types resolve and no illegal references) " + Optionals.DEBUG + " (debug) [last nine args optional and unordered]";
 
-	static void parseArgs(String arg, Inputs inputs, Outputs outputs, Flags flags) {
+	static void parseArg(String arg, Inputs inputs, Outputs outputs, Flags flags) {
 		try {
 			if (arg.startsWith(Optionals.UNRESOLVED_TYPES_OUTPUT_FILE.indicator())) {
 				outputs.setUnresolvedTypes(arg.replaceFirst(Optionals.UNRESOLVED_TYPES_OUTPUT_FILE.indicator(), ""));
@@ -38,6 +38,10 @@ public class Enforce {
 			}
 			if (arg.startsWith(Optionals.ILLEGAL_REFERENCES_OUTPUT_FILE.indicator())) {
 				outputs.setIllegalReferences(arg.replaceFirst(Optionals.ILLEGAL_REFERENCES_OUTPUT_FILE.indicator(), ""));
+				return;
+			}
+			if (arg.startsWith(Optionals.ALL_REFERENCES_OUTPUT_FILE.indicator())) {
+				outputs.setAllReferences(arg.replaceFirst(Optionals.ALL_REFERENCES_OUTPUT_FILE.indicator(), ""));
 				return;
 			}
 			if (arg.startsWith(Optionals.IGNORES.indicator())) {
@@ -70,13 +74,16 @@ public class Enforce {
 		throw new EnforcerException("unrecognized option " + arg + USAGE, Errors.UNRECOGNIZED_COMMAND_LINE_OPTION);
 	}
 
-	static void debug(Target target, Map<String, Type> types, RollUp rollUp, PrintStream ps, Flags flags) throws Exception {
+	static void debug(Target target, Map<String, Type> types, RollUp rollUp, PrintStream ps, Flags flags, int max) throws Exception {
 		if (!flags.debug()) {
 			return;
 		}
 		TargetUtils.dump(target, ps);
 		rollUp.dump(ps);
 		ps.println("Total outermost types: " + types.size());
+		if (types.size() > max) {
+			return;
+		}
 		for (String typeName : CollectionUtils.sort(new ArrayList<>(types.keySet()))) {
 			ps.println("\t" + typeName);
 			for (String referenceName : CollectionUtils.sort(new ArrayList<>(types.get(typeName).referenceNames()))) {
@@ -85,12 +92,11 @@ public class Enforce {
 		}
 	}
 
-	static void reportProblems(Set<Problem> problems, Errors error, PrintStream ps, File out) throws Exception {
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(out))) {
+	static void reportProblems(Set<Problem> problems, Errors error, File out) throws Exception {
+		try (PrintStream ps = new PrintStream(new FileOutputStream(out))) {
 			for (Problem problem : CollectionUtils.sort(new ArrayList<>(problems))) {
 				if (problem.error() == error) {
-					writer.append(problem.description());
-					writer.newLine();
+					ps.println(problem.description());
 				}
 			}
 		}
@@ -122,12 +128,35 @@ public class Enforce {
 		}
 		ps.println("PROBLEMS FOUND, SEE OUTPUT FILES:");
 		if (foundUnresolvedTypes) {
-			reportProblems(problems, Errors.UNRESOLVED_REFERENCE, ps, outputs.unresolvedTypes());
+			reportProblems(problems, Errors.UNRESOLVED_REFERENCE, outputs.unresolvedTypes());
 			ps.println(outputs.unresolvedTypes().getName());
 		}
 		if (foundIllegalReferences) {
-			reportProblems(problems, Errors.ILLEGAL_REFERENCE, ps, outputs.illegalReferences());
+			reportProblems(problems, Errors.ILLEGAL_REFERENCE, outputs.illegalReferences());
 			ps.println(outputs.illegalReferences().getName());
+		}
+	}
+
+	static void outputAllReferences(Map<String, Type> types, Outputs outputs) throws Exception {
+		if (outputs.allReferences() == null) {
+			return;
+		}
+		if (types.isEmpty()) {
+			return;
+		}
+		List<String> allReferences = new ArrayList<>();
+		for (Type referringType : types.values()) {
+			for (Type referredToType : referringType.references()) {
+				if (TypeUtils.isSelfReference(referringType, referredToType)) {
+					continue;
+				}
+				allReferences.add(TypeUtils.parseableDescription(referringType, referredToType) + (TypeUtils.isLayerViolation(referringType, referredToType) ? "!ILLEGAL" : ""));
+			}
+		}
+		try (PrintStream ps = new PrintStream(new FileOutputStream(outputs.allReferences()))) {
+			for (String reference : CollectionUtils.sort(allReferences)) {
+				ps.println(reference);
+			}
 		}
 	}
 
@@ -137,8 +166,9 @@ public class Enforce {
 		Map<String, Type> types = EnforcerUtils.resolve(inputs, problems, flags);
 		RollUp rollUp = new RollUp();
 		EnforcerUtils.correlate(types, target.components(), rollUp, problems, flags);
-		debug(target, types, rollUp, ps, flags);
+		debug(target, types, rollUp, ps, flags, 100);
 		reportProblems(problems, ps, outputs);
+		outputAllReferences(types, outputs);
 	}
 
 	public static void mainImpl(String[] args, PrintStream ps) throws Exception {
@@ -149,14 +179,14 @@ public class Enforce {
 			if (args.length < 3) {
 				throw new EnforcerException("not enough args" + USAGE, Errors.NOT_ENOUGH_ARGS);
 			}
-			if (args.length > 11) {
+			if (args.length > 12) {
 				throw new EnforcerException("too many args" + USAGE, Errors.TOO_MANY_ARGS);
 			}
 			inputs = new Inputs(new File(args[0]), new File(args[1]));
 			outputs = new Outputs(new File(args[2]));
 			flags = new Flags();
 			for (int i = 3; i < args.length; i++) {
-				parseArgs(args[i], inputs, outputs, flags);
+				parseArg(args[i], inputs, outputs, flags);
 			}
 			if (outputs.unresolvedTypes() == null) {
 				outputs.setUnresolvedTypes(Outputs.UNRESOLVED_TYPES_DEFAULT_FILE_NAME);

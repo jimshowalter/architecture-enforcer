@@ -28,7 +28,7 @@ import org.pfsw.tools.cda.base.model.workset.ClasspathPartDefinition;
 import org.pfsw.tools.cda.core.init.WorksetInitializer;
 
 public class EnforcerUtils {
-	
+
 	static Set<String> ignores(File ignoresFile) throws Exception {
 		Set<String> ignores = new HashSet<>();
 		if (ignoresFile == null) {
@@ -54,7 +54,7 @@ public class EnforcerUtils {
 		}
 		return ignores;
 	}
-	
+
 	static boolean skip(String typeName, Set<String> ignores) {
 		if (typeName.contains(":")) { // Handles glitches in pf-CDA, for example "evelField:Ljava.lang.Object".
 			return true;
@@ -66,17 +66,19 @@ public class EnforcerUtils {
 		}
 		return false;
 	}
-	
+
 	static boolean skip(String referringTypeName, String referredToTypeName, Set<String> ignores) {
 		if (referringTypeName.equals(referredToTypeName)) {
 			return true; // Skip self-references.
 		}
 		return skip(referredToTypeName, ignores);
 	}
-	
+
 	static String denest(String typeName, Flags flags) {
 		if (typeName.startsWith("$")) {
-			// TODO: Classes can start with dollar signs, so this is a problem. See if pf-CDA provides a way to determine if a class is nested, and, if so, to get its outermost class.
+			// TODO: Classes can start with dollar signs, so this is a problem. See if
+			// pf-CDA provides a way to determine if a class is nested, and, if so, to get
+			// its outermost class.
 			throw new EnforcerException("malformed class name '" + typeName + "'", Errors.MALFORMED_CLASS_NAME);
 		}
 		if (flags.preserveNestedTypes()) {
@@ -84,7 +86,7 @@ public class EnforcerUtils {
 		}
 		return typeName.replaceAll("[$].*$", "");
 	}
-	
+
 	static Type get(String typeName, Map<String, Type> types) {
 		Type type = types.get(typeName);
 		if (type == null) {
@@ -93,7 +95,7 @@ public class EnforcerUtils {
 		}
 		return type;
 	}
-	
+
 	static void parse(File file, Map<String, Type> types, Set<String> ignores, Set<Problem> problems, String entryName, boolean requireReferredTo, Flags flags) throws Exception {
 		if (file == null) {
 			return;
@@ -136,7 +138,7 @@ public class EnforcerUtils {
 			}
 		}
 	}
-	
+
 	static void resolve(Map<String, Type> types, Set<Problem> problems) {
 		for (Type type : types.values()) {
 			for (String referenceName : type.referenceNames()) {
@@ -149,9 +151,9 @@ public class EnforcerUtils {
 			}
 		}
 	}
-	
+
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
-	
+
 	static String plural(Errors error) {
 		if (error == Errors.MULTIPLE_ERRORS) {
 			return "S";
@@ -178,7 +180,7 @@ public class EnforcerUtils {
 			throw new EnforcerException("FATAL ERROR" + plural(error) + ":" + builder.toString(), error);
 		}
 	}
-	
+
 	static void release(Workset workset, Set<Problem> problems) {
 		if (workset == null) {
 			return;
@@ -189,7 +191,7 @@ public class EnforcerUtils {
 			problems.add(new Problem("unable to release workset " + workset.getName() + ": " + t.getMessage(), Errors.UNABLE_TO_RELEASE_WORKSET));
 		}
 	}
-	
+
 	public static Map<String, Type> resolve(Inputs inputs, Set<Problem> problems, Flags flags) throws Exception {
 		Set<String> ignores = ignores(inputs.ignores());
 		Map<String, Type> types = new HashMap<>();
@@ -202,7 +204,7 @@ public class EnforcerUtils {
 			wsInitializer.initializeWorksetAndWait(null);
 			for (ClassInformation classInfo : workset.getAllContainedClasses()) {
 				String referringClass = denest(classInfo.getName().trim(), flags);
-				// TODO: Instead of creating the entire graph and then ignoring, see if there's a way to pass in a filter when initializing the workspace.
+				// TODO: Instead of creating the entire graph and then ignoring, see if there's  a way to pass in a filter when initializing the workspace.
 				if (skip(referringClass, ignores)) {
 					continue;
 				}
@@ -225,7 +227,7 @@ public class EnforcerUtils {
 		report(problems, flags);
 		return types;
 	}
-	
+
 	public static void correlate(Map<String, Type> types, Map<String, Component> components, RollUp rollUp, Set<Problem> problems, Flags flags) {
 		for (Component component : components.values()) {
 			for (String className : component.classes()) {
@@ -254,18 +256,10 @@ public class EnforcerUtils {
 			type.setBelongsTo(component);
 		}
 		report(problems, flags);
-		for (Type type : types.values()) {
-			for (Type referredTo : type.references()) {
-				if (type.belongsTo() == referredTo.belongsTo()) {
-					continue; // Skip intra-component references.
-				}
-				if (type.belongsTo().layer().depth() <= referredTo.belongsTo().layer().depth()) {
-					String parseableDescription = type.name() + "!" + type.belongsTo().name() + "!" + type.belongsTo().layer().name() + "!" + type.belongsTo().layer().depth() + "|" + referredTo.name()
-							+ "!" + referredTo.belongsTo().name() + "!" + referredTo.belongsTo().layer().name() + "!" + referredTo.belongsTo().layer().depth();
-					String humanReadableDescription = "type " + type.name() + " in component " + type.belongsTo().quotedName() + " in layer " + type.belongsTo().layer().quotedName() + " depth "
-							+ type.belongsTo().layer().depth() + " refers to type " + referredTo.name() + " in component " + referredTo.belongsTo().quotedName() + " in layer "
-							+ referredTo.belongsTo().layer().quotedName() + " depth " + referredTo.belongsTo().layer().depth();
-					problems.add(new Problem(parseableDescription, Errors.ILLEGAL_REFERENCE, humanReadableDescription));
+		for (Type referringType : types.values()) {
+			for (Type referredToType : referringType.references()) {
+				if (TypeUtils.isLayerViolation(referringType, referredToType)) {
+					problems.add(new Problem(TypeUtils.parseableDescription(referringType, referredToType), Errors.ILLEGAL_REFERENCE, TypeUtils.humanReadableDescription(referringType, referredToType)));
 				}
 			}
 		}
