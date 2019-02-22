@@ -101,9 +101,7 @@ code into projects, this tool should continue to be run in CI/CD.
 
 1. Create a war file for your project. This is necessary even if your project isn't deployed as a war, because pf-CDA requires a war (or at least works best when pointed at a war).
 
-1. From the cda directory, run the commands in INSTALL.txt to put the jars in the cda directory in your local repo. This is needed because the cda jars aren't in a Maven repo anywhere online.
-
-1. Sync and build this project.
+1. Sync and build this project. Ignore "[WARNING] The POM for org.apache.bcel:bcel:jar:6.3.PR1 is missing, no dependency information available" and "[WARNING] Classes in bundle 'Architecture Enforcer' do no match with execution data. For report generation the same class files must be used as at runtime".
 
 1. Verify that the project works, by running this command (adjusted for your environment):
 
@@ -245,6 +243,8 @@ Once all unresolved and illegal references are fixed, strict mode should be enab
 This tool can of course be improved. Below are listed some things we know would make it better, plus some things that might or might not be good ideas. We welcome contributions of these and other improvements.
 
 ### TODOs We Like ###
+
+* Fix the build warnings.
 
 * Jacoco excludes in the pom aren't working for the pf-CDA classes, possibly due to the shaded jar. Because excludes aren't working, we can't enable the check for 100% statement and branch coverage.
 
