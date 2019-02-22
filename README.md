@@ -298,21 +298,21 @@ Only general, well-known refactoring concepts have been reused (layering, encaps
 
 The following table summarizes differences between the two tools:
 
-|Proprietary Tool|This Tool|Advantage|
-|:---------------|:--------|:--------|
-|Proprietary|Open-source|This tool|
-|Parses source files and POMs|Uses compiled bytecode|This tool|
-|Files/directories|Classes/packages|This tool|
-|Prescriptive (kinds of components, etc.)|Unrestricted|This tool|
-|Can't split packages across components|Can specify individual classes per component (in addition to packages, or instead of packages)|This tool|
-|Can't handle classes in default package (that is, no package), requires special-casing in code|Can specify individual classes per component, even without any package|This tool|
-|Thousands of lines|Less than 1k lines|This tool|
-|Complex|Simple|This tool|
-|Incompletely unit tested|100% statement and branch coverage|This tool|
-|Requires Maven to run it|Can run as jar with main, or as Maven mojo|This tool|
-|Code full of special-casing for particular company|No company-specific special-casing|This tool|
-|Parses string-based references (reflection) in Java (Class.forName), in JSP files, and in other kinds of files, plus supports manual entry of hard-to-parse cases|Requires manual entry of all cases|Proprietary tool|
-|Includes line numbers and text of code on line in output of illegal references|Only outputs classes and components|Proprietary tool|
+|Proprietary Tool|This Tool|
+|:---------------|:--------|
+|Proprietary|Open-source|
+|Parses source files and POMs|Uses compiled bytecode|
+|Files/directories|Classes/packages|
+|Prescriptive (kinds of components, etc.)|Unrestricted|
+|Can't split packages across components|Can specify individual classes per component (in addition to packages, or instead of packages)|
+|Can't handle classes in default package (that is, no package), requires special-casing in code|Can specify individual classes per component, even without any package|
+|Thousands of lines|Less than 1k lines|
+|Complex|Simple|
+|Incompletely unit tested|100% statement and branch coverage|
+|Requires Maven to run it|Can run as jar with main, or as Maven mojo|
+|Code full of special-casing for particular company|No company-specific special-casing|
+|Parses string-based references (reflection) in Java (Class.forName), in JSP files, and in other kinds of files, plus supports manual entry of hard-to-parse cases|Requires manual entry of all cases|
+|Includes line numbers and text of code on line in output of illegal references|Only outputs classes and components|
 |Fast|Fast|Tie|
 
 Why did we choose pf-CDA? It's fast, and it has a simple API (at least for what we needed to do).
