@@ -106,7 +106,7 @@ public class Enforce {
 	// means we can't get here at all if there are any problems.
 	// In non-strict mode, we can get here, but only if all problems are fatal only
 	// when strict is specified. We need to report those problems.
-	static void reportProblems(Set<Problem> problems, PrintStream ps, Outputs outputs) throws Exception {
+	static void reportProblems(Set<Problem> problems, PrintStream ps, Outputs outputs, Flags flags) throws Exception {
 		boolean foundUnresolvedTypes = false;
 		boolean foundIllegalReferences = false;
 		boolean foundWarnings = false;
@@ -167,7 +167,7 @@ public class Enforce {
 		RollUp rollUp = new RollUp();
 		EnforcerUtils.correlate(types, target.components(), rollUp, problems, flags);
 		debug(target, types, rollUp, ps, flags, 100);
-		reportProblems(problems, ps, outputs);
+		reportProblems(problems, ps, outputs, flags);
 		outputAllReferences(types, outputs);
 	}
 

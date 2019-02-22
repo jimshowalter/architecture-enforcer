@@ -19,6 +19,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 public class FileUtilsTest {
@@ -60,18 +61,21 @@ public class FileUtilsTest {
 		assertTrue(file.isFile());
 		try {
 			FileUtils.checkReadFile(new File(TestUtils.testClassesPath("SampleIgnores.txt") + "bogus"));
+			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("does not exist"));
 			assertEquals(Errors.FILE_DOES_NOT_EXIST, e.error());
 		}
 		try {
 			FileUtils.checkReadFile(new MockFile(TestUtils.testClassesPath("SampleTarget2.yaml").toString()));
+			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("cannot read"));
 			assertEquals(Errors.CANNOT_READ_FILE, e.error());
 		}
 		try {
 			FileUtils.checkReadFile(new MockFile(TestUtils.testClassesPath("SampleTarget2.yaml").toString(), true));
+			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("error validating file"));
 			assertEquals(Errors.ERROR_VALIDATING_FILE, e.error());
@@ -82,12 +86,14 @@ public class FileUtilsTest {
 		assertTrue(dir.isDirectory());
 		try {
 			FileUtils.checkWriteDir(new MockFile(TestUtils.testClassesFile("SampleTarget2.yaml").getParentFile().getPath()));
+			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("cannot write"));
 			assertEquals(Errors.CANNOT_WRITE_TO_DIRECTORY, e.error());
 		}
 		try {
 			FileUtils.checkWriteDir(new File("< > ##$#%SFS&*@#$#@ SDF []{}||"));
+			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("error validating directory"));
 			assertEquals(Errors.ERROR_VALIDATING_DIRECTORY, e.error());

@@ -47,5 +47,7 @@ public class ProblemsTest {
 		assertEquals("foo", problem.description());
 		assertFalse(problem.isFatal(false));
 		assertFalse(problem.isFatal(true));
+		problem = new Problem("foo", Errors.ILLEGAL_REFERENCE, "big long explanation");
+		assertEquals(Errors.ILLEGAL_REFERENCE.toString() + ": big long explanation", problem.humanReadableToString());
 	}
 }

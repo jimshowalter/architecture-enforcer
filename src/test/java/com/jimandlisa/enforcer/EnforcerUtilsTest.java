@@ -23,6 +23,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.pfsw.tools.cda.base.model.Workset;
 
@@ -60,6 +61,7 @@ public class EnforcerUtilsTest {
 		assertEquals("com.foo.Bar$Baz", EnforcerUtils.denest("com.foo.Bar$Baz", flags));
 		try {
 			EnforcerUtils.denest("$Foo", new Flags());
+			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("malformed class name"));
 			assertEquals(Errors.MALFORMED_CLASS_NAME, e.error());
@@ -87,12 +89,14 @@ public class EnforcerUtilsTest {
 		EnforcerUtils.parse(TestUtils.testClassesFile("TestReflections.txt"), types, ignores, problems, "reflection", true, flags);
 		try {
 			EnforcerUtils.parse(TestUtils.testClassesFile("BadReflections.txt"), types, ignores, problems, "reflection", true, flags);
+			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("invalid reflection entry in"));
 			assertEquals(Errors.MISSING_REFERRED_TO_CLASS, e.error());
 		}
 		try {
 			EnforcerUtils.parse(TestUtils.testClassesFile("BadFixUnresolveds.txt"), types, ignores, problems, "fix-unresolved", false, flags);
+			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("invalid fix-unresolved entry in"));
 			assertEquals(Errors.MALFORMED_CLASS_TO_CLASS_REFERENCE, e.error());
@@ -126,6 +130,7 @@ public class EnforcerUtilsTest {
 		problems.add(new Problem("COVERAGE1", Errors.CANNOT_READ_FILE));
 		try {
 			EnforcerUtils.report(problems, flags);
+			Assert.fail();
 		} catch (EnforcerException e) {
 			assertEquals(Errors.CANNOT_READ_FILE, e.error());
 			assertFalse(e.getMessage().contains("COVERAGE0"));
@@ -135,12 +140,24 @@ public class EnforcerUtilsTest {
 		problems.add(new Problem("COVERAGE2", Errors.CLASS_BOTH_REFERRED_TO_AND_IGNORED));
 		try {
 			EnforcerUtils.report(problems, flags);
+			Assert.fail();
 		} catch (EnforcerException e) {
 			assertEquals(Errors.MULTIPLE_ERRORS, e.error());
 			assertFalse(e.getMessage().contains("COVERAGE0"));
 			assertTrue(e.getMessage().contains("FATAL ERRORS:"));
 			assertTrue(e.getMessage().contains("COVERAGE1"));
 			assertTrue(e.getMessage().contains("COVERAGE2"));
+		}
+		problems.clear();
+		problems.add(new Problem("foo", Errors.ILLEGAL_REFERENCE, "big long explanation"));
+		flags.enableStrict();
+		try {
+			EnforcerUtils.report(problems, flags);
+			Assert.fail();
+		} catch (EnforcerException e) {
+			assertEquals(Errors.ILLEGAL_REFERENCE, e.error());
+			assertTrue(e.getMessage().contains("FATAL ERROR:"));
+			assertTrue(e.getMessage().contains(Errors.ILLEGAL_REFERENCE.toString() + ": big long explanation"));
 		}
 	}
 	
@@ -259,6 +276,7 @@ public class EnforcerUtilsTest {
 		components.put(component2.name(), component2);
 		try {
 			EnforcerUtils.correlate(types, components, new RollUp(), problems, flags);
+			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(problems.iterator().next().description().contains("unable to resolve class to type:"));
 			assertEquals(Errors.CLASS_NOT_RESOLVED_TO_TYPE, e.error());
@@ -285,6 +303,7 @@ public class EnforcerUtilsTest {
 		components.put(component1.name(), component1);
 		try {
 			EnforcerUtils.correlate(types, components, new RollUp(), problems, flags);
+			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(problems.iterator().next().description().contains("unable to resolve type to component name:"));
 			assertEquals(Errors.TYPE_NOT_RESOLVED_TO_COMPONENT, e.error());

@@ -16,6 +16,7 @@ package com.jimandlisa.enforcer;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 public class FlagsTest {
@@ -30,18 +31,21 @@ public class FlagsTest {
 		assertEquals("preserveNestedTypes=true, strict=true, debug=true", flags.toString());
 		try {
 			flags.enablePreserveNestedTypes();
+			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("preserve nested types already set"));
 			assertEquals(Errors.PRESERVE_NESTED_TYPES_ALREADY_SPECIFIED, e.error());
 		}
 		try {
 			flags.enableStrict();
+			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("strict already set"));
 			assertEquals(Errors.STRICT_ALREADY_SPECIFIED, e.error());
 		}
 		try {
 			flags.enableDebug();
+			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("debug already set"));
 			assertEquals(Errors.DEBUG_ALREADY_SPECIFIED, e.error());

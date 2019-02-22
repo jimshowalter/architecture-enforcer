@@ -173,7 +173,11 @@ public class EnforcerUtils {
 					error = Errors.MULTIPLE_ERRORS;
 				}
 				builder.append(LINE_SEPARATOR);
-				builder.append(problem);
+				if (problem.error() == Errors.ILLEGAL_REFERENCE) {
+					builder.append(problem.humanReadableToString());
+				} else {
+					builder.append(problem);
+				}
 			}
 		}
 		if (builder != null) {

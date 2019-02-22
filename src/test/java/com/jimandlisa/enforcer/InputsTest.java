@@ -18,6 +18,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 public class InputsTest {
@@ -36,18 +37,21 @@ public class InputsTest {
 		inputs.toString();
 		try {
 			inputs.setIgnores(new File("foo"));
+			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("already set ignores file"));
 			assertEquals(Errors.IGNORES_FILE_ALREADY_SPECIFIED, e.error());
 		}
 		try {
 			inputs.setReflections(new File("foo"));
+			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("already set reflections file"));
 			assertEquals(Errors.REFLECTIONS_FILE_ALREADY_SPECIFIED, e.error());
 		}
 		try {
 			inputs.setFixUnresolveds(new File("foo"));
+			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("already set fix-unresolveds file"));
 			assertEquals(Errors.FIX_UNRESOLVEDS_FILE_ALREADY_SPECIFIED, e.error());

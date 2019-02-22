@@ -191,7 +191,7 @@ public class EnforceTest {
 			outputs.setIllegalReferences(Outputs.ILLEGAL_REFERENCES_DEFAULT_FILE_NAME);
 			outputs.unresolvedTypes().delete();
 			outputs.illegalReferences().delete();
-			Enforce.reportProblems(problems, ps, outputs);
+			Enforce.reportProblems(problems, ps, outputs, new Flags());
 			assertFalse(outputs.unresolvedTypes().exists());
 			assertTrue(outputs.illegalReferences().exists());
 			outputs.illegalReferences().delete();
@@ -204,7 +204,7 @@ public class EnforceTest {
 			outputs.setIllegalReferences(Outputs.ILLEGAL_REFERENCES_DEFAULT_FILE_NAME);
 			outputs.unresolvedTypes().delete();
 			outputs.illegalReferences().delete();
-			Enforce.reportProblems(problems, ps, outputs);
+			Enforce.reportProblems(problems, ps, outputs, new Flags());
 			assertTrue(outputs.unresolvedTypes().exists());
 			assertFalse(outputs.illegalReferences().exists());
 			outputs.unresolvedTypes().delete();
@@ -218,7 +218,7 @@ public class EnforceTest {
 			outputs.setIllegalReferences(Outputs.ILLEGAL_REFERENCES_DEFAULT_FILE_NAME);
 			outputs.unresolvedTypes().delete();
 			outputs.illegalReferences().delete();
-			Enforce.reportProblems(problems, ps, outputs);
+			Enforce.reportProblems(problems, ps, outputs, new Flags());
 			assertTrue(outputs.unresolvedTypes().exists());
 			assertTrue(outputs.illegalReferences().exists());
 			outputs.unresolvedTypes().delete();
@@ -233,7 +233,7 @@ public class EnforceTest {
 			outputs.setIllegalReferences(Outputs.ILLEGAL_REFERENCES_DEFAULT_FILE_NAME);
 			outputs.unresolvedTypes().delete();
 			outputs.illegalReferences().delete();
-			Enforce.reportProblems(problems, ps, outputs);
+			Enforce.reportProblems(problems, ps, outputs, new Flags());
 			assertTrue(outputs.unresolvedTypes().exists());
 			assertTrue(outputs.illegalReferences().exists());
 			outputs.unresolvedTypes().delete();
@@ -247,7 +247,7 @@ public class EnforceTest {
 			outputs.setIllegalReferences(Outputs.ILLEGAL_REFERENCES_DEFAULT_FILE_NAME);
 			outputs.unresolvedTypes().delete();
 			outputs.illegalReferences().delete();
-			Enforce.reportProblems(problems, ps, outputs);
+			Enforce.reportProblems(problems, ps, outputs, new Flags());
 			assertFalse(outputs.unresolvedTypes().exists());
 			assertFalse(outputs.illegalReferences().exists());
 		}
@@ -259,7 +259,7 @@ public class EnforceTest {
 			outputs.setIllegalReferences(Outputs.ILLEGAL_REFERENCES_DEFAULT_FILE_NAME);
 			outputs.unresolvedTypes().delete();
 			outputs.illegalReferences().delete();
-			Enforce.reportProblems(problems, ps, outputs);
+			Enforce.reportProblems(problems, ps, outputs, new Flags());
 			assertFalse(outputs.unresolvedTypes().exists());
 			assertFalse(outputs.illegalReferences().exists());
 			TestUtils.compareTestClassesFile(baos, "CannedWarnings1.txt");
@@ -273,7 +273,7 @@ public class EnforceTest {
 			outputs.setIllegalReferences(Outputs.ILLEGAL_REFERENCES_DEFAULT_FILE_NAME);
 			outputs.unresolvedTypes().delete();
 			outputs.illegalReferences().delete();
-			Enforce.reportProblems(problems, ps, outputs);
+			Enforce.reportProblems(problems, ps, outputs, new Flags());
 			assertFalse(outputs.unresolvedTypes().exists());
 			assertFalse(outputs.illegalReferences().exists());
 			TestUtils.compareTestClassesFile(baos, "CannedWarnings2.txt");
@@ -365,12 +365,12 @@ public class EnforceTest {
 		TestUtils.compareTargetFile("file2.txt", "TestIllegalReferencesOutputCanned.txt");
 		file2.delete();
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
-			Enforce.mainImpl(new String[] { TestUtils.testClassesFile("SampleTarget2.yaml").getAbsolutePath(), TestUtils.sampleWar().getAbsolutePath(),
+			Enforce.mainImpl(new String[] { TestUtils.testClassesFile("SampleTarget2.yaml").getAbsolutePath(), TestUtils.sampleWar().getAbsolutePath(), TestUtils.targetDir().getAbsolutePath(),
 					Optionals.IGNORES.indicator() + TestUtils.testClassesFile("SampleIgnores.txt").getAbsolutePath(), "-s" }, ps);
+			Assert.fail();
 		} catch (EnforcerException e) {
-			assertTrue(e.getMessage().contains("FATAL ERRORS:"));
-			assertTrue(e.getMessage().contains("UNRESOLVED_REFERENCE: com.jimandlisa.utils.Unresolved"));
-			assertTrue(e.getMessage().contains("UNRESOLVED_REFERENCE: com.jimandlisa.utils.AnotherUnresolved"));
+			assertTrue(e.getMessage().contains("FATAL ERROR:"));
+			assertTrue(e.getMessage().contains("ILLEGAL_REFERENCE: type com.jimandlisa.app.one.App1 in component 'App One' in layer 'App' depth 1 refers to type com.jimandlisa.app.two.App2 in component 'App Two' in layer 'App' depth 1"));
 		}
 	}
 }

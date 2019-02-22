@@ -15,6 +15,7 @@ package com.jimandlisa.enforcer;
 
 import static org.junit.Assert.assertEquals;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 public class ArgUtilsTest {
@@ -25,12 +26,14 @@ public class ArgUtilsTest {
 		assertEquals("abc", ArgUtils.check(" abc \t", "name"));
 		try {
 			ArgUtils.check((String) null, "name");
+			Assert.fail();
 		} catch (EnforcerException e) {
 			assertEquals("null name", e.getMessage());
 			assertEquals(Errors.NULL_STRING_ARG, e.error());
 		}
 		try {
 			ArgUtils.check(" \t ", "name");
+			Assert.fail();
 		} catch (EnforcerException e) {
 			assertEquals("empty name", e.getMessage());
 			assertEquals(Errors.EMPTY_STRING_ARG, e.error());
@@ -38,6 +41,7 @@ public class ArgUtilsTest {
 		ArgUtils.checkName("This is a Very_Fine0-name", "name");
 		try {
 			ArgUtils.checkName("$S()*@##$", "name");
+			Assert.fail();
 		} catch (EnforcerException e) {
 			assertEquals("invalid name 'name'", e.getMessage());
 			assertEquals(Errors.INVALID_NAME_ARG, e.error());
@@ -45,6 +49,7 @@ public class ArgUtilsTest {
 		assertEquals((Integer) 123, ArgUtils.check(123, "name"));
 		try {
 			ArgUtils.check((Integer) null, "name");
+			Assert.fail();
 		} catch (EnforcerException e) {
 			assertEquals("null name", e.getMessage());
 			assertEquals(Errors.NULL_INTEGER_ARG, e.error());
@@ -53,6 +58,7 @@ public class ArgUtilsTest {
 		assertEquals(layer, ArgUtils.check(layer, "name"));
 		try {
 			ArgUtils.check((Layer) null, "name");
+			Assert.fail();
 		} catch (EnforcerException e) {
 			assertEquals("null name", e.getMessage());
 			assertEquals(Errors.NULL_LAYER_ARG, e.error());
@@ -61,6 +67,7 @@ public class ArgUtilsTest {
 		assertEquals(domain, ArgUtils.check(domain, "name"));
 		try {
 			ArgUtils.check((Domain) null, "name");
+			Assert.fail();
 		} catch (EnforcerException e) {
 			assertEquals("null name", e.getMessage());
 			assertEquals(Errors.NULL_DOMAIN_ARG, e.error());
@@ -68,6 +75,7 @@ public class ArgUtilsTest {
 		assertEquals(Errors.CANNOT_READ_FILE, ArgUtils.check(Errors.CANNOT_READ_FILE, "name"));
 		try {
 			ArgUtils.check((Errors) null, "name");
+			Assert.fail();
 		} catch (EnforcerException e) {
 			assertEquals("null name", e.getMessage());
 			assertEquals(Errors.NULL_ERRORS_ARG, e.error());

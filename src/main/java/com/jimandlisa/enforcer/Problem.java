@@ -27,7 +27,7 @@ public class Problem implements Comparable<Problem> {
 		this.error = ArgUtils.check(error, "error");
 		this.detail = detail;
 	}
-	
+
 	Problem(final String description, final Errors error) {
 		this(description, error, null);
 	}
@@ -39,7 +39,7 @@ public class Problem implements Comparable<Problem> {
 	public Errors error() {
 		return error;
 	}
-	
+
 	public String detail() {
 		return detail;
 	}
@@ -64,7 +64,7 @@ public class Problem implements Comparable<Problem> {
 		if (!(obj instanceof Problem)) {
 			return false;
 		}
-		return description().equals(((Problem)obj).description());
+		return description().equals(((Problem) obj).description());
 	}
 
 	@Override
@@ -74,6 +74,10 @@ public class Problem implements Comparable<Problem> {
 
 	@Override
 	public String toString() {
-		return  error() + ": " + description();
+		return error() + ": " + description();
+	}
+
+	public String humanReadableToString() {
+		return error() + ": " + detail();
 	}
 }
