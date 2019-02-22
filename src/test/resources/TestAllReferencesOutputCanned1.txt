@@ -1,0 +1,12 @@
+com.jimandlisa.app.one.App1!App One!App!1|com.jimandlisa.app.two.App2!App Two!App!1!ILLEGAL
+com.jimandlisa.app.one.App1!App One!App!1|com.jimandlisa.data.Data!Data!Data!0
+com.jimandlisa.app.one.App1!App One!App!1|com.jimandlisa.utils.Utils!Utils!Utils!-1
+com.jimandlisa.app.two.App2!App Two!App!1|com.jimandlisa.data.Data!Data!Data!0
+com.jimandlisa.app.two.App2!App Two!App!1|com.jimandlisa.utils.Utils!Utils!Utils!-1
+com.jimandlisa.data.Data!Data!Data!0|com.jimandlisa.utils.Utils!Utils!Utils!-1
+com.jimandlisa.service.Service2!App Two!App!1|com.jimandlisa.utils.Utils!Utils!Utils!-1
+com.jimandlisa.service.one.Service1!App One!App!1|com.jimandlisa.utils.Utils!Utils!Utils!-1
+com.jimandlisa.ui.one.UI1!UI One!UI!2|com.jimandlisa.service.one.Service1!App One!App!1
+com.jimandlisa.ui.one.UI1!UI One!UI!2|com.jimandlisa.utils.Utils!Utils!Utils!-1
+com.jimandlisa.ui.two.UI2!UI Two!UI!2|com.jimandlisa.service.Service2!App Two!App!1
+com.jimandlisa.ui.two.UI2!UI Two!UI!2|com.jimandlisa.utils.Utils!Utils!Utils!-1

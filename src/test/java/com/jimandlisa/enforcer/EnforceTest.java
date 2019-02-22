@@ -279,7 +279,7 @@ public class EnforceTest {
 			TestUtils.compareTestClassesFile(baos, "CannedWarnings2.txt");
 		}
 	}
-	
+
 	@Test
 	public void testOutputAllReferences() throws Exception {
 		Outputs outputs = TestUtils.outputs();
@@ -366,11 +366,31 @@ public class EnforceTest {
 		file2.delete();
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
 			Enforce.mainImpl(new String[] { TestUtils.testClassesFile("SampleTarget2.yaml").getAbsolutePath(), TestUtils.sampleWar().getAbsolutePath(), TestUtils.targetDir().getAbsolutePath(),
+					Optionals.ALL_REFERENCES_OUTPUT_FILE.indicator() + Outputs.ALL_REFERENCES_DEFAULT_FILE_NAME,
+					Optionals.IGNORES.indicator() + TestUtils.testClassesFile("SampleIgnores.txt").getAbsolutePath() }, ps);
+		}
+		File allReferences = TestUtils.targetFile(Outputs.ALL_REFERENCES_DEFAULT_FILE_NAME);
+		assertTrue(allReferences.exists());
+		TestUtils.compareTargetFile(Outputs.ALL_REFERENCES_DEFAULT_FILE_NAME, "TestAllReferencesOutputCanned1.txt");
+		allReferences.delete();
+		illegalReferencesOutputFile.delete();
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
+			Enforce.mainImpl(new String[] { TestUtils.testClassesFile("SampleTarget2.yaml").getAbsolutePath(), TestUtils.sampleWar().getAbsolutePath(), TestUtils.targetDir().getAbsolutePath(),
+					Optionals.ALL_REFERENCES_OUTPUT_FILE.indicator() + Outputs.ALL_REFERENCES_DEFAULT_FILE_NAME,
+					Optionals.IGNORES.indicator() + TestUtils.testClassesFile("SampleIgnores.txt").getAbsolutePath(), "-p" }, ps);
+		}
+		assertTrue(allReferences.exists());
+		TestUtils.compareTargetFile(Outputs.ALL_REFERENCES_DEFAULT_FILE_NAME, "TestAllReferencesOutputCanned2.txt");
+		allReferences.delete();
+		illegalReferencesOutputFile.delete();
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
+			Enforce.mainImpl(new String[] { TestUtils.testClassesFile("SampleTarget2.yaml").getAbsolutePath(), TestUtils.sampleWar().getAbsolutePath(), TestUtils.targetDir().getAbsolutePath(),
 					Optionals.IGNORES.indicator() + TestUtils.testClassesFile("SampleIgnores.txt").getAbsolutePath(), "-s" }, ps);
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("FATAL ERROR:"));
-			assertTrue(e.getMessage().contains("ILLEGAL_REFERENCE: type com.jimandlisa.app.one.App1 in component 'App One' in layer 'App' depth 1 refers to type com.jimandlisa.app.two.App2 in component 'App Two' in layer 'App' depth 1"));
+			assertTrue(e.getMessage().contains(
+					"ILLEGAL_REFERENCE: type com.jimandlisa.app.one.App1 in component 'App One' in layer 'App' depth 1 refers to type com.jimandlisa.app.two.App2 in component 'App Two' in layer 'App' depth 1"));
 		}
 	}
 }
