@@ -315,11 +315,16 @@ The following table summarizes differences between the two tools:
 |Includes line numbers and text of code on line in output of illegal references|Only outputs classes and components|Proprietary tool|
 |Fast|Fast|Tie|
 
+Why did we choose pf-CDA? It's fast, and it has a simple API (at least for what we needed to do).
+There are alternatives, for example http://javaparser.org, https://innig.net/macker, https://commons.apache.org/proper/commons-bcel, etc. There are a few issues with pf-CDA, but it's not clear if any of the alternatives would be an improvement.
+For example, regarding misssing types, https://maven.apache.org/shared/maven-dependency-analyzer/index.html says: "Analysis is not done at source but bytecode level, then some cases are not detected (constants, annotations with source-only retention,
+links in javadoc) which can lead to wrong result if they are the only use of a dependency." We are grateful to the author of pf-CDA!
+
 ## See Also ##
 
 https://github.com/jimshowalter/architecture-enforcer-sample
 
-http://www.dependency-analyzer.org
+http://www.dependency-analyzer.org (pf-CDA)
 
 ## Copyright/Licensing ##
 
