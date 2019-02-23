@@ -7,6 +7,8 @@ Compares a codebase's current state to a desired target state, identifying and r
 
 This tool is not prescriptive about how you define your architecture, other than identifying illegal references.
 
+A companion project, https://github.com/jimshowalter/architecture-enforcer-sample, provides a sample war used by this project's tests, and in this documentation.
+
 ## Defining Target State ##
 
 The target state is defined in a yaml file. The file defines layers, domains, and components, all of which are logical groupings that exist "virtually" on top of whatever snarl constitutes the current codebase.
@@ -44,7 +46,7 @@ Packages not listed in the target-state file are rolled up to the nearest enclos
 Different subpackages can be assigned to different components. For example, com.foo.utils.math could be assigned to a Math component, com.foo.utils.strings could be assigned to a Strings component, and com.foo.utils could be assigned to a Utils component.
 
 Individual classes can be split out from packages and assigned to different components by specifying classes belonging to the components. However, this should be treated as temporary, because when code is relocated to Maven projects (or Java modules),
-best practice is for every package to belong to exactly one project/module. Sok where possible, moving classes to different packages is preferable.
+best practice is for every package to belong to exactly one project/module. So, where possible, moving classes to different packages is preferable.
 
 Classes belonging to the default package (that is, not having a package) can be assigned to components by specifying them in the components.
 
@@ -101,7 +103,7 @@ code into projects, this tool should continue to be run in CI/CD.
 
 1. Create a war file for your project. This is necessary even if your project isn't deployed as a war, because pf-CDA requires a war (or at least works best when pointed at a war).
 
-1. Sync and build this project. Ignore "[WARNING] The POM for org.apache.bcel:bcel:jar:6.3.PR1 is missing, no dependency information available" and "[WARNING] Classes in bundle 'Architecture Enforcer' do no match with execution data. For report generation the same class files must be used as at runtime".
+1. Sync and build this project. Ignore "[WARNING] The POM for org.apache.bcel:bcel:jar:6.3.PR1 is missing, no dependency information available" and "[WARNING] Classes in bundle 'Architecture Enforcer' do no [sic] match with execution data. For report generation the same class files must be used as at runtime".
 
 1. Verify that the project works, by running this command (adjusted for your environment):
 
@@ -152,7 +154,7 @@ Unresolved types are written as the fully-qualified type name, one type per line
 
 By default, the unresolved-types output file name is "unresolved_types.txt", and the illegal-references output file name is "illegal_references.txt". These can be overridden with the -U and -I options, respectively.
 
-If -R is specified, all references (not just illegal references) are written to the specified file. 
+If -A is specified, all references (not just illegal references) are written to the specified file. 
 
 References are written in a format designed to be easy to machine read:
 
@@ -313,7 +315,6 @@ The following table summarizes differences between the two tools:
 |Code full of special-casing for particular company|No company-specific special-casing|
 |Parses string-based references (reflection) in Java (Class.forName), in JSP files, and in other kinds of files, plus supports manual entry of hard-to-parse cases|Requires manual entry of all cases|
 |Includes line numbers and text of code on line in output of illegal references|Only outputs classes and components|
-|Fast|Fast|Tie|
 
 Why did we choose pf-CDA? It's fast, and it has a simple API (at least for what we needed to do).
 There are alternatives, for example http://javaparser.org, https://innig.net/macker, https://commons.apache.org/proper/commons-bcel, etc. There are a few issues with pf-CDA, but it's not clear if any of the alternatives would be an improvement.
