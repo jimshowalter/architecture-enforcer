@@ -18,7 +18,7 @@ import java.util.List;
 
 public class CollectionUtils {
 
-	// Wrapper over standard collections sort, but returning the result so it can be used in in rhs expressions.
+	// Wrapper over standard collections sort, but returning the result so it can be used in rhs expressions.
 	public static <T extends Comparable<? super T>> List<T> sort(List<T> list) {
         Collections.sort(list);
         return list;
