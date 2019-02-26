@@ -4,6 +4,7 @@ Architecture Enforcer
 Architecture analyzer/enforcer for Java codebases.
 
 Compares a codebase's current state to a desired target state, identifying and reporting on all references that violate the target architecture.
+
 A companion project, https://github.com/jimshowalter/architecture-enforcer-sample, provides a sample war used by this project's tests, and in this documentation.
 
 ## Defining Target State ##
