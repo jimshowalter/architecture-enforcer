@@ -9,4 +9,4 @@ components:
     layer: Everything
     description: Start with everything in one component.
     packages:
-      - com.foo.bar
+      - com.jimandlisa

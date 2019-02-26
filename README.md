@@ -3,11 +3,23 @@ Architecture Enforcer
 
 Architecture analyzer/enforcer for Java codebases.
 
-Compares a codebase's current state to a desired target state, identifying and reporting on all references that violate the target architecture.
+There are many tools for static analysis (including dependency analysis). For example, jdeps. But those tools just report on the current state of the codebase.
+
+In contrast, this tool compares a codebase's current state to a desired target state, identifying and reporting on all references that violate the target architecture.
 
 This tool is not prescriptive about how you define your architecture, other than identifying illegal references.
 
 A companion project, https://github.com/jimshowalter/architecture-enforcer-sample, provides a sample war used by this project's tests, and in this documentation.
+
+## Important Note ##
+
+This tool depends on you taking the time to define your desired target state.
+
+If you aren't able and/or willing to take the time to define your target state, toss this tool, because it can't help you.
+
+There is no known software-analysis tool that can generate a target state for you. All they can do is tell you that the code is a mess, which you already know.
+
+Often programmers on a legacy codebase will say the code sucks, but without a target state to compare to, there's no data. Sucks compared to what? How much does it suck, and in what ways, specifically?
 
 ## Defining Target State ##
 
@@ -104,8 +116,9 @@ code into projects, this tool should continue to be run in CI/CD.
 1. Create a war file for your project. This is necessary even if your project isn't deployed as a war, because pf-CDA requires a war (or at least works best when pointed at a war).
 
 1. Sync and build this project. Ignore "[WARNING] The POM for org.apache.bcel:bcel:jar:6.3.PR1 is missing, no dependency information available" and "[WARNING] Classes in bundle 'Architecture Enforcer' do no [sic] match with execution data. For report generation the same class files must be used as at runtime".
+We're working on fixing those warnings (and welcome your help, if you know how to make them go away).
 
-1. Verify that the project works, by running this command (adjusted for your environment):
+1. Verify that the project works, by running this command in the target directory (adjusted for your environment):
 
 java -jar architecture-enforcer-1.0-SNAPSHOT.jar /path/to/architecture-enforcer/src/test/resources/SampleTarget2.yaml /path/to/architecture-enforcer/target/test-classes/architecture-enforcer-sample-1.0-SNAPSHOT.war /path/to/architecture-enforcer/target -i/path/to/architecture-enforcer/target/test-classes/SampleIgnores.txt
 
@@ -113,6 +126,10 @@ java -jar architecture-enforcer-1.0-SNAPSHOT.jar /path/to/architecture-enforcer/
 
 1. Using one of the provided sample yaml files as a starting point, define the target state for your project. This can take weeks for a large project, but you can start by just defining a few basic layers (for example, data, logic, and UI), then iterate.
 (It's probably better to start small anyway, instead of trying to boil the ocean in one shot.)
+
+We provide two sample yaml files. SampleTarget1.yaml is the ball-of-mud target state, where everything is in one layer and component (and no domains are used). SampleTarget2.yaml demonstrates a layered target state, with domains. You can start with either sample, plus SampleIgnores.txt, and go from there.
+
+To run the tool with SampleTarget1.yaml, just change 2 to 1 in the above command.
 
 ## Command-line Arguments ###
 
@@ -201,6 +218,8 @@ Components can be "simple", where both the API and implementation of the compone
 
 Paired components move the codebase in the direction of dependency injection, where the implementations chosen at runtime (including during testing) can vary without consumers of the API portions of components being aware anything has changed.
 
+Paired components enforce the idea that calls are only allowed to "come in through the front door".
+
 To define target state this way:
 
 * Put the APIs for paired components in a single layer.
@@ -219,10 +238,12 @@ Notes:
 
 * Simple components provide no way to prevent other components (in higher levels) from depending on their internals. But for shared low-level utilities that is often fine.
 
-* Teams that wish to avoid the tedium of specifying N low-level simple components can just define a single component that contains all shared types, utilities, etc. However, depending on the codebase, this can create a single component containing a million lines (or more) of code.
+* Teams that wish to avoid the tedium of specifying N low-level simple components in M little layers can just define a single "platform" component that contains all shared types, utilities, etc. in one layer. However, depending on the codebase, this can create a single component containing a million lines (or more) of code.
 
 * Incremental compilation is a nice side effect of this approach. So long as a programmer only changes the code in the implementation of a paired component, recompilation is limited to just that implementation.
 Once Mavenized (or moved into modules) this can reduce cycle time from minutes to seconds (not counting time to redeploy).
+
+* You may need to define some "shim" layers between APIs and impls, for example to share some common types that you don't want to push down below the APIs. That's fine--do hatever makes sense for your target state.
 
 ## Problem Kinds ##
 
@@ -317,7 +338,7 @@ The following table summarizes differences between the two tools:
 |Includes line numbers and text of code on line in output of illegal references|Only outputs classes and components|
 
 Why did we choose pf-CDA? It's fast, and it has a simple API (at least for what we needed to do).
-There are alternatives, for example http://javaparser.org, https://innig.net/macker, https://commons.apache.org/proper/commons-bcel, etc. There are a few issues with pf-CDA, but it's not clear if any of the alternatives would be an improvement.
+There are alternatives, for example http://javaparser.org, https://innig.net/macker, https://commons.apache.org/proper/commons-bcel, https://docs.oracle.com/javase/9/tools/jdeps.htm, etc. There are a few issues with pf-CDA, but it's not clear if any of the alternatives would be an improvement.
 For example, regarding misssing types, https://maven.apache.org/shared/maven-dependency-analyzer/index.html says: "Analysis is not done at source but bytecode level, then some cases are not detected (constants, annotations with source-only retention,
 links in javadoc) which can lead to wrong result if they are the only use of a dependency." We are grateful to the author of pf-CDA!
 
