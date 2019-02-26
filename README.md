@@ -64,9 +64,18 @@ Intra-component references are ignored.
 
 Inter-component references are allowed, so long as the referring component is in a layer higher than the referred-to component.
 
-Inter-component references that refer to components in higher layers, or in the same layer, are illegal. Those are the references this tool detects and reports.
+Inter-component references that refer to components in higher layers, or in the same layer, are illegal (note that this means circular references among components are illegal). Those are the references this tool detects and reports.
 
-Note that this means circular references among components are illegal.
+In a sense, the entire point of this tool is to be able to implement this function:
+
+```
+	public static boolean isLayerViolation(Type referringType, Type referredToType) {
+		if (isSelfReference(referringType, referredToType)) { // Ignore intra-component references.
+			return false;
+		}
+		return referringType.belongsTo().layer().depth() <= referredToType.belongsTo().layer().depth();
+	}
+```
 
 ### Nested Classes And References ###
 
