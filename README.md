@@ -103,11 +103,11 @@ Code can refer to other code by strings, either directly via Class.forName, or i
 
 Code can also be coupled to other code by messages (weak coupling, but that's still a dependency), and in the database (foreign keys), etc.
 
-This tool only finds direct references, and supports manually listing known reflection-based references.
+This tool only finds direct references, and supports manually listing known reflection-based references ("Reflection is the enemy of refactoring").
 
 ### Removing Illegal References ###
 
-Over time, a team can use various techniques to move the actual state of the codebase towards the desired state, gradually eliminating illegal references. For example, calls from one implementation to another can be replaced with calls to APIs,
+Over time, a team can use various techniques to move the actual state of the codebase towards the desired state, gradually eliminating illegal references. For example, calls from one implementation to another can be replaced with calls to APIs ("Only allow code in through the front door"),
 shared types can be pushed down from APIs into lower-level components, etc.
 
 Once there are no illegal references, code can be forklifted into separate projects (for example, separate Maven projects, or modules). It seems that this would protect the architecture, because Maven/modules don't allow circular
