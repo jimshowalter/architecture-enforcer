@@ -321,6 +321,8 @@ public class EnforceTest {
 		Enforce.outputAllReferences(types, outputs);
 		TestUtils.compareTargetFile("all_references.txt", "CannedAllReferences4.txt");
 		outputs.allReferences().delete();
+		assertEquals("!LEGAL", Enforce.legality(type4, type1));
+		assertEquals("!ILLEGAL", Enforce.legality(type1, type4));
 	}
 
 	@Test

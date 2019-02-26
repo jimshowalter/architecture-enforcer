@@ -136,6 +136,10 @@ public class Enforce {
 			ps.println(outputs.illegalReferences().getName());
 		}
 	}
+	
+	static String legality(Type referringType, Type referredToType) {
+		return "!" + (TypeUtils.isLayerViolation(referringType, referredToType) ? "ILLEGAL" : "LEGAL");
+	}
 
 	static void outputAllReferences(Map<String, Type> types, Outputs outputs) throws Exception {
 		if (outputs.allReferences() == null) {
@@ -150,7 +154,7 @@ public class Enforce {
 				if (TypeUtils.isSelfReference(referringType, referredToType)) {
 					continue;
 				}
-				allReferences.add(TypeUtils.parseableDescription(referringType, referredToType) + (TypeUtils.isLayerViolation(referringType, referredToType) ? "!ILLEGAL" : ""));
+				allReferences.add(TypeUtils.parseableDescription(referringType, referredToType) + legality(referringType, referredToType));
 			}
 		}
 		try (PrintStream ps = new PrintStream(new FileOutputStream(outputs.allReferences()))) {

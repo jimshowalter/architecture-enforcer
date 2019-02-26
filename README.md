@@ -173,7 +173,7 @@ If -A is specified, all references (not just illegal references) are written to 
 References are written in a format designed to be easy to machine read:
 
 ```
-referringType!referringComponent!referringLayer!referringDepth!referredToType!referredToComponent!referredToLayer!referredToDepth(!ILLEGAL)?
+referringType!referringComponent!referringLayer!referringDepth!referredToType!referredToComponent!referredToLayer!referredToDepth
 ```
 
 For example:
@@ -187,6 +187,8 @@ The Problem objects for illegal references have a detail field that presents the
 ```
 type com.jimandlisa.app.one.App1 in component 'App One' in layer 'App' depth 1 refers to type com.jimandlisa.app.two.App2 in component 'App Two' in layer 'App' depth 1
 ```
+
+If -A is specified, the references end in "!LEGAL" or "!ILLEGAL". In all other files, and in exception messages, the suffix is superfluous because legality is clear from context.
 
 Notes:
 
@@ -274,15 +276,13 @@ This tool can of course be improved. Below are listed some things we know would 
 
 * Fix the build warnings.
 
-* Jacoco excludes in the pom aren't working for the pf-CDA classes, possibly due to the shaded jar. Because excludes aren't working, we can't enable the check for 100% statement and branch coverage.
-
 * Some of the tests use mock classes instead of simply using Mockito. They should be updated to use Mockito.
 
 * Classes can start with dollar signs, so the current approach to denesting is erroneous. See if pf-CDA provides a way to determine if a class is nested, and, if so, to get its outermost class.
 
-* There is repetitive code in the architecture-enforcer-sample project that probably could be simplified via aspects.
-
 * Instead of creating the entire graph with pf-CDA (which can be gigantic for large codebases) and then ignoring a bunch of classes, see if there's a way to pass in a filter when initializing the pf-CDA workspace.
+
+* There is repetitive "Utils.called" call-tracking code in the architecture-enforcer-sample project that probably could be simplified via aspects.
 
 * Provide a way to fail builds if the count of illegal references increases. Note that this is different from enabling strict mode, because in that case builds fail if there are any illegal references, so the previous count is known (it's zero).
 This requires determining that there were N illegal references in the previous build, and now there are N + M illegal references in the current build. One way to do this is to access the previous build in CI/CD using something like the Jenkins API.

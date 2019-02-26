@@ -90,8 +90,7 @@
               <goal>prepare-agent</goal>
             </goals>
           </execution>
-          <!-- Uncommenting this causes the build to fail on all pfsw classes, which should be ignored but aren't.
-          <execution>
+           <execution>
             <id>check</id>
             <phase>prepare-package</phase>
             <goals>
@@ -121,7 +120,6 @@
               </rules>
             </configuration>
           </execution>
-          -->
           <execution>
             <id>report</id>
             <phase>prepare-package</phase>
