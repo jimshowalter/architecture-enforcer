@@ -3,11 +3,14 @@ Architecture Enforcer
 
 Architecture analyzer/enforcer for Java codebases.
 
-There are many tools for static analysis (including dependency analysis). For example, jdeps. But those tools just report on the current state of the codebase.
+There are many tools for code analysis, including dependency analysis and cluster identification.
 
-In contrast, this tool compares a codebase's current state to a desired target state, identifying and reporting on all references that violate the target architecture.
+But those tools just report on the current state of the codebase.
 
-This tool is not prescriptive about how you define your architecture, other than identifying illegal references.
+A tool might, for example, run the HCS algorithm on the code, and detect that there are some clusters,
+but the odds that those clusters are how you wish the code is clustered are extremely low, particularly in legacy code (which tends to be mass of unwanted dependencies).
+
+In contrast, this tool compares a codebase's current state to a desired target state that you define, identifying and reporting on all references that violate the aspirational target architecture.
 
 A companion project, https://github.com/jimshowalter/architecture-enforcer-sample, provides a sample war used by this project's tests, and in this documentation.
 
@@ -15,9 +18,9 @@ A companion project, https://github.com/jimshowalter/architecture-enforcer-sampl
 
 This tool depends on you taking the time to define your desired target state.
 
-If you aren't able and/or willing to take the time to define your target state, toss this tool, because it can't help you.
+If you aren't able and/or willing to take the time to define your target state, this tool can't help you.
 
-There is no known software-analysis tool that can generate a target state for you. All they can do is tell you that the code is a mess, which you already know.
+There is no known tool that can generate a target state for you. All most tools can do is tell you that the code is a mess, which you already know.
 
 Often programmers on a legacy codebase will say the code sucks, but without a target state to compare to, there's no data. Sucks compared to what? How much does it suck, and in what ways, specifically?
 
@@ -211,6 +214,8 @@ for example Class.forName(someStringFromAVariable + SomeClass.someFunction(some 
 * Sample files are located in the src/test/resources directory. They start with "Sample".
 
 ## Useful Patterns ##
+
+This tool is not prescriptive about how you define your architecture.
 
 When defining your project's target state, there are some useful patterns you might want to use.
 
