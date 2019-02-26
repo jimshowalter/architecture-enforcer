@@ -280,6 +280,8 @@ This tool can of course be improved. Below are listed some things we know would 
 
 * PERFORMANCE: Instead of creating the entire graph with pf-CDA (which can be gigantic for large codebases) and then ignoring a bunch of classes, see if there's a way to pass in a filter when initializing the pf-CDA workspace.
 
+* HYGIENE: Start tracking these todos in a bug-tracking system.
+
 * HYGIENE: Add one or more code-quality tools to the build. For example, findbugs, errorprone, etc.
 
 * HYGIENE: There is repetitive "Utils.called" call-tracking code in the architecture-enforcer-sample project that probably could be simplified via aspects.
