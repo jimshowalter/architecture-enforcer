@@ -243,7 +243,7 @@ Notes:
 * Incremental compilation is a nice side effect of this approach. So long as a programmer only changes the code in the implementation of a paired component, recompilation is limited to just that implementation.
 Once Mavenized (or moved into modules) this can reduce cycle time from minutes to seconds (not counting time to redeploy).
 
-* You may need to define some "shim" layers between APIs and impls, for example to share some common types that you don't want to push down below the APIs. That's fine--do hatever makes sense for your target state.
+* You may need to define some "shim" layers between APIs and impls, for example to share some common types that you don't want to push down below the APIs. That's fine&mdash;do whatever makes sense for your target state.
 
 ## Problem Kinds ##
 
