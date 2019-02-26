@@ -16,6 +16,7 @@ package com.jimandlisa.enforcer;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doThrow;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,15 +26,16 @@ import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.pfsw.tools.cda.base.model.Workset;
 
 public class EnforcerUtilsTest {
-	
+
 	@Test
 	public void testMisc() {
 		new EnforcerUtils();
 	}
-	
+
 	@Test
 	public void testIgnores() throws Exception {
 		Set<String> ignores = EnforcerUtils.ignores(null);
@@ -52,7 +54,7 @@ public class EnforcerUtilsTest {
 		assertTrue(EnforcerUtils.skip("com.foo.Bar", "com.foo.Bar", ignores));
 		assertFalse(EnforcerUtils.skip("com.foo.Bar", "com.foo.Baz", ignores));
 	}
-	
+
 	@Test
 	public void testDenest() {
 		assertEquals("com.foo.Bar", EnforcerUtils.denest("com.foo.Bar$Baz", new Flags()));
@@ -67,7 +69,7 @@ public class EnforcerUtilsTest {
 			assertEquals(Errors.MALFORMED_CLASS_NAME, e.error());
 		}
 	}
-	
+
 	@Test
 	public void testGetType() {
 		Map<String, Type> types = new HashMap<>();
@@ -78,9 +80,9 @@ public class EnforcerUtilsTest {
 		assertEquals("foo", type0.name());
 		assertEquals(1, types.size());
 	}
-	
+
 	@Test
-	public void testParser()  throws Exception {
+	public void testParser() throws Exception {
 		Set<String> ignores = new HashSet<>();
 		Map<String, Type> types = new HashMap<>();
 		Set<Problem> problems = new LinkedHashSet<>();
@@ -106,7 +108,7 @@ public class EnforcerUtilsTest {
 		ignores.add("foo.");
 		EnforcerUtils.parse(TestUtils.testClassesFile("TestFixUnresolveds.txt"), types, ignores, problems, "fix-unresolved", false, flags);
 		assertEquals(1, problems.size());
-        assertTrue(problems.iterator().next().description().contains("class is listed as referring but also listed in ignores:"));
+		assertTrue(problems.iterator().next().description().contains("class is listed as referring but also listed in ignores:"));
 		assertEquals(Errors.CLASS_BOTH_REFERRING_AND_IGNORED, problems.iterator().next().error());
 		types.clear();
 		ignores.clear();
@@ -114,10 +116,10 @@ public class EnforcerUtilsTest {
 		ignores.add("com.x.");
 		EnforcerUtils.parse(TestUtils.testClassesFile("TestFixUnresolveds.txt"), types, ignores, problems, "fix-unresolved", false, flags);
 		assertEquals(1, problems.size());
-        assertTrue(problems.iterator().next().description().contains("class is listed as referred-to but also listed in ignores:"));
+		assertTrue(problems.iterator().next().description().contains("class is listed as referred-to but also listed in ignores:"));
 		assertEquals(Errors.CLASS_BOTH_REFERRED_TO_AND_IGNORED, problems.iterator().next().error());
 	}
-	
+
 	@Test
 	public void testReport() {
 		assertEquals("S", EnforcerUtils.plural(Errors.MULTIPLE_ERRORS));
@@ -160,30 +162,20 @@ public class EnforcerUtilsTest {
 			assertTrue(e.getMessage().contains(Errors.ILLEGAL_REFERENCE.toString() + ": big long explanation"));
 		}
 	}
-	
-	private static class MockWorkset extends Workset { // TODO: Replace with mockito.
 
-		public MockWorkset(String worksetName) {
-			super(worksetName);
-		}
-		
-		@Override
-		public void release() {
-			throw new RuntimeException("COVERAGE");
-		}
-	}
-	
 	@Test
 	public void testRelease() {
 		EnforcerUtils.release(null, null);
 		Set<Problem> problems = new HashSet<>();
 		EnforcerUtils.release(new Workset("COVERAGE"), problems);
 		assertTrue(problems.isEmpty());
-		EnforcerUtils.release(new MockWorkset("COVERAGE"), problems);
-		assertTrue(problems.iterator().next().description().contains("unable to release workset COVERAGE"));
+		Workset mockWorkset = Mockito.mock(Workset.class);
+		doThrow(new RuntimeException("COVERAGE")).when(mockWorkset).release();
+		EnforcerUtils.release(mockWorkset, problems);
+		assertTrue(problems.iterator().next().description().contains("unable to release workset null: COVERAGE"));
 		assertTrue(problems.iterator().next().error() == Errors.UNABLE_TO_RELEASE_WORKSET);
 	}
-	
+
 	@Test
 	public void testResolve() {
 		Map<String, Type> types = new HashMap<>();
@@ -200,12 +192,12 @@ public class EnforcerUtilsTest {
 		EnforcerUtils.resolve(types, problems);
 		assertTrue(problems.isEmpty());
 	}
-	
+
 	@Test
 	public void testResolve2() throws Exception {
 		EnforcerUtils.resolve(TestUtils.inputs(true, true, true), new HashSet<>(), new Flags());
 	}
-	
+
 	@Test
 	public void testCorrelate() {
 		Map<String, Type> types = new HashMap<>();
@@ -227,7 +219,7 @@ public class EnforcerUtilsTest {
 		assertEquals(component1, type1.belongsTo());
 		assertEquals(type1, component1.types().get(type1.name()));
 	}
-	
+
 	@Test
 	public void testCorrelateWithClasses() {
 		Map<String, Type> types = new HashMap<>();
@@ -257,7 +249,7 @@ public class EnforcerUtilsTest {
 		assertEquals(component2, type1.belongsTo());
 		assertEquals(type1, component2.types().get(type1.name()));
 	}
-	
+
 	@Test
 	public void testFailedCorrelateWithClasses() {
 		Map<String, Type> types = new HashMap<>();
@@ -287,7 +279,7 @@ public class EnforcerUtilsTest {
 			assertEquals(Errors.CLASS_NOT_RESOLVED_TO_TYPE, e.error());
 		}
 	}
-	
+
 	@Test
 	public void testFailedTypeToComponentCorrelate() {
 		Map<String, Type> types = new HashMap<>();
@@ -341,7 +333,8 @@ public class EnforcerUtilsTest {
 		type3.references().add(type1);
 		EnforcerUtils.correlate(types, components, new RollUp(), problems, flags);
 		assertTrue(problems.iterator().next().description().contains("com.bar.Baz3!Comp0!L0!0|com.foo.bar.Baz!Comp1!L1!1"));
-		assertTrue(problems.iterator().next().detail().contains("type com.bar.Baz3 in component 'Comp0' in layer 'L0' depth 0 refers to type com.foo.bar.Baz in component 'Comp1' in layer 'L1' depth 1"));
+		assertTrue(
+				problems.iterator().next().detail().contains("type com.bar.Baz3 in component 'Comp0' in layer 'L0' depth 0 refers to type com.foo.bar.Baz in component 'Comp1' in layer 'L1' depth 1"));
 		assertEquals(Errors.ILLEGAL_REFERENCE, problems.iterator().next().error());
 	}
 }

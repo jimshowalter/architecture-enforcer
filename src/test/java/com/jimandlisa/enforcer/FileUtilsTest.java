@@ -16,42 +16,15 @@ package com.jimandlisa.enforcer;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 public class FileUtilsTest {
-
-	private static class MockFile extends File { // TODO: Replace with mockito.
-
-		private static final long serialVersionUID = -6543042914615276188L;
-
-		public MockFile(final String pathname) {
-			super(pathname);
-		}
-
-		private boolean blowUp = false;
-
-		public MockFile(final String pathname, final boolean blowUp) {
-			super(pathname);
-			this.blowUp = blowUp;
-		}
-
-		@Override
-		public boolean canRead() {
-			if (blowUp) {
-				throw new RuntimeException("COVERAGE");
-			}
-			return false;
-		}
-		
-		@Override
-		public boolean canWrite() {
-			return false;
-		}
-	}
 
 	@Test
 	public void doTest() {
@@ -67,14 +40,19 @@ public class FileUtilsTest {
 			assertEquals(Errors.FILE_DOES_NOT_EXIST, e.error());
 		}
 		try {
-			FileUtils.checkReadFile(new MockFile(TestUtils.testClassesPath("SampleTarget2.yaml").toString()));
+			File mockFile = Mockito.mock(File.class);
+			when(mockFile.exists()).thenReturn(true);
+			when(mockFile.canRead()).thenReturn(false);
+			FileUtils.checkReadFile(mockFile);
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("cannot read"));
 			assertEquals(Errors.CANNOT_READ_FILE, e.error());
 		}
 		try {
-			FileUtils.checkReadFile(new MockFile(TestUtils.testClassesPath("SampleTarget2.yaml").toString(), true));
+			File mockFile = Mockito.mock(File.class);
+			when(mockFile.exists()).thenThrow(new RuntimeException("COVERAGE"));
+			FileUtils.checkReadFile(mockFile);
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("error validating file"));
@@ -85,7 +63,10 @@ public class FileUtilsTest {
 		assertNotNull(dir);
 		assertTrue(dir.isDirectory());
 		try {
-			FileUtils.checkWriteDir(new MockFile(TestUtils.testClassesFile("SampleTarget2.yaml").getParentFile().getPath()));
+			File mockFile = Mockito.mock(File.class);
+			when(mockFile.toPath()).thenReturn(dir.toPath());
+			when(mockFile.canWrite()).thenReturn(false);
+			FileUtils.checkWriteDir(mockFile);
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("cannot write"));

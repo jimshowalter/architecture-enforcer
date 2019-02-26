@@ -276,8 +276,6 @@ This tool can of course be improved. Below are listed some things we know would 
 
 * Fix the build warnings.
 
-* Some of the tests use mock classes instead of simply using Mockito. They should be updated to use Mockito.
-
 * Classes can start with dollar signs, so the current approach to denesting is erroneous. See if pf-CDA provides a way to determine if a class is nested, and, if so, to get its outermost class.
 
 * Instead of creating the entire graph with pf-CDA (which can be gigantic for large codebases) and then ignoring a bunch of classes, see if there's a way to pass in a filter when initializing the pf-CDA workspace.
