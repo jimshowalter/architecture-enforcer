@@ -133,7 +133,7 @@ To run the tool with SampleTarget1.yaml, just change 2 to 1 in the above command
 
 ## Command-line Arguments ###
 
-1. Run this tool with at least the first three args specified.
+Run this tool with at least the first three args specified.
 
 The full set of args is:
 
