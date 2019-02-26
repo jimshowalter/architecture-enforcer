@@ -334,7 +334,7 @@ The following table summarizes differences between the two tools:
 |Prescriptive (kinds of components, etc.)|Unrestricted|
 |Can't split packages across components|Can specify individual classes per component (in addition to packages, or instead of packages)|
 |Can't handle classes in default package (that is, no package), requires special-casing in code|Can specify individual classes per component, even without any package|
-|Thousands of lines|Less than 1k lines|
+|Thousands of lines|Fewer than 1k lines|
 |Complex|Simple|
 |Incompletely unit tested|100% statement and branch coverage|
 |Requires Maven to run it|Can run as jar with main, or as Maven mojo|
