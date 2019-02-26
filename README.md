@@ -115,7 +115,9 @@ We're working on fixing those warnings (and welcome your help, if you know how t
 
 1. Verify that the project works, by running this command in the target directory (adjusted for your environment):
 
->> java -jar architecture-enforcer-1.0-SNAPSHOT.jar /path/to/architecture-enforcer/src/test/resources/SampleTarget2.yaml /path/to/architecture-enforcer/target/test-classes/architecture-enforcer-sample-1.0-SNAPSHOT.war /path/to/architecture-enforcer/target -i/path/to/architecture-enforcer/target/test-classes/SampleIgnores.txt
+```
+java -jar architecture-enforcer-1.0-SNAPSHOT.jar /path/to/architecture-enforcer/src/test/resources/SampleTarget2.yaml /path/to/architecture-enforcer/target/test-classes/architecture-enforcer-sample-1.0-SNAPSHOT.war /path/to/architecture-enforcer/target -i/path/to/architecture-enforcer/target/test-classes/SampleIgnores.txt
+```
 
 4. (Optional) Run the tool from Eclipse or IntelliJ.
 
@@ -170,15 +172,21 @@ If -A is specified, all references (not just illegal references) are written to 
 
 References are written in a format designed to be easy to machine read:
 
-> referringType!referringComponent!referringLayer!referringDepth!referredToType!referredToComponent!referredToLayer!referredToDepth(!ILLEGAL)?
+```
+referringType!referringComponent!referringLayer!referringDepth!referredToType!referredToComponent!referredToLayer!referredToDepth(!ILLEGAL)?
+```
 
 For example:
 
-> com.jimandlisa.app.one.App1!App One!App!1|com.jimandlisa.app.two.App2!App Two!App!1
+```
+com.jimandlisa.app.one.App1!App One!App!1|com.jimandlisa.app.two.App2!App Two!App!1
+```
 
 The Problem objects for illegal references have a detail field that presents the same information in a more human-readable format:
 
-> type com.jimandlisa.app.one.App1 in component 'App One' in layer 'App' depth 1 refers to type com.jimandlisa.app.two.App2 in component 'App Two' in layer 'App' depth 1
+```
+type com.jimandlisa.app.one.App1 in component 'App One' in layer 'App' depth 1 refers to type com.jimandlisa.app.two.App2 in component 'App Two' in layer 'App' depth 1
+```
 
 Notes:
 
