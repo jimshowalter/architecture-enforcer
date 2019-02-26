@@ -338,8 +338,9 @@ The following table summarizes differences between the two tools:
 |Complex|Simple|
 |Incompletely unit tested|100% statement and branch coverage|
 |Requires Maven to run it|Can run as jar with main, or as Maven mojo|
+|Unresolved references special-cased in code|Unresolved references entered in a text file|
 |Code full of special-casing for particular company|No company-specific special-casing|
-|Parses string-based references (reflection) in Java (Class.forName), in JSP files, and in other kinds of files, plus supports manual entry of hard-to-parse cases|Requires manual entry of all cases|
+|Parses string-based references (reflection) in Java (Class.forName), in JSP files, and in other kinds of files, plus supports manual entry of hard-to-parse cases|Requires manual entry of reflection references|
 |Includes line numbers and text of code on line in output of illegal references|Only outputs classes and components|
 
 Why did we choose pf-CDA? It's fast, and it has a simple API (at least for what we needed to do).
