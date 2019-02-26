@@ -3,26 +3,8 @@ Architecture Enforcer
 
 Architecture analyzer/enforcer for Java codebases.
 
-There are many tools for code analysis, including dependency analysis and cluster identification.
-
-But those tools just report on the current state of the codebase.
-
-A tool might, for example, run the HCS algorithm on the code, and detect that there are some clusters,
-but the odds that those clusters are how you wish the code is clustered are extremely low, particularly in legacy code (which tends to be mass of unwanted dependencies).
-
-In contrast, this tool compares a codebase's current state to a desired target state that you define, identifying and reporting on all references that violate the aspirational target architecture.
-
+Compares a codebase's current state to a desired target state, identifying and reporting on all references that violate the target architecture.
 A companion project, https://github.com/jimshowalter/architecture-enforcer-sample, provides a sample war used by this project's tests, and in this documentation.
-
-## Important Note ##
-
-This tool depends on you taking the time to define your desired target state.
-
-If you aren't able and/or willing to take the time to define your target state, this tool can't help you.
-
-There is no known tool that can generate a target state for you. All most tools can do is tell you that the code is a mess, which you already know.
-
-Often programmers on a legacy codebase will say the code sucks, but without a target state to compare to, there's no data. Sucks compared to what? How much does it suck, and in what ways, specifically?
 
 ## Defining Target State ##
 
@@ -103,11 +85,11 @@ Code can refer to other code by strings, either directly via Class.forName, or i
 
 Code can also be coupled to other code by messages (weak coupling, but that's still a dependency), and in the database (foreign keys), etc.
 
-This tool only finds direct references, and supports manually listing known reflection-based references ("Reflection is the enemy of refactoring").
+This tool only finds direct references, and supports manually listing known reflection-based references.
 
 ### Removing Illegal References ###
 
-Over time, a team can use various techniques to move the actual state of the codebase towards the desired state, gradually eliminating illegal references. For example, calls from one implementation to another can be replaced with calls to APIs ("Only allow code in through the front door"),
+Over time, a team can use various techniques to move the actual state of the codebase towards the desired state, gradually eliminating illegal references. For example, calls from one implementation to another can be replaced with calls to APIs,
 shared types can be pushed down from APIs into lower-level components, etc.
 
 Once there are no illegal references, code can be forklifted into separate projects (for example, separate Maven projects, or modules). It seems that this would protect the architecture, because Maven/modules don't allow circular
@@ -215,17 +197,17 @@ for example Class.forName(someStringFromAVariable + SomeClass.someFunction(some 
 
 ## Useful Patterns ##
 
-This tool is not prescriptive about how you define your architecture.
-
-When defining your project's target state, there are some useful patterns you might want to use.
+This tool is not prescriptive about how you define your target state. However, there are some useful patterns you might want to use.
 
 Components can be "simple", where both the API and implementation of the component are combined, or can be "paired", where the API and implementation are separated.
 
-Paired components move the codebase in the direction of dependency injection, where the implementations chosen at runtime (including during testing) can vary without consumers of the API portions of components being aware anything has changed.
+Paired components:
 
-Paired components enforce the idea that calls are only allowed to "come in through the front door".
+* Move the codebase in the direction of dependency injection, where the implementations chosen at runtime (including during testing) can vary without consumers of the API portions of components being aware anything has changed.
 
-To define target state this way:
+* Enforce the idea that calls are only allowed to "come in through the front door".
+
+To define your target state this way:
 
 * Put the APIs for paired components in a single layer.
 
