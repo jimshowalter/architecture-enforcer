@@ -362,7 +362,7 @@ We are grateful to the author of pf-CDA!
 
 ## Copyright/Licensing ##
 
-The pf-CDA tool is free to use in binary form (the source is not available). In case the developer changes the licensing or takes down his site, the latest free version is checked into this github, along with individual jars from the zip.
+The pf-CDA tool is free to use in binary form (the source is not available). In case the developer changes the licensing or takes down his site, the latest free version is checked into this github.
 
 All files in this github except for the pf-CDA zip and jars are subject to the following MIT license:
 
