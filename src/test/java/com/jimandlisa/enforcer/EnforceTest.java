@@ -279,6 +279,14 @@ public class EnforceTest {
 			TestUtils.compareTestClassesFile(baos, "CannedWarnings2.txt");
 		}
 	}
+	
+	@Test
+	public void testProblemsCount() {
+		assertEquals(0, Enforce.problemsCount(false, false));
+		assertEquals(1, Enforce.problemsCount(false, true));
+		assertEquals(1, Enforce.problemsCount(true, false));
+		assertEquals(2, Enforce.problemsCount(true, true));
+	}
 
 	@Test
 	public void testOutputAllReferences() throws Exception {

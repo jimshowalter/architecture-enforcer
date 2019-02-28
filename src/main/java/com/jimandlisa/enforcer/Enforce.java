@@ -101,6 +101,12 @@ public class Enforce {
 			}
 		}
 	}
+	
+	static int problemsCount(boolean foundUnresolvedTypes, boolean foundIllegalReferences) {
+		int count = foundUnresolvedTypes ? 1 : 0;
+		count = foundIllegalReferences ? count + 1 : count;
+		return count;
+	}
 
 	// To have gotten here, there can't be any fatal errors. In strict mode, that
 	// means we can't get here at all if there are any problems.
@@ -123,10 +129,11 @@ public class Enforce {
 				ps.println(problem.description());
 			}
 		}
-		if (!foundUnresolvedTypes && !foundIllegalReferences) {
+		int count = problemsCount(foundUnresolvedTypes, foundIllegalReferences);
+		if (count == 0) {
 			return;
 		}
-		ps.println("PROBLEMS FOUND, SEE OUTPUT FILES:");
+		ps.println("PROBLEMS FOUND, SEE OUTPUT FILE" + (count == 1 ? "" : "S") + ":");
 		if (foundUnresolvedTypes) {
 			reportProblems(problems, Errors.UNRESOLVED_REFERENCE, outputs.unresolvedTypes());
 			ps.println(outputs.unresolvedTypes().getName());
