@@ -158,9 +158,6 @@ public class Enforce {
 		List<String> allReferences = new ArrayList<>();
 		for (Type referringType : types.values()) {
 			for (Type referredToType : referringType.references()) {
-				if (TypeUtils.isSelfReference(referringType, referredToType)) {
-					continue;
-				}
 				allReferences.add(TypeUtils.parseableDescription(referringType, referredToType) + legality(referringType, referredToType));
 			}
 		}

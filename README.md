@@ -168,7 +168,7 @@ Unresolved types are written as the fully-qualified type name, one type per line
 
 By default, the unresolved-types output file name is "unresolved_types.txt", and the illegal-references output file name is "illegal_references.txt". These can be overridden with the -U and -I options, respectively.
 
-If -A is specified, all references (not just illegal references) are written to the specified file. This can be useful to feed into other programs, for example to visualize the architecture and illegal references, generate complexity metrics, etc.
+If -A is specified, all references (not just illegal references) are written to the specified file, including intra-component references. This can be useful to feed into other programs, for example to visualize the architecture, generate complexity metrics, etc.
 
 References are written in a format designed to be easy to machine read:
 
@@ -213,7 +213,7 @@ include $TheNestedType in the names.
 * pf-CDA is smart enough to add references on its own for simple Class.forName calls where the string name of the class is directly specified, as in Class.forName("com.foo.bar.Baz"), but it can't follow complicated string concatenations, strings returned by functions, etc.,
 for example Class.forName(someStringFromAVariable + SomeClass.someFunction(some args from somewhere) + SOME\_STRING\_CONSTANT + ".Foo"). That's why you have to add them manually. Also, pf-CDA doesn't parse reflection references in JSP files, Spring, etc.
 
-* If the target state only contains one component, there will not be any illegal references, and if -A is specified, the file will be empty.
+* If the target state only contains one component, there can't be any illegal references.
 
 * Sample files are located in the src/test/resources directory. They start with "Sample".
 
