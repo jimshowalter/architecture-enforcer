@@ -168,7 +168,7 @@ Unresolved types are written as the fully-qualified type name, one type per line
 
 By default, the unresolved-types output file name is "unresolved_types.txt", and the illegal-references output file name is "illegal_references.txt". These can be overridden with the -U and -I options, respectively.
 
-If -A is specified, all references (not just illegal references) are written to the specified file. 
+If -A is specified, all references (not just illegal references) are written to the specified file. This can be useful to feed into other programs, for example to visualize the architecture and illegal references, generate complexity metrics, etc.
 
 References are written in a format designed to be easy to machine read:
 
