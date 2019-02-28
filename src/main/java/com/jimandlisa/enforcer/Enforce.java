@@ -169,6 +169,7 @@ public class Enforce {
 		}
 		Map<String, String> refs = new HashMap<>();
 		Integer id = 0;
+		// Experimental output for https://gephi.org. If we decide to keep both this and yed, need to combine the loops for efficiency.
 		try (PrintStream ps = new PrintStream(new FileOutputStream(new File(outputs.allReferences().getAbsolutePath().replace(".txt", "_GephiNodes.csv"))))) {
 			ps.println("ID;Label");
 			for (String reference : CollectionUtils.sort(allReferences)) {
@@ -185,6 +186,22 @@ public class Enforce {
 				String referringType = segments[0];
 				String referredToType = segments[1];
 				ps.println(refs.get(referringType) + ";" + refs.get(referredToType));
+			}
+		}
+		// Experimental output for https://www.yworks.com/products/yed. If we decide to keep both this and Gephi, need to combine the loops for efficiency.
+		try (PrintStream ps = new PrintStream(new FileOutputStream(new File(outputs.allReferences().getAbsolutePath().replace(".txt", ".tgf"))))) {
+			for (String reference : CollectionUtils.sort(allReferences)) {
+				id++;
+				String referringType = reference.split("!")[0];
+				refs.put(referringType, id.toString());
+				ps.println(id + " " + referringType);
+			}
+			ps.println("#");
+			for (String reference : CollectionUtils.sort(allReferences)) {
+				String[] segments = reference.split("!");
+				String referringType = segments[0];
+				String referredToType = segments[1];
+				ps.println(refs.get(referringType) + " " + refs.get(referredToType));
 			}
 		}
 	}
