@@ -213,6 +213,8 @@ include $TheNestedType in the names.
 * pf-CDA is smart enough to add references on its own for simple Class.forName calls where the string name of the class is directly specified, as in Class.forName("com.foo.bar.Baz"), but it can't follow complicated string concatenations, strings returned by functions, etc.,
 for example Class.forName(someStringFromAVariable + SomeClass.someFunction(some args from somewhere) + SOME\_STRING\_CONSTANT + ".Foo"). That's why you have to add them manually. Also, pf-CDA doesn't parse reflection references in JSP files, Spring, etc.
 
+* If the target state only contains one component, there will not be any illegal references, and if -A is specified, the file will be empty.
+
 * Sample files are located in the src/test/resources directory. They start with "Sample".
 
 ## Useful Patterns ##
