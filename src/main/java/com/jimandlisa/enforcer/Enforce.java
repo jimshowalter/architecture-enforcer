@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -164,6 +165,26 @@ public class Enforce {
 		try (PrintStream ps = new PrintStream(new FileOutputStream(outputs.allReferences()))) {
 			for (String reference : CollectionUtils.sort(allReferences)) {
 				ps.println(reference);
+			}
+		}
+		Map<String, String> refs = new HashMap<>();
+		Integer id = 0;
+		try (PrintStream ps = new PrintStream(new FileOutputStream(new File(outputs.allReferences().getAbsolutePath().replace(".txt", "_GephiNodes.csv"))))) {
+			ps.println("ID;Label");
+			for (String reference : CollectionUtils.sort(allReferences)) {
+				id++;
+				String referringType = reference.split("!")[0];
+				refs.put(referringType, id.toString());
+				ps.println(id + ";" + referringType);
+			}
+		}
+		try (PrintStream ps = new PrintStream(new FileOutputStream(new File(outputs.allReferences().getAbsolutePath().replace(".txt", "_GephiEdges.csv"))))) {
+			ps.println("Source;Target");
+			for (String reference : CollectionUtils.sort(allReferences)) {
+				String[] segments = reference.split("!");
+				String referringType = segments[0];
+				String referredToType = segments[1];
+				ps.println(refs.get(referringType) + ";" + refs.get(referredToType));
 			}
 		}
 	}
