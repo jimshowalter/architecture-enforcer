@@ -169,7 +169,7 @@ Unresolved types are written as the fully-qualified type name, one type per line
 By default, the unresolved-types output file name is "unresolved_types.txt", and the illegal-references output file name is "illegal_references.txt". These can be overridden with the -U and -I options, respectively.
 
 If -A is specified, all references (not just illegal references) are written to the specified file, including intra-component references. This can be useful to feed into other programs, for example to visualize the architecture, generate complexity metrics, etc.
-As an experiment, when -A is specified, input files for https://gephi.org (*_GephiNodes.csv, *_GephiEdges.csv) and https://www.yworks.com/products/yed (*.tgf) are generated.
+As an experiment, when -A is specified, input files for https://gephi.org (*\_GephiNodes.csv, *\_GephiEdges.csv) and https://www.yworks.com/products/yed (*.tgf) are generated.
 
 References are written in a format designed to be easy to machine read:
 
