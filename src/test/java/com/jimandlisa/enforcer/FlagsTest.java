@@ -14,6 +14,7 @@
 package com.jimandlisa.enforcer;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Assert;
@@ -25,9 +26,15 @@ public class FlagsTest {
 	public void doTest() {
 		Flags flags = new Flags();
 		assertEquals("preserveNestedTypes=false, strict=false, debug=false", flags.toString());
+		assertFalse(flags.preserveNestedTypes());
 		flags.enablePreserveNestedTypes();
+		assertTrue(flags.preserveNestedTypes());
+		assertFalse(flags.strict());
 		flags.enableStrict();
+		assertTrue(flags.strict());
+		assertFalse(flags.debug());
 		flags.enableDebug();
+		assertTrue(flags.debug());
 		assertEquals("preserveNestedTypes=true, strict=true, debug=true", flags.toString());
 		try {
 			flags.enablePreserveNestedTypes();

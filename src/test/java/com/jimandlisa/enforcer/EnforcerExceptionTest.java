@@ -17,7 +17,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-public class ExceptionTest {
+public class EnforcerExceptionTest {
 
 	@Test
 	public void doTest() {

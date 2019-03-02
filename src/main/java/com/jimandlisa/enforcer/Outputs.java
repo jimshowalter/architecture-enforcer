@@ -71,6 +71,6 @@ public class Outputs {
 
 	@Override
 	public String toString() {
-		return "unresolvedTypes=" + unresolvedTypes() + ", illegalReferences=" + illegalReferences() + ", allReferences=" + allReferences();
+		return "unresolvedTypes=" + unresolvedTypes + ", illegalReferences=" + illegalReferences + ", allReferences=" + allReferences;
 	}
 }

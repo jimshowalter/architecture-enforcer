@@ -17,11 +17,11 @@ import java.util.regex.Pattern;
 
 public class ArgUtils {
 
-	public static String check(String val, String name) {
-		if (val == null) {
+	public static String check(String str, String name) {
+		if (str == null) {
 			throw new EnforcerException("null " + name, Errors.NULL_STRING_ARG);
 		}
-		String trimmed = val.trim();
+		String trimmed = str.trim();
 		if (trimmed.isEmpty()) {
 			throw new EnforcerException("empty " + name, Errors.EMPTY_STRING_ARG);
 		}
@@ -30,39 +30,60 @@ public class ArgUtils {
 	
 	private static Pattern NAME_PATTERN = Pattern.compile("^[0-9A-Za-z][0-9A-Za-z_ -]*$");
 	
-	public static String checkName(String val, String name) {
-		String trimmed = check(val, name);
+	public static String checkName(String str, String name) {
+		String trimmed = check(str, name);
 		if (!NAME_PATTERN.matcher(trimmed).matches()) {
 			throw new EnforcerException("invalid name '" + name + "'", Errors.INVALID_NAME_ARG);
 		}
 		return trimmed;
 	}
 	
-	public static Integer check(Integer val, String name) {
-		if (val == null) {
+	public static Integer check(Integer num, String name) {
+		if (num == null) {
 			throw new EnforcerException("null " + name, Errors.NULL_INTEGER_ARG);
 		}
-		return val;
+		return num;
 	}
 	
-	public static Layer check(Layer val, String name) {
-		if (val == null) {
+	public static Layer check(Layer layer, String name) {
+		if (layer == null) {
 			throw new EnforcerException("null " + name, Errors.NULL_LAYER_ARG);
 		}
-		return val;
+		return layer;
 	}
 	
-	public static Domain check(Domain val, String name) {
-		if (val == null) {
+	public static Domain check(Domain domain, String name) {
+		if (domain == null) {
 			throw new EnforcerException("null " + name, Errors.NULL_DOMAIN_ARG);
 		}
-		return val;
+		return domain;
 	}
 	
-	public static Errors check(Errors val, String name) {
-		if (val == null) {
+	public static Component check(Component component, String name) {
+		if (component == null) {
+			throw new EnforcerException("null " + name, Errors.NULL_COMPONENT_ARG);
+		}
+		return component;
+	}
+	
+	public static Type check(Type type, String name) {
+		if (type == null) {
+			throw new EnforcerException("null " + name, Errors.NULL_TYPE_ARG);
+		}
+		return type;
+	}
+	
+	public static Problem check(Problem problem, String name) {
+		if (problem == null) {
+			throw new EnforcerException("null " + name, Errors.NULL_PROBLEM_ARG);
+		}
+		return problem;
+	}
+	
+	public static Errors check(Errors error, String name) {
+		if (error == null) {
 			throw new EnforcerException("null " + name, Errors.NULL_ERRORS_ARG);
 		}
-		return val;
+		return error;
 	}
 }

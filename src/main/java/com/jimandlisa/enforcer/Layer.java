@@ -54,6 +54,6 @@ public class Layer {
 	
 	@Override
 	public String toString() {
-		return "name=" + quotedName() + ", depth=" + depth();
+		return "name=" + quotedName + ", depth=" + depth;
 	}
 }

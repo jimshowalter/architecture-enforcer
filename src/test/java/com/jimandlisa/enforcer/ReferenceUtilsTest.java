@@ -19,40 +19,41 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-public class TypeUtilsTest {
+public class ReferenceUtilsTest {
 
 	@Test
 	public void doTest() {
-		new TypeUtils();
+		new ReferenceUtils();
 		Layer layer1 = new Layer("One", 1, null);
 		Component comp1 = new Component("Comp1", layer1, null, null);
 		Component comp2 = new Component("Comp2", layer1, null, null);
 		Layer layer2 = new Layer("Two", 2, null);
 		Component comp3 = new Component("Comp3", layer2, null, null);
 		Type type1 = new Type("foo");
-		type1.setBelongsTo(comp1);
+		type1.setComponent(comp1);
 		Type type2 = new Type("bar");
-		type2.setBelongsTo(comp1);
-		assertTrue(TypeUtils.isSelfReference(type1, type1));
-		assertTrue(TypeUtils.isSelfReference(type1, type2));
-		assertTrue(TypeUtils.isSelfReference(type2, type1));
-		assertFalse(TypeUtils.isLayerViolation(type1, type2));
-		assertFalse(TypeUtils.isLayerViolation(type2, type1));
+		type2.setComponent(comp1);
+		assertTrue(ReferenceUtils.isSelfReference(new Reference(type1, type1)));
+		assertTrue(ReferenceUtils.isSelfReference(new Reference(type1, type2)));
+		assertTrue(ReferenceUtils.isSelfReference(new Reference(type2, type1)));
+		assertFalse(ReferenceUtils.isLayerViolation(new Reference(type1, type2)));
+		assertFalse(ReferenceUtils.isLayerViolation(new Reference(type2, type1)));
 		type2 = new Type("bar");
-		type2.setBelongsTo(comp2);
-		assertTrue(TypeUtils.isSelfReference(type1, type1));
-		assertFalse(TypeUtils.isSelfReference(type1, type2));
-		assertFalse(TypeUtils.isSelfReference(type2, type1));
-		assertTrue(TypeUtils.isLayerViolation(type1, type2));
-		assertTrue(TypeUtils.isLayerViolation(type2, type1));
+		type2.setComponent(comp2);
+		assertTrue(ReferenceUtils.isSelfReference(new Reference(type1, type1)));
+		assertFalse(ReferenceUtils.isSelfReference(new Reference(type1, type2)));
+		assertFalse(ReferenceUtils.isSelfReference(new Reference(type2, type1)));
+		assertTrue(ReferenceUtils.isLayerViolation(new Reference(type1, type2)));
+		assertTrue(ReferenceUtils.isLayerViolation(new Reference(type2, type1)));
 		type2 = new Type("bar");
-		type2.setBelongsTo(comp3);
-		assertTrue(TypeUtils.isSelfReference(type1, type1));
-		assertFalse(TypeUtils.isSelfReference(type1, type2));
-		assertFalse(TypeUtils.isSelfReference(type2, type1));
-		assertTrue(TypeUtils.isLayerViolation(type1, type2));
-		assertFalse(TypeUtils.isLayerViolation(type2, type1));
-		assertEquals("foo!Comp1!One!1|bar!Comp3!Two!2", TypeUtils.parseableDescription(type1, type2));
-		assertEquals("type foo in component 'Comp1' in layer 'One' depth 1 refers to type bar in component 'Comp3' in layer 'Two' depth 2", TypeUtils.humanReadableDescription(type1, type2));
+		type2.setComponent(comp3);
+		assertTrue(ReferenceUtils.isSelfReference(new Reference(type1, type1)));
+		assertFalse(ReferenceUtils.isSelfReference(new Reference(type1, type2)));
+		assertFalse(ReferenceUtils.isSelfReference(new Reference(type2, type1)));
+		assertTrue(ReferenceUtils.isLayerViolation(new Reference(type1, type2)));
+		assertFalse(ReferenceUtils.isLayerViolation(new Reference(type2, type1)));
+		assertEquals("foo!Comp1!One!1!bar!Comp3!Two!2", ReferenceUtils.parseableDescription(new Reference(type1, type2)));
+		assertEquals("type foo in component 'Comp1' in layer 'One' depth 1 refers to type bar in component 'Comp3' in layer 'Two' depth 2",
+				ReferenceUtils.humanReadableDescription(new Reference(type1, type2)));
 	}
 }

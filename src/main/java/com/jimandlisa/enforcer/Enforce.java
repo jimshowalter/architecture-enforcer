@@ -18,6 +18,7 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -145,22 +146,20 @@ public class Enforce {
 		}
 	}
 	
-	static String legality(Type referringType, Type referredToType) {
-		return "!" + (TypeUtils.isLayerViolation(referringType, referredToType) ? "ILLEGAL" : "LEGAL");
+	static String legality(Reference reference) {
+		return "!" + (ReferenceUtils.isLayerViolation(reference) ? "ILLEGAL" : "LEGAL");
 	}
 
-	static void outputAllReferences(Map<String, Type> types, Outputs outputs) throws Exception {
+	static void outputAllReferences(Set<Reference> references, Outputs outputs) throws Exception {
 		if (outputs.allReferences() == null) {
 			return;
 		}
-		if (types.isEmpty()) {
+		if (references.isEmpty()) {
 			return;
 		}
 		List<String> allReferences = new ArrayList<>();
-		for (Type referringType : types.values()) {
-			for (Type referredToType : referringType.references()) {
-				allReferences.add(TypeUtils.parseableDescription(referringType, referredToType) + legality(referringType, referredToType));
-			}
+		for (Reference reference : references) {
+			allReferences.add(ReferenceUtils.parseableDescription(reference) + legality(reference));
 		}
 		try (PrintStream ps = new PrintStream(new FileOutputStream(outputs.allReferences()))) {
 			for (String reference : CollectionUtils.sort(allReferences)) {
@@ -184,10 +183,11 @@ public class Enforce {
 			for (String reference : CollectionUtils.sort(allReferences)) {
 				String[] segments = reference.split("!");
 				String referringType = segments[0];
-				String referredToType = segments[1];
+				String referredToType = segments[4];
 				ps.println(refs.get(referringType) + ";" + refs.get(referredToType));
 			}
 		}
+		id = 0;
 		try (PrintStream ps = new PrintStream(new FileOutputStream(new File(outputs.allReferences().getAbsolutePath().replace(".txt", ".tgf"))))) {
 			for (String reference : CollectionUtils.sort(allReferences)) {
 				id++;
@@ -199,7 +199,7 @@ public class Enforce {
 			for (String reference : CollectionUtils.sort(allReferences)) {
 				String[] segments = reference.split("!");
 				String referringType = segments[0];
-				String referredToType = segments[1];
+				String referredToType = segments[4];
 				ps.println(refs.get(referringType) + " " + refs.get(referredToType));
 			}
 		}
@@ -211,10 +211,11 @@ public class Enforce {
 		Set<Problem> problems = new LinkedHashSet<>();
 		Map<String, Type> types = EnforcerUtils.resolve(inputs, problems, flags);
 		RollUp rollUp = new RollUp();
-		EnforcerUtils.correlate(types, target.components(), rollUp, problems, flags);
+		Set<Reference> references = new HashSet<>();
+		EnforcerUtils.correlate(types, target.components(), rollUp, references, problems, flags);
 		debug(target, types, rollUp, ps, flags, 100);
 		reportProblems(problems, ps, outputs, flags);
-		outputAllReferences(types, outputs);
+		outputAllReferences(references, outputs);
 	}
 
 	public static void mainImpl(String[] args, PrintStream ps) throws Exception {

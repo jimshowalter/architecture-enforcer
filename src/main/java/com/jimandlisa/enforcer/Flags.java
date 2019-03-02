@@ -35,7 +35,7 @@ public class Flags {
 	}
 	
 	public void enableStrict() {
-		if (strict()) {
+		if (strict) {
 			throw new EnforcerException("strict already set", Errors.STRICT_ALREADY_SPECIFIED);
 		}
 		this.strict = true;
@@ -46,7 +46,7 @@ public class Flags {
 	}
 	
 	public void enableDebug() {
-		if (debug()) {
+		if (debug) {
 			throw new EnforcerException("debug already set", Errors.DEBUG_ALREADY_SPECIFIED);
 		}
 		this.debug = true;
@@ -58,6 +58,6 @@ public class Flags {
 	
 	@Override
 	public String toString() {
-		return "preserveNestedTypes=" + preserveNestedTypes() + ", strict=" + strict() + ", debug=" + debug();
+		return "preserveNestedTypes=" + preserveNestedTypes + ", strict=" + strict + ", debug=" + debug;
 	}
 }

@@ -71,11 +71,11 @@ public class Component {
 	}
 	
 	public void add(Type type) {
-		types().put(type.name(), type);
+		types.put(type.name(), type);
 	}
 
 	@Override
 	public String toString() {
-		return "name=" + quotedName() + ", layer=" + layer().quotedName() + ", depth=" + layer().depth() + ", domain=" + (domain() == null ? null : domain.quotedName());
+		return "name=" + quotedName + ", layer=" + layer().quotedName() + ", depth=" + layer().depth() + ", domain=" + (domain == null ? null : domain.quotedName());
 	}
 }

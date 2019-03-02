@@ -26,6 +26,10 @@ public class ComponentTest {
 		Layer layer = new Layer("name", 0, "description");
 		Domain domain = new Domain("name", "description");
 		Component component = new Component("name", layer, domain, "description");
+		assertEquals("name", component.name());
+		assertEquals("'name'", component.quotedName());
+		assertEquals(layer, component.layer());
+		assertEquals(domain, component.domain());
 		assertEquals("name='name', layer='name', depth=0, domain='name'", component.toString());
 		assertEquals("description", component.description());
 		component = new Component("name", layer, null, "description");

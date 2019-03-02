@@ -21,6 +21,9 @@ public enum Errors {
 	NULL_INTEGER_ARG,
 	NULL_LAYER_ARG,
 	NULL_DOMAIN_ARG,
+	NULL_COMPONENT_ARG,
+	NULL_TYPE_ARG,
+	NULL_PROBLEM_ARG,
 	NULL_ERRORS_ARG,
 	INVALID_NAME_ARG,
 	UNRESOLVED_TYPES_OUTPUT_FILE_ALREADY_SPECIFIED,
@@ -29,6 +32,8 @@ public enum Errors {
 	IGNORES_FILE_ALREADY_SPECIFIED,
 	REFLECTIONS_FILE_ALREADY_SPECIFIED,
 	FIX_UNRESOLVEDS_FILE_ALREADY_SPECIFIED,
+	COMPONENT_ALREADY_SPECIFIED,
+	PROBLEM_ALREADY_SPECIFIED,
 	PRESERVE_NESTED_TYPES_ALREADY_SPECIFIED,
 	STRICT_ALREADY_SPECIFIED,
 	DEBUG_ALREADY_SPECIFIED,
@@ -75,10 +80,10 @@ public enum Errors {
 	}
 	
 	public boolean isFatal(boolean strict) {
-		if (severity() == Severities.WARNING) {
+		if (severity == Severities.WARNING) {
 			return false;
 		}
-		if (severity()== Severities.ALWAYS_ERROR) {
+		if (severity == Severities.ALWAYS_ERROR) {
 			return true;
 		}
 		if (strict) {

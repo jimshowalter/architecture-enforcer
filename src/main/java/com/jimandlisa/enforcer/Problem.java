@@ -20,12 +20,16 @@ public class Problem implements Comparable<Problem> {
 	private final String description;
 	private final Errors error;
 	private final String detail;
+	private final int hashCode;
+	private final String toString;
 
 	public Problem(final String description, final Errors error, final String detail) {
 		super();
 		this.description = ArgUtils.check(description, "description");
 		this.error = ArgUtils.check(error, "error");
 		this.detail = detail;
+		this.hashCode = error.hashCode() + description.hashCode();
+		this.toString = error + ": " + description;
 	}
 
 	Problem(final String description, final Errors error) {
@@ -45,12 +49,12 @@ public class Problem implements Comparable<Problem> {
 	}
 
 	public boolean isFatal(boolean strict) {
-		return error().isFatal(strict);
+		return error.isFatal(strict);
 	}
 
 	@Override
 	public int hashCode() {
-		return error().hashCode() + description().hashCode();
+		return hashCode;
 	}
 
 	@Override
@@ -64,20 +68,20 @@ public class Problem implements Comparable<Problem> {
 		if (!(obj instanceof Problem)) {
 			return false;
 		}
-		return description().equals(((Problem) obj).description());
+		return description.equals(((Problem)obj).description);
 	}
 
 	@Override
 	public int compareTo(Problem other) {
-		return toString().compareTo(other.toString());
+		return toString.compareTo(other.toString);
 	}
 
 	@Override
 	public String toString() {
-		return error() + ": " + description();
+		return toString;
 	}
 
 	public String humanReadableToString() {
-		return error() + ": " + detail();
+		return error + ": " + detail;
 	}
 }

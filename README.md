@@ -69,11 +69,11 @@ Inter-component references that refer to components in higher layers, or in the 
 In a sense, the entire point of this tool is to be able to implement this function:
 
 ```
-	public static boolean isLayerViolation(Type referringType, Type referredToType) {
-		if (isSelfReference(referringType, referredToType)) { // Ignore intra-component references.
+	public static boolean isLayerViolation(Reference reference) {
+		if (isSelfReference(reference)) { // Ignore intra-component references.
 			return false;
 		}
-		return referringType.belongsTo().layer().depth() <= referredToType.belongsTo().layer().depth();
+		return reference.referringType().component().layer().depth() <= reference.referredToType().component().layer().depth();
 	}
 ```
 

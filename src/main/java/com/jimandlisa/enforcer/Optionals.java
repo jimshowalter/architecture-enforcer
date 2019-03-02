@@ -36,6 +36,6 @@ enum Optionals {
 	
 	@Override
 	public String toString() {
-		return indicator();
+		return indicator;
 	}
 }

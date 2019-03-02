@@ -25,7 +25,7 @@ public class ArgUtilsTest {
 		new ArgUtils();
 		assertEquals("abc", ArgUtils.check(" abc \t", "name"));
 		try {
-			ArgUtils.check((String) null, "name");
+			ArgUtils.check((String)null, "name");
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertEquals("null name", e.getMessage());
@@ -46,35 +46,62 @@ public class ArgUtilsTest {
 			assertEquals("invalid name 'name'", e.getMessage());
 			assertEquals(Errors.INVALID_NAME_ARG, e.error());
 		}
-		assertEquals((Integer) 123, ArgUtils.check(123, "name"));
+		assertEquals((Integer)123, ArgUtils.check(123, "value"));
 		try {
-			ArgUtils.check((Integer) null, "name");
+			ArgUtils.check((Integer)null, "value");
 			Assert.fail();
 		} catch (EnforcerException e) {
-			assertEquals("null name", e.getMessage());
+			assertEquals("null value", e.getMessage());
 			assertEquals(Errors.NULL_INTEGER_ARG, e.error());
 		}
 		Layer layer = new Layer("name", 4, null);
-		assertEquals(layer, ArgUtils.check(layer, "name"));
+		assertEquals(layer, ArgUtils.check(layer, "layer"));
 		try {
-			ArgUtils.check((Layer) null, "name");
+			ArgUtils.check((Layer)null, "layer");
 			Assert.fail();
 		} catch (EnforcerException e) {
-			assertEquals("null name", e.getMessage());
+			assertEquals("null layer", e.getMessage());
 			assertEquals(Errors.NULL_LAYER_ARG, e.error());
 		}
 		Domain domain = new Domain("name", null);
-		assertEquals(domain, ArgUtils.check(domain, "name"));
+		assertEquals(domain, ArgUtils.check(domain, "domain"));
 		try {
-			ArgUtils.check((Domain) null, "name");
+			ArgUtils.check((Domain)null, "domain");
 			Assert.fail();
 		} catch (EnforcerException e) {
-			assertEquals("null name", e.getMessage());
+			assertEquals("null domain", e.getMessage());
 			assertEquals(Errors.NULL_DOMAIN_ARG, e.error());
+		}
+		Component component = new Component("name", layer, domain, null);
+		assertEquals(component, ArgUtils.check(component, "component"));
+		try {
+			ArgUtils.check((Component)null, "component");
+			Assert.fail();
+		} catch (EnforcerException e) {
+			assertEquals("null component", e.getMessage());
+			assertEquals(Errors.NULL_COMPONENT_ARG, e.error());
+		}
+		Type type = new Type("foo");
+		assertEquals(type, ArgUtils.check(type, "type"));
+		try {
+			ArgUtils.check((Type)null, "type");
+			Assert.fail();
+		} catch (EnforcerException e) {
+			assertEquals("null type", e.getMessage());
+			assertEquals(Errors.NULL_TYPE_ARG, e.error());
+		}
+		Problem problem = new Problem("problem", Errors.CANNOT_READ_FILE);
+		assertEquals(problem, ArgUtils.check(problem, "problem"));
+		try {
+			ArgUtils.check((Problem)null, "problem");
+			Assert.fail();
+		} catch (EnforcerException e) {
+			assertEquals("null problem", e.getMessage());
+			assertEquals(Errors.NULL_PROBLEM_ARG, e.error());
 		}
 		assertEquals(Errors.CANNOT_READ_FILE, ArgUtils.check(Errors.CANNOT_READ_FILE, "name"));
 		try {
-			ArgUtils.check((Errors) null, "name");
+			ArgUtils.check((Errors)null, "name");
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertEquals("null name", e.getMessage());

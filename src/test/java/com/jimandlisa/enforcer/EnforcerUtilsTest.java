@@ -201,6 +201,7 @@ public class EnforcerUtilsTest {
 	@Test
 	public void testCorrelate() {
 		Map<String, Type> types = new HashMap<>();
+		Set<Reference> references = new LinkedHashSet<>();
 		Set<Problem> problems = new LinkedHashSet<>();
 		Flags flags = new Flags();
 		Type type1 = new Type("com.foo.bar.Baz");
@@ -214,15 +215,16 @@ public class EnforcerUtilsTest {
 		Component component1 = new Component("Comp1", layer1, null, null);
 		component1.packages().add("com.foo");
 		components.put(component1.name(), component1);
-		EnforcerUtils.correlate(types, components, new RollUp(), problems, flags);
+		EnforcerUtils.correlate(types, components, new RollUp(), references, problems, flags);
 		assertTrue(problems.isEmpty());
-		assertEquals(component1, type1.belongsTo());
+		assertEquals(component1, type1.component());
 		assertEquals(type1, component1.types().get(type1.name()));
 	}
 
 	@Test
 	public void testCorrelateWithClasses() {
 		Map<String, Type> types = new HashMap<>();
+		Set<Reference> references = new LinkedHashSet<>();
 		Set<Problem> problems = new LinkedHashSet<>();
 		Flags flags = new Flags();
 		Type type1 = new Type("com.foo.bar.Baz");
@@ -244,15 +246,16 @@ public class EnforcerUtilsTest {
 		component2.packages().add("com.other");
 		component2.classes().add("com.foo.bar.Baz");
 		components.put(component2.name(), component2);
-		EnforcerUtils.correlate(types, components, new RollUp(), problems, flags);
+		EnforcerUtils.correlate(types, components, new RollUp(), references, problems, flags);
 		assertTrue(problems.isEmpty());
-		assertEquals(component2, type1.belongsTo());
+		assertEquals(component2, type1.component());
 		assertEquals(type1, component2.types().get(type1.name()));
 	}
 
 	@Test
 	public void testFailedCorrelateWithClasses() {
 		Map<String, Type> types = new HashMap<>();
+		Set<Reference> references = new LinkedHashSet<>();
 		Set<Problem> problems = new LinkedHashSet<>();
 		Flags flags = new Flags();
 		Type type1 = new Type("com.foo.bar.Baz");
@@ -272,10 +275,10 @@ public class EnforcerUtilsTest {
 		component2.classes().add("com.foo.bar.Bat");
 		components.put(component2.name(), component2);
 		try {
-			EnforcerUtils.correlate(types, components, new RollUp(), problems, flags);
+			EnforcerUtils.correlate(types, components, new RollUp(), references, problems, flags);
 			Assert.fail();
 		} catch (EnforcerException e) {
-			assertTrue(problems.iterator().next().description().contains("unable to resolve class to type:"));
+			assertTrue(problems.iterator().next().description().contains("unable to resolve class to type"));
 			assertEquals(Errors.CLASS_NOT_RESOLVED_TO_TYPE, e.error());
 		}
 	}
@@ -283,6 +286,7 @@ public class EnforcerUtilsTest {
 	@Test
 	public void testFailedTypeToComponentCorrelate() {
 		Map<String, Type> types = new HashMap<>();
+		Set<Reference> references = new LinkedHashSet<>();
 		Set<Problem> problems = new LinkedHashSet<>();
 		Flags flags = new Flags();
 		Type type1 = new Type("com.foo.bar.Baz");
@@ -299,10 +303,10 @@ public class EnforcerUtilsTest {
 		component1.packages().add("com.foo");
 		components.put(component1.name(), component1);
 		try {
-			EnforcerUtils.correlate(types, components, new RollUp(), problems, flags);
+			EnforcerUtils.correlate(types, components, new RollUp(), references, problems, flags);
 			Assert.fail();
 		} catch (EnforcerException e) {
-			assertTrue(problems.iterator().next().description().contains("unable to resolve type to component name:"));
+			assertTrue(problems.iterator().next().description().contains("unable to resolve type " + type3 + " to component"));
 			assertEquals(Errors.TYPE_NOT_RESOLVED_TO_COMPONENT, e.error());
 		}
 	}
@@ -310,6 +314,7 @@ public class EnforcerUtilsTest {
 	@Test
 	public void testLayerViolationCorrelate() {
 		Map<String, Type> types = new HashMap<>();
+		Set<Reference> references = new LinkedHashSet<>();
 		Set<Problem> problems = new LinkedHashSet<>();
 		Flags flags = new Flags();
 		Type type1 = new Type("com.foo.bar.Baz");
@@ -331,8 +336,8 @@ public class EnforcerUtilsTest {
 		components.put(component2.name(), component2);
 		type3.referenceNames().add("com.foo.bar.Baz");
 		type3.references().add(type1);
-		EnforcerUtils.correlate(types, components, new RollUp(), problems, flags);
-		assertTrue(problems.iterator().next().description().contains("com.bar.Baz3!Comp0!L0!0|com.foo.bar.Baz!Comp1!L1!1"));
+		EnforcerUtils.correlate(types, components, new RollUp(), references, problems, flags);
+		assertTrue(problems.iterator().next().description().contains("com.bar.Baz3!Comp0!L0!0!com.foo.bar.Baz!Comp1!L1!1"));
 		assertTrue(
 				problems.iterator().next().detail().contains("type com.bar.Baz3 in component 'Comp0' in layer 'L0' depth 0 refers to type com.foo.bar.Baz in component 'Comp1' in layer 'L1' depth 1"));
 		assertEquals(Errors.ILLEGAL_REFERENCE, problems.iterator().next().error());

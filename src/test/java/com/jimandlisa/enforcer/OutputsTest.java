@@ -25,10 +25,16 @@ public class OutputsTest {
 	public void doTest() {
 		Outputs outputs = new Outputs(TestUtils.targetDir());
 		assertEquals(TestUtils.targetDir(), outputs.outputDirectory());
+		outputs.toString();
 		outputs.setIllegalReferences(Outputs.ILLEGAL_REFERENCES_DEFAULT_FILE_NAME);
-		outputs.setUnresolvedTypes(Outputs.UNRESOLVED_TYPES_DEFAULT_FILE_NAME);
 		assertEquals(Outputs.ILLEGAL_REFERENCES_DEFAULT_FILE_NAME, outputs.illegalReferences().getName());
+		outputs.toString();
+		outputs.setUnresolvedTypes(Outputs.UNRESOLVED_TYPES_DEFAULT_FILE_NAME);
 		assertEquals(Outputs.UNRESOLVED_TYPES_DEFAULT_FILE_NAME, outputs.unresolvedTypes().getName());
+		outputs.toString();
+		outputs.setAllReferences(Outputs.ALL_REFERENCES_DEFAULT_FILE_NAME);
+		assertEquals(Outputs.ALL_REFERENCES_DEFAULT_FILE_NAME, outputs.allReferences().getName());
+		outputs.toString();
 		try {
 			outputs.setIllegalReferences("foo");
 			Assert.fail();
@@ -42,6 +48,13 @@ public class OutputsTest {
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("unresolved types output file already set"));
 			assertEquals(Errors.UNRESOLVED_TYPES_OUTPUT_FILE_ALREADY_SPECIFIED, e.error());
+		}
+		try {
+			outputs.setAllReferences("foo");
+			Assert.fail();
+		} catch (EnforcerException e) {
+			assertTrue(e.getMessage().contains("all references output file already set"));
+			assertEquals(Errors.ALL_REFERENCES_OUTPUT_FILE_ALREADY_SPECIFIED, e.error());
 		}
 	}
 }

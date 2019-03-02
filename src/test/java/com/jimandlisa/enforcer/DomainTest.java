@@ -13,8 +13,9 @@
 
 package com.jimandlisa.enforcer;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -23,13 +24,15 @@ public class DomainTest {
 	@Test
 	public void doTest() {
 		Domain domain = new Domain("name", "description");
-		assertNotNull(domain.name());
-		assertNotNull(domain.description());
-		domain.toString();
+		assertEquals("name", domain.name());
+		assertEquals("'name'", domain.quotedName());
+		assertEquals("description", domain.description());
+		assertEquals("name='name'", domain.toString());
 		domain = new Domain("name", null);
-		assertNotNull(domain.name());
+		assertEquals("name", domain.name());
+		assertEquals("'name'", domain.quotedName());
 		assertNull(domain.description());
-		domain.toString();
-		domain.components();
+		assertEquals("name='name'", domain.toString());
+		assertTrue(domain.components().isEmpty());
 	}
 }

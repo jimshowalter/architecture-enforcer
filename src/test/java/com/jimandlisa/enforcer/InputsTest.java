@@ -14,6 +14,8 @@
 package com.jimandlisa.enforcer;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -26,12 +28,20 @@ public class InputsTest {
 	@Test
 	public void doTest() {
 		Inputs inputs = TestUtils.inputs(false, false, false);
+		assertNotNull(inputs.target());
+		assertNotNull(inputs.war());
 		inputs.toString();
+		assertNull(inputs.ignores());
 		inputs.setIgnores(TestUtils.testClassesFile("SampleIgnores.txt"));
+		assertNotNull(inputs.ignores());
 		inputs.toString();
+		assertNull(inputs.reflections());
 		inputs.setReflections(TestUtils.testClassesFile("SampleReflections.txt"));
+		assertNotNull(inputs.reflections());
 		inputs.toString();
+		assertNull(inputs.fixUnresolveds());
 		inputs.setFixUnresolveds(TestUtils.testClassesFile("SampleFixUnresolveds.txt"));
+		assertNotNull(inputs.fixUnresolveds());
 		inputs.toString();
 		inputs = TestUtils.inputs(true, true, true);
 		inputs.toString();

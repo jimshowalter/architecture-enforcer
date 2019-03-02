@@ -208,7 +208,7 @@ public class EnforcerUtils {
 			wsInitializer.initializeWorksetAndWait(null);
 			for (ClassInformation classInfo : workset.getAllContainedClasses()) {
 				String referringClass = denest(classInfo.getName().trim(), flags);
-				// TODO: Instead of creating the entire graph and then ignoring, see if there's  a way to pass in a filter when initializing the workspace.
+				// TODO: Instead of creating the entire graph and then ignoring, see if there's a way to pass in a filter when initializing the workspace.
 				if (skip(referringClass, ignores)) {
 					continue;
 				}
@@ -232,38 +232,42 @@ public class EnforcerUtils {
 		return types;
 	}
 
-	public static void correlate(Map<String, Type> types, Map<String, Component> components, RollUp rollUp, Set<Problem> problems, Flags flags) {
+	public static void correlate(Map<String, Type> types, Map<String, Component> components, RollUp rollUp, Set<Reference> references, Set<Problem> problems, Flags flags) {
 		for (Component component : components.values()) {
 			for (String className : component.classes()) {
 				Type type = types.get(className);
 				if (type == null) {
-					problems.add(new Problem("unable to resolve class to type: " + className, Errors.CLASS_NOT_RESOLVED_TO_TYPE));
-					continue;
+					problems.add(new Problem("unable to resolve class to type " + className + ", adding synthesized type", Errors.CLASS_NOT_RESOLVED_TO_TYPE));
+					type = new Type(className);
+					types.put(className, type);
 				}
 				component.add(type);
-				type.setBelongsTo(component);
+				type.setComponent(component);
 			}
 		}
 		report(problems, flags);
 		rollUp.add(components.values());
 		for (Type type : types.values()) {
-			if (type.belongsTo() != null) {
-				continue;
+			if (type.component() != null) {
+				continue; // Was already resolved by class name.
 			}
 			String componentName = rollUp.get(type.name());
 			if (componentName == null) {
-				problems.add(new Problem("unable to resolve type to component name: " + type.name(), Errors.TYPE_NOT_RESOLVED_TO_COMPONENT));
+				problems.add(new Problem("unable to resolve type " + type.name() + " to component", Errors.TYPE_NOT_RESOLVED_TO_COMPONENT));
 				continue;
 			}
 			Component component = components.get(componentName);
 			component.add(type);
-			type.setBelongsTo(component);
+			type.setComponent(component);
 		}
 		report(problems, flags);
 		for (Type referringType : types.values()) {
 			for (Type referredToType : referringType.references()) {
-				if (TypeUtils.isLayerViolation(referringType, referredToType)) {
-					problems.add(new Problem(TypeUtils.parseableDescription(referringType, referredToType), Errors.ILLEGAL_REFERENCE, TypeUtils.humanReadableDescription(referringType, referredToType)));
+				Reference reference = new Reference(referringType, referredToType);
+				references.add(reference);
+				if (ReferenceUtils.isLayerViolation(reference)) {
+					reference.setProblem(new Problem(ReferenceUtils.parseableDescription(reference), Errors.ILLEGAL_REFERENCE, ReferenceUtils.humanReadableDescription(reference)));
+					problems.add(reference.problem());
 				}
 			}
 		}

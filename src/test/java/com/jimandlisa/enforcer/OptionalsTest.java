@@ -13,6 +13,8 @@
 
 package com.jimandlisa.enforcer;
 
+import static org.junit.Assert.assertNotNull;
+
 import org.junit.Test;
 
 public class OptionalsTest {
@@ -20,6 +22,7 @@ public class OptionalsTest {
 	@Test
 	public void doTest() {
 		for (Optionals optional : Optionals.values()) {
+			assertNotNull(optional.indicator());
 			optional.toString();
 		}
 	}

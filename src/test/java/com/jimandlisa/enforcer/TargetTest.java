@@ -14,24 +14,29 @@
 package com.jimandlisa.enforcer;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-public class LayerTest {
+public class TargetTest {
 
 	@Test
-	public void doTest() {
-		Layer layer = new Layer("name", 0, "description");
-		assertEquals("name", layer.name());
-		assertEquals("'name'", layer.quotedName());
-		assertEquals(0, layer.depth());
-		assertEquals("description", layer.description());
-		assertEquals("name='name', depth=0", layer.toString());
-		assertTrue(layer.components().isEmpty());
-		layer = new Layer("name", 0, null);
-		assertEquals("name='name', depth=0", layer.toString());
-		assertNull(layer.description());
+	public void testTarget() {
+		Target target = new Target();
+		assertTrue(target.layers().isEmpty());
+		assertTrue(target.domains().isEmpty());
+		assertTrue(target.components().isEmpty());
+		Layer layer = new Layer("foo", 0, null);
+		Domain domain = new Domain("bar", null);
+		Component component = new Component("baz", layer, domain, null);
+		target.add(layer);
+		target.add(domain);
+		target.add(component);
+		assertEquals(1, target.layers().size());
+		assertEquals(layer, target.layers().values().iterator().next());
+		assertEquals(1, target.domains().size());
+		assertEquals(domain, target.domains().values().iterator().next());
+		assertEquals(1, target.components().size());
+		assertEquals(component, target.components().values().iterator().next());
 	}
 }

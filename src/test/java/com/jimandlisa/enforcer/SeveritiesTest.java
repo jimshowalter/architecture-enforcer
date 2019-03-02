@@ -13,25 +13,14 @@
 
 package com.jimandlisa.enforcer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
 
-public class LayerTest {
+public class SeveritiesTest {
 
 	@Test
 	public void doTest() {
-		Layer layer = new Layer("name", 0, "description");
-		assertEquals("name", layer.name());
-		assertEquals("'name'", layer.quotedName());
-		assertEquals(0, layer.depth());
-		assertEquals("description", layer.description());
-		assertEquals("name='name', depth=0", layer.toString());
-		assertTrue(layer.components().isEmpty());
-		layer = new Layer("name", 0, null);
-		assertEquals("name='name', depth=0", layer.toString());
-		assertNull(layer.description());
+		for (Severities serverity : Severities.values()) {
+			serverity.toString();
+		}
 	}
 }

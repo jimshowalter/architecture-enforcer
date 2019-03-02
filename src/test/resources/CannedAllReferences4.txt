@@ -1,4 +1,0 @@
-bar!Comp1!One!1|baz!Comp2!One!1!ILLEGAL
-bum!Comp3!Two!2|foo!Comp1!One!1!LEGAL
-foo!Comp1!One!1|bar!Comp1!One!1!LEGAL
-foo!Comp1!One!1|baz!Comp2!One!1!ILLEGAL

@@ -13,47 +13,50 @@
 
 package com.jimandlisa.enforcer;
 
-import java.util.HashSet;
-import java.util.Set;
+public class Reference implements Comparable<Reference> {
 
-public class Type implements Comparable<Type> {
+	private final Type referringType;
+	private final Type referredToType;
+	private final int hashCode;
+	private final String baseToString;
+	private Problem problem = null;
+	private boolean isIllegal = false;
 
-	private final String name;
-	private final Set<String> referenceNames = new HashSet<>();
-	private final Set<Type> references = new HashSet<>();
-	private Component component = null;
-
-	public Type(final String name) {
+	public Reference(final Type referringType, final Type referredToType) {
 		super();
-		this.name = ArgUtils.check(name, "name");
+		this.referringType = ArgUtils.check(referringType, "referringType");
+		this.referredToType = ArgUtils.check(referredToType, "referredToType");
+		this.hashCode = referringType.hashCode() + referredToType.hashCode();
+		this.baseToString = referringType.name() + " -> " + referredToType.name();
 	}
 
-	public String name() {
-		return name;
+	public Type referringType() {
+		return referringType;
 	}
 
-	public Set<String> referenceNames() {
-		return referenceNames;
+	public Type referredToType() {
+		return referredToType;
 	}
 
-	public Set<Type> references() {
-		return references;
-	}
-
-	public void setComponent(final Component component) {
-		if (component() != null) {
-			throw new EnforcerException("component already set", Errors.COMPONENT_ALREADY_SPECIFIED);
+	public void setProblem(final Problem problem) {
+		if (problem() != null) {
+			throw new EnforcerException("already set problem " + problem, Errors.PROBLEM_ALREADY_SPECIFIED);
 		}
-		this.component = ArgUtils.check(component, "component");
+		this.problem = ArgUtils.check(problem, "problem");
+		this.isIllegal = problem.error() == Errors.ILLEGAL_REFERENCE;
 	}
 
-	public Component component() {
-		return component;
+	public Problem problem() {
+		return problem;
+	}
+
+	public boolean isIllegal() {
+		return isIllegal;
 	}
 
 	@Override
 	public int hashCode() {
-		return name.hashCode();
+		return hashCode;
 	}
 
 	@Override
@@ -64,19 +67,19 @@ public class Type implements Comparable<Type> {
 		if (this == obj) {
 			return true;
 		}
-		if (!(obj instanceof Type)) {
+		if (!(obj instanceof Reference)) {
 			return false;
 		}
-		return name.equals(((Type)obj).name);
+		return baseToString.equals(((Reference)obj).baseToString);
 	}
 
 	@Override
-	public int compareTo(Type other) {
-		return name.compareTo(other.name);
+	public int compareTo(Reference other) {
+		return baseToString.compareTo(other.baseToString);
 	}
 
 	@Override
 	public String toString() {
-		return name;
+		return baseToString + (isIllegal ? " [ILLEGAL]" : "");
 	}
 }

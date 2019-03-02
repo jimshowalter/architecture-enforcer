@@ -72,6 +72,6 @@ public class Inputs {
 
 	@Override
 	public String toString() {
-		return "target=" + target() + ", war=" + war() + ", ignores=" + ignores() + ", reflections=" + reflections() + ", fix-unresolveds=" + fixUnresolveds();
+		return "target=" + target + ", war=" + war + ", ignores=" + ignores + ", reflections=" + reflections + ", fix-unresolveds=" + fixUnresolveds;
 	}
 }

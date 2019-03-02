@@ -48,6 +48,6 @@ public class Domain {
 
 	@Override
 	public String toString() {
-		return "name=" + quotedName();
+		return "name=" + quotedName;
 	}
 }
