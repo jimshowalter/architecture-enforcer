@@ -196,7 +196,7 @@ public class Enforce {
 				ps.println(refs.get(referringType) + ";" + refs.get(referredToType));
 			}
 		}
-		try (PrintStream ps = new PrintStream(new FileOutputStream(new File(outputs.allReferences().getAbsolutePath().replace(".txt", "_yed.tgf"))))) {
+		try (PrintStream ps = new PrintStream(new FileOutputStream(new File(outputs.allReferences().getAbsolutePath().replace(".txt", "_yEd.tgf"))))) {
 			for (Map.Entry<String, Integer> entry : refs.entrySet()) {
 				ps.println(entry.getValue() + " " + entry.getKey());
 			}
