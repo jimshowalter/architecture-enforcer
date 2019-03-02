@@ -211,7 +211,7 @@ include $TheNestedType in the names.
 
 * Adding a referred-to class to the reflections or fix-unresolveds files can introduce new unresolved classes. When that happens, you need to keep entering classes until all classes are defined.
 
-* When not running in strict mode, the tool creates unresolved types and adds them to the type-lookup map. This is just a band-aid through, because whatever types a missing type refers to are not included in the analysis (because they aren't known).
+* The tool creates unresolved types and adds them to the type-lookup map so downstream analysis doesn't blow up. This is just a band-aid through, because whatever types a missing type refers to are not included in the analysis (because they aren't known).
 
 * pf-CDA is smart enough to add references on its own for simple Class.forName calls where the string name of the class is directly specified, as in Class.forName("com.foo.bar.Baz"), but it can't follow complicated string concatenations, strings returned by functions, etc.,
 for example Class.forName(someStringFromAVariable + SomeClass.someFunction(some args from somewhere) + SOME\_STRING\_CONSTANT + ".Foo"). That's why you have to add them manually. Also, pf-CDA doesn't parse reflection references in JSP files, Spring, etc.
