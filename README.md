@@ -166,7 +166,7 @@ Unresolved types and illegal references are written to the output directory (if 
 
 Unresolved types are written as the fully-qualified type name, one type per line.
 
-By default, the unresolved-types output file name is "unresolved_types.txt", and the illegal-references output file name is "illegal_references.txt". These can be overridden with the -U and -I options, respectively.
+By default, the unresolved-types output file name is "unresolved\_types.txt", and the illegal-references output file name is "illegal\_references.txt". These can be overridden with the -U and -I options, respectively.
 
 If -A is specified, all references (not just illegal references) are written to the specified file, including intra-component references. This can be useful to feed into other programs, for example to visualize the architecture, generate complexity metrics, etc.
 As an experiment, when -A is specified, input files for https://gephi.org (\*\_GephiNodes.csv, \*\_GephiEdges.csv) and https://www.yworks.com/products/yed (\*.tgf) are generated.
@@ -210,6 +210,8 @@ you don't need to add any referred-to classes (and you don't need a colon after 
 include $TheNestedType in the names.
 
 * Adding a referred-to class to the reflections or fix-unresolveds files can introduce new unresolved classes. When that happens, you need to keep entering classes until all classes are defined.
+
+* When not running in strict mode, the tool creates unresolved types and adds them to the type-lookup map. This is just a band-aid through, because whatever types a missing type refers to are not included in the analysis (because they aren't known).
 
 * pf-CDA is smart enough to add references on its own for simple Class.forName calls where the string name of the class is directly specified, as in Class.forName("com.foo.bar.Baz"), but it can't follow complicated string concatenations, strings returned by functions, etc.,
 for example Class.forName(someStringFromAVariable + SomeClass.someFunction(some args from somewhere) + SOME\_STRING\_CONSTANT + ".Foo"). That's why you have to add them manually. Also, pf-CDA doesn't parse reflection references in JSP files, Spring, etc.
