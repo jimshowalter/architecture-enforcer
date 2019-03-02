@@ -17,13 +17,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+// Handles interactions with the user, and outputs results.
 public class Enforce {
 
 	private static final String USAGE = ": usage: /full/path/to/target/architecture/.yaml /full/path/to/.war /full/path/to/writable/output/directory " + Optionals.UNRESOLVED_TYPES_OUTPUT_FILE
@@ -110,10 +111,8 @@ public class Enforce {
 		return count;
 	}
 
-	// To have gotten here, there can't be any fatal errors. In strict mode, that
-	// means we can't get here at all if there are any problems.
-	// In non-strict mode, we can get here, but only if all problems are fatal only
-	// when strict is specified. We need to report those problems.
+	// To have gotten here, there can't be any fatal errors. In strict mode, that means we can't get here at all if there are any problems.
+	// In non-strict mode, we can get here, but only if all problems are fatal only when strict is specified. We need to report those problems.
 	static void reportProblems(Set<Problem> problems, PrintStream ps, Outputs outputs, Flags flags) throws Exception {
 		boolean foundUnresolvedTypes = false;
 		boolean foundIllegalReferences = false;
@@ -167,15 +166,25 @@ public class Enforce {
 			}
 		}
 		// Experimental output for https://gephi.org and https://www.yworks.com/products/yed.
-		Map<String, String> refs = new HashMap<>();
-		Integer id = 0;
+		Map<String, Integer> refs = new LinkedHashMap<>();
+		int id = 0;
+		for (String reference : CollectionUtils.sort(allReferences)) {
+			String[] segments = reference.split("!");
+			String referringType = segments[0];
+			String referredToType = segments[4];
+			if (!refs.containsKey(referringType)) {
+				id++;
+				refs.put(referringType, id);
+			}
+			if (!refs.containsKey(referredToType)) {
+				id++;
+				refs.put(referredToType, id);
+			}
+		}
 		try (PrintStream ps = new PrintStream(new FileOutputStream(new File(outputs.allReferences().getAbsolutePath().replace(".txt", "_GephiNodes.csv"))))) {
 			ps.println("ID;Label");
-			for (String reference : CollectionUtils.sort(allReferences)) {
-				id++;
-				String referringType = reference.split("!")[0];
-				refs.put(referringType, id.toString());
-				ps.println(id + ";" + referringType);
+			for (Map.Entry<String, Integer> entry : refs.entrySet()) {
+				ps.println(entry.getValue() + ";" + entry.getKey());
 			}
 		}
 		try (PrintStream ps = new PrintStream(new FileOutputStream(new File(outputs.allReferences().getAbsolutePath().replace(".txt", "_GephiEdges.csv"))))) {
@@ -187,13 +196,9 @@ public class Enforce {
 				ps.println(refs.get(referringType) + ";" + refs.get(referredToType));
 			}
 		}
-		id = 0;
-		try (PrintStream ps = new PrintStream(new FileOutputStream(new File(outputs.allReferences().getAbsolutePath().replace(".txt", ".tgf"))))) {
-			for (String reference : CollectionUtils.sort(allReferences)) {
-				id++;
-				String referringType = reference.split("!")[0];
-				refs.put(referringType, id.toString());
-				ps.println(id + " " + referringType);
+		try (PrintStream ps = new PrintStream(new FileOutputStream(new File(outputs.allReferences().getAbsolutePath().replace(".txt", "_yed.tgf"))))) {
+			for (Map.Entry<String, Integer> entry : refs.entrySet()) {
+				ps.println(entry.getValue() + " " + entry.getKey());
 			}
 			ps.println("#");
 			for (String reference : CollectionUtils.sort(allReferences)) {
