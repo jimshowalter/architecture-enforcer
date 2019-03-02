@@ -116,18 +116,23 @@ public class Enforce {
 	static void reportProblems(Set<Problem> problems, PrintStream ps, Outputs outputs, Flags flags) throws Exception {
 		boolean foundUnresolvedTypes = false;
 		boolean foundIllegalReferences = false;
-		boolean foundWarnings = false;
+		List<String> warnings = new ArrayList<>();
 		for (Problem problem : problems) {
 			if (problem.error() == Errors.UNRESOLVED_REFERENCE) {
 				foundUnresolvedTypes = true;
 			} else if (problem.error() == Errors.ILLEGAL_REFERENCE) {
 				foundIllegalReferences = true;
 			} else {
-				if (!foundWarnings) {
-					ps.println("WARNINGS:");
-					foundWarnings = true;
-				}
-				ps.println(problem.description());
+				warnings.add(problem.description());
+			}
+		}
+		if (warnings.size() == 1) {
+			ps.println("WARNING:");
+			ps.println(warnings.iterator().next());
+		} else if (warnings.size() > 1) {
+			ps.println("WARNINGS:");
+			for (String warning : warnings) {
+				ps.println(warning);
 			}
 		}
 		int count = problemsCount(foundUnresolvedTypes, foundIllegalReferences);

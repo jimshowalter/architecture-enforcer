@@ -1,2 +1,2 @@
-WARNINGS:
+WARNING:
 foo
