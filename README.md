@@ -277,17 +277,19 @@ This tool can of course be improved. Below are listed some things we know would 
 
 ### TODOs We Like ###
 
-* WARNING: Fix the build warnings.
-
 * BUG: Classes can start with dollar signs, so the current approach to denesting is erroneous. See if pf-CDA provides a way to determine if a class is nested, and, if so, to get its outermost class.
 
 * PERFORMANCE: Instead of creating the entire graph with pf-CDA (which can be gigantic for large codebases) and then ignoring a bunch of classes, see if there's a way to pass in a filter when initializing the pf-CDA workspace.
 
-* HYGIENE: Start tracking these todos in a bug-tracking system.
+* WARNING: Fix the build warnings.
+
+* HYGEINE: Either remove the experimental outputs for Gephi and yed, or make them first-class citizens (separate fields in Outputs object, only run through map once, etc.).
 
 * HYGIENE: Add one or more code-quality tools to the build. For example, findbugs, errorprone, etc.
 
 * HYGIENE: There is repetitive "Utils.called" call-tracking code in the architecture-enforcer-sample project that probably could be simplified via aspects.
+
+* HYGIENE: Start tracking these todos in a bug-tracking system.
 
 * FEATURE: Provide a way to fail builds if the count of illegal references increases. Note that this is different from enabling strict mode, because in that case builds fail if there are any illegal references, so the previous count is known (it's zero).
 This requires determining that there were N illegal references in the previous build, and now there are N + M illegal references in the current build. One way to do this is to access the previous build in CI/CD using something like the Jenkins API.
