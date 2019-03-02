@@ -38,12 +38,12 @@ public class Reference implements Comparable<Reference> {
 		return referredToType;
 	}
 
-	public boolean isSelfReference() {
+	public boolean isIntraComponentReference() {
 		return referringType.component().equals(referredToType.component());
 	}
 
 	public boolean isLayerViolation() {
-		if (isSelfReference()) { // Ignore intra-component references.
+		if (isIntraComponentReference()) {
 			return false;
 		}
 		return referringType.component().layer().depth() <= referredToType.component().layer().depth();
