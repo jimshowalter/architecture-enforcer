@@ -175,6 +175,7 @@ public class Enforce {
 			if (!refs.containsKey(referringType)) {
 				id++;
 				refs.put(referringType, id);
+				continue;
 			}
 			if (!refs.containsKey(referredToType)) {
 				id++;
