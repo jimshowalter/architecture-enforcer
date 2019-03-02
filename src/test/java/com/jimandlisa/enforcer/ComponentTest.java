@@ -44,6 +44,7 @@ public class ComponentTest {
 		assertTrue(component.packages().isEmpty());
 		assertTrue(component.classes().isEmpty());
 		assertTrue(component.types().isEmpty());
+		assertTrue(component.references().isEmpty());
 		component.add(new Type("abcd"));
 		assertEquals("abcd", component.types().values().iterator().next().name());
 	}

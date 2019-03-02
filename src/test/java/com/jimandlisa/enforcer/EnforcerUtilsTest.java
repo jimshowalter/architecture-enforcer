@@ -126,12 +126,12 @@ public class EnforcerUtilsTest {
 		assertTrue(EnforcerUtils.plural(Errors.CANNOT_READ_FILE).isEmpty());
 		Flags flags = new Flags();
 		Set<Problem> problems = new LinkedHashSet<>();
-		EnforcerUtils.report(problems, flags);
+		EnforcerUtils.reportFatalErrors(problems, flags);
 		problems.add(new Problem("COVERAGE0", Errors.UNRESOLVED_REFERENCE));
-		EnforcerUtils.report(problems, flags);
+		EnforcerUtils.reportFatalErrors(problems, flags);
 		problems.add(new Problem("COVERAGE1", Errors.CANNOT_READ_FILE));
 		try {
-			EnforcerUtils.report(problems, flags);
+			EnforcerUtils.reportFatalErrors(problems, flags);
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertEquals(Errors.CANNOT_READ_FILE, e.error());
@@ -141,7 +141,7 @@ public class EnforcerUtilsTest {
 		}
 		problems.add(new Problem("COVERAGE2", Errors.CLASS_BOTH_REFERRED_TO_AND_IGNORED));
 		try {
-			EnforcerUtils.report(problems, flags);
+			EnforcerUtils.reportFatalErrors(problems, flags);
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertEquals(Errors.MULTIPLE_ERRORS, e.error());
@@ -154,7 +154,7 @@ public class EnforcerUtilsTest {
 		problems.add(new Problem("foo", Errors.ILLEGAL_REFERENCE, "big long explanation"));
 		flags.enableStrict();
 		try {
-			EnforcerUtils.report(problems, flags);
+			EnforcerUtils.reportFatalErrors(problems, flags);
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertEquals(Errors.ILLEGAL_REFERENCE, e.error());

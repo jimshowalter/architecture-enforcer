@@ -139,24 +139,6 @@ public class EnforcerUtils {
 		}
 	}
 
-	static void resolve(Map<String, Type> types, Set<Problem> problems) {
-		Set<Type> synthetics = new HashSet<>();
-		for (Type type : types.values()) {
-			for (String referenceName : type.referenceNames()) {
-				Type reference = types.get(referenceName);
-				if (reference == null) {
-					problems.add(new Problem(referenceName, Errors.UNRESOLVED_REFERENCE));
-					synthetics.add(new Type(referenceName));
-					continue;
-				}
-				type.references().add(reference);
-			}
-		}
-		for (Type synthetic : synthetics) {
-			types.put(synthetic.name(), synthetic);
-		}
-	}
-
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
 	static String plural(Errors error) {
@@ -166,7 +148,7 @@ public class EnforcerUtils {
 		return "";
 	}
 
-	static void report(Set<Problem> problems, Flags flags) {
+	static void reportFatalErrors(Set<Problem> problems, Flags flags) {
 		StringBuilder builder = null;
 		Errors error = null;
 		for (Problem problem : problems) {
@@ -187,6 +169,24 @@ public class EnforcerUtils {
 		}
 		if (builder != null) {
 			throw new EnforcerException("FATAL ERROR" + plural(error) + ":" + builder.toString(), error);
+		}
+	}
+
+	static void resolve(Map<String, Type> types, Set<Problem> problems) {
+		Set<Type> synthetics = new HashSet<>();
+		for (Type type : types.values()) {
+			for (String referenceName : type.referenceNames()) {
+				Type reference = types.get(referenceName);
+				if (reference == null) {
+					problems.add(new Problem(referenceName, Errors.UNRESOLVED_REFERENCE));
+					synthetics.add(new Type(referenceName));
+					continue;
+				}
+				type.references().add(reference);
+			}
+		}
+		for (Type synthetic : synthetics) {
+			types.put(synthetic.name(), synthetic);
 		}
 	}
 
@@ -231,13 +231,13 @@ public class EnforcerUtils {
 		}
 		parse(inputs.reflections(), types, ignores, problems, "reflection", true, flags); // Get reflection-based referring and referred-to classes from reflections file.
 		parse(inputs.fixUnresolveds(), types, ignores, problems, "fix-unresolved", false, flags); // Get referring and referred-to classes from fix-unresolveds file.
-		report(problems, flags);
+		reportFatalErrors(problems, flags);
 		resolve(types, problems);
-		report(problems, flags);
+		reportFatalErrors(problems, flags);
 		return types;
 	}
 
-	public static void correlate(Map<String, Type> types, Map<String, Component> components, RollUp rollUp, Set<Reference> references, Set<Problem> problems, Flags flags) {
+	static void correlateComponentClassesToTypes(Map<String, Type> types, Map<String, Component> components, Set<Problem> problems) {
 		for (Component component : components.values()) {
 			for (String className : component.classes()) {
 				Type type = types.get(className);
@@ -249,7 +249,9 @@ public class EnforcerUtils {
 				type.setComponent(component);
 			}
 		}
-		report(problems, flags);
+	}
+
+	static void correlateTypesToComponents(Map<String, Type> types, Map<String, Component> components, RollUp rollUp, Set<Problem> problems) {
 		rollUp.add(components.values());
 		for (Type type : types.values()) {
 			if (type.component() != null) {
@@ -264,17 +266,28 @@ public class EnforcerUtils {
 			component.add(type);
 			type.setComponent(component);
 		}
-		report(problems, flags);
+	}
+
+	static void correlateTypesToReferences(Map<String, Type> types, Set<Reference> references, Set<Problem> problems) {
 		for (Type referringType : types.values()) {
 			for (Type referredToType : referringType.references()) {
 				Reference reference = new Reference(referringType, referredToType);
 				references.add(reference);
+				referringType.component().references().add(reference);
 				if (reference.isLayerViolation()) {
 					reference.setProblem(new Problem(reference.parseableDescription(), Errors.ILLEGAL_REFERENCE, reference.humanReadableDescription()));
 					problems.add(reference.problem());
 				}
 			}
 		}
-		report(problems, flags);
+	}
+
+	public static void correlate(Map<String, Type> types, Map<String, Component> components, RollUp rollUp, Set<Reference> references, Set<Problem> problems, Flags flags) {
+		correlateComponentClassesToTypes(types, components, problems);
+		reportFatalErrors(problems, flags);
+		correlateTypesToComponents(types, components, rollUp, problems);
+		reportFatalErrors(problems, flags);
+		correlateTypesToReferences(types, references, problems);
+		reportFatalErrors(problems, flags);
 	}
 }

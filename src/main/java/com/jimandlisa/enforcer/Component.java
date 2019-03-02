@@ -14,6 +14,7 @@
 package com.jimandlisa.enforcer;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -28,6 +29,7 @@ public class Component {
 	private final Set<String> packages = new LinkedHashSet<>();
 	private final Set<String> classes = new LinkedHashSet<>();
 	private final Map<String, Type> types = new HashMap<>();
+	private final Set<Reference> references = new HashSet<>();
 	
 	public Component(final String name, final Layer layer, final Domain domain, final String description) {
 		super();
@@ -72,6 +74,10 @@ public class Component {
 	
 	public void add(Type type) {
 		types.put(type.name(), type);
+	}
+	
+	public Set<Reference> references() {
+		return references;
 	}
 
 	@Override
