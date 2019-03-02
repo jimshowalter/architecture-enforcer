@@ -140,15 +140,20 @@ public class EnforcerUtils {
 	}
 
 	static void resolve(Map<String, Type> types, Set<Problem> problems) {
+		Set<Type> synthetics = new HashSet<>();
 		for (Type type : types.values()) {
 			for (String referenceName : type.referenceNames()) {
 				Type reference = types.get(referenceName);
 				if (reference == null) {
 					problems.add(new Problem(referenceName, Errors.UNRESOLVED_REFERENCE));
+					synthetics.add(new Type(referenceName));
 					continue;
 				}
 				type.references().add(reference);
 			}
+		}
+		for (Type synthetic : synthetics) {
+			types.put(synthetic.name(), synthetic);
 		}
 	}
 
@@ -237,9 +242,8 @@ public class EnforcerUtils {
 			for (String className : component.classes()) {
 				Type type = types.get(className);
 				if (type == null) {
-					problems.add(new Problem("unable to resolve class to type " + className + ", adding synthesized type", Errors.CLASS_NOT_RESOLVED_TO_TYPE));
-					type = new Type(className);
-					types.put(className, type);
+					problems.add(new Problem("unable to resolve class to type " + className, Errors.CLASS_NOT_RESOLVED_TO_TYPE));
+					continue;
 				}
 				component.add(type);
 				type.setComponent(component);
