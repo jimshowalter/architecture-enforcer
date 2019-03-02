@@ -64,6 +64,36 @@ public class ReferenceTest {
 		assertTrue(reference1.isIllegal());
 		assertEquals(type1.name() + " -> " + type2.name() + " [ILLEGAL]", reference1.toString());
 		assertEquals(reference1.referringType().hashCode() + reference1.referredToType().hashCode(), reference1.hashCode());
+		Layer layer1 = new Layer("One", 1, null);
+		Component comp1 = new Component("Comp1", layer1, null, null);
+		Component comp2 = new Component("Comp2", layer1, null, null);
+		Layer layer2 = new Layer("Two", 2, null);
+		Component comp3 = new Component("Comp3", layer2, null, null);
+		type1 = new Type("foo");
+		type1.setComponent(comp1);
+		type2 = new Type("bar");
+		type2.setComponent(comp1);
+		assertTrue(new Reference(type1, type1).isSelfReference());
+		assertTrue(new Reference(type1, type2).isSelfReference());
+		assertTrue(new Reference(type2, type1).isSelfReference());
+		assertFalse(new Reference(type1, type2).isLayerViolation());
+		assertFalse(new Reference(type2, type1).isLayerViolation());
+		type2 = new Type("bar");
+		type2.setComponent(comp2);
+		assertTrue(new Reference(type1, type1).isSelfReference());
+		assertFalse(new Reference(type1, type2).isSelfReference());
+		assertFalse(new Reference(type2, type1).isSelfReference());
+		assertTrue(new Reference(type1, type2).isLayerViolation());
+		assertTrue(new Reference(type2, type1).isLayerViolation());
+		type2 = new Type("bar");
+		type2.setComponent(comp3);
+		assertTrue(new Reference(type1, type1).isSelfReference());
+		assertFalse(new Reference(type1, type2).isSelfReference());
+		assertFalse(new Reference(type2, type1).isSelfReference());
+		assertTrue(new Reference(type1, type2).isLayerViolation());
+		assertFalse(new Reference(type2, type1).isLayerViolation());
+		assertEquals("foo!Comp1!One!1!bar!Comp3!Two!2", new Reference(type1, type2).parseableDescription());
+		assertEquals("type foo in component 'Comp1' in layer 'One' depth 1 refers to type bar in component 'Comp3' in layer 'Two' depth 2", new Reference(type1, type2).humanReadableDescription());
 		try {
 			new Reference(null, null);
 		} catch (EnforcerException e) {

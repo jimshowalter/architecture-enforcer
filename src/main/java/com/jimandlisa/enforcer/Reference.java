@@ -38,6 +38,17 @@ public class Reference implements Comparable<Reference> {
 		return referredToType;
 	}
 
+	public boolean isSelfReference() {
+		return referringType.component().equals(referredToType.component());
+	}
+
+	public boolean isLayerViolation() {
+		if (isSelfReference()) { // Ignore intra-component references.
+			return false;
+		}
+		return referringType.component().layer().depth() <= referredToType.component().layer().depth();
+	}
+
 	public void setProblem(final Problem problem) {
 		if (problem() != null) {
 			throw new EnforcerException("already set problem " + problem, Errors.PROBLEM_ALREADY_SPECIFIED);
@@ -81,5 +92,16 @@ public class Reference implements Comparable<Reference> {
 	@Override
 	public String toString() {
 		return baseToString + (isIllegal ? " [ILLEGAL]" : "");
+	}
+
+	public String parseableDescription() {
+		return referringType.name() + "!" + referringType.component().name() + "!" + referringType.component().layer().name() + "!" + referringType.component().layer().depth() + "!"
+				+ referredToType.name() + "!" + referredToType.component().name() + "!" + referredToType.component().layer().name() + "!" + referredToType.component().layer().depth();
+	}
+
+	public String humanReadableDescription() {
+		return "type " + referringType.name() + " in component " + referringType.component().quotedName() + " in layer " + referringType.component().layer().quotedName() + " depth "
+				+ referringType.component().layer().depth() + " refers to type " + referredToType.name() + " in component " + referredToType.component().quotedName() + " in layer "
+				+ referredToType.component().layer().quotedName() + " depth " + referredToType.component().layer().depth();
 	}
 }

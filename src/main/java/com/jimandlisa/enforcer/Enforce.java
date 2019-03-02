@@ -103,7 +103,7 @@ public class Enforce {
 			}
 		}
 	}
-	
+
 	static int problemsCount(boolean foundUnresolvedTypes, boolean foundIllegalReferences) {
 		int count = foundUnresolvedTypes ? 1 : 0;
 		count = foundIllegalReferences ? count + 1 : count;
@@ -145,9 +145,9 @@ public class Enforce {
 			ps.println(outputs.illegalReferences().getName());
 		}
 	}
-	
+
 	static String legality(Reference reference) {
-		return "!" + (ReferenceUtils.isLayerViolation(reference) ? "ILLEGAL" : "LEGAL");
+		return "!" + (reference.isLayerViolation() ? "ILLEGAL" : "LEGAL");
 	}
 
 	static void outputAllReferences(Set<Reference> references, Outputs outputs) throws Exception {
@@ -159,7 +159,7 @@ public class Enforce {
 		}
 		List<String> allReferences = new ArrayList<>();
 		for (Reference reference : references) {
-			allReferences.add(ReferenceUtils.parseableDescription(reference) + legality(reference));
+			allReferences.add(reference.parseableDescription() + legality(reference));
 		}
 		try (PrintStream ps = new PrintStream(new FileOutputStream(outputs.allReferences()))) {
 			for (String reference : CollectionUtils.sort(allReferences)) {
