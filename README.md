@@ -7,6 +7,10 @@ Compares a codebase's current state to a desired target state, identifying and r
 
 A companion project, https://github.com/jimshowalter/architecture-enforcer-sample, provides a sample war used by this project's tests, and in this documentation.
 
+## Why Not Just Use <Some Other Tool>? ##
+
+There are a bunch of tools that can analyze the structure of a codebase, for example 
+
 ## Defining Target State ##
 
 A target state is defined in terms of layers, domains, and components, all of which are logical groupings that exist "virtually" on top of whatever snarl constitutes the current codebase.
@@ -88,20 +92,20 @@ To summarize:
 In a sense, the entire point of this tool is to be able to implement these three functions:
 
 ```
-	public boolean isIntraComponentReference() {
-		return referringType.component().equals(referredToType.component());
-	}
-	
-	public boolean isInSameOrLowerLayer() {
-		return referringType.component().layer().depth() <= referredToType.component().layer().depth();
-	}
+public boolean isIntraComponentReference() {
+	return referringType.component().equals(referredToType.component());
+}
 
-	public boolean isLayerViolation() {
-		if (isIntraComponentReference()) {
-			return false;
-		}
-		return isInSameOrLowerLayer();
+public boolean isInSameOrLowerLayer() {
+	return referringType.component().layer().depth() <= referredToType.component().layer().depth();
+}
+
+public boolean isLayerViolation() {
+	if (isIntraComponentReference()) {
+		return false;
 	}
+	return isInSameOrLowerLayer();
+}
 ```
 
 ### Nested Classes And References ###
