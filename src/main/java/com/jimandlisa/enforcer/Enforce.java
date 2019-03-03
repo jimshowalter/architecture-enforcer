@@ -211,16 +211,50 @@ public class Enforce {
 		if (components.isEmpty()) {
 			return;
 		}
-		Set<String> refs = new HashSet<>();
+		Set<String> componentRefs = new HashSet<>();
 		for (Component component : components) {
 			for (Reference reference : component.references()) {
-				refs.add(component.name() + "!" + reference.referredToType().component().name() + "!" + reference.kind());
+				componentRefs.add(component.name() + "!" + reference.referredToType().component().name() + "!" + reference.kind());
 			}
 		}
-		List<String> sorted = CollectionUtils.sort(new ArrayList<>(refs));
+		List<String> allRefs = CollectionUtils.sort(new ArrayList<>(componentRefs));
 		try (PrintStream ps = new PrintStream(new FileOutputStream(outputs.allComponentReferences()))) {
-			for (String ref : sorted) {
+			for (String ref : allRefs) {
 				ps.println(ref);
+			}
+		}
+		Map<String, Integer> refs = new LinkedHashMap<>();
+		int id = 0;
+		for (String reference : allRefs) {
+			String[] segments = reference.split("!");
+			String referringComponent = segments[0];
+			String referredToComponent = segments[1];
+			if (!refs.containsKey(referringComponent)) {
+				id++;
+				refs.put(referringComponent, id);
+				continue;
+			}
+			if (!refs.containsKey(referredToComponent)) {
+				id++;
+				refs.put(referredToComponent, id);
+			}
+		}
+		try (PrintStream gephiNodes = new PrintStream(new FileOutputStream(outputs.allComponentReferencesGephiNodes()));
+				PrintStream gephiEdges = new PrintStream(new FileOutputStream(outputs.allComponentReferencesGephiEdges()));
+				PrintStream yed = new PrintStream(new FileOutputStream(outputs.allComponentReferencesYeD()))) {
+			gephiNodes.println("ID;Label");
+			for (Map.Entry<String, Integer> entry : refs.entrySet()) {
+				gephiNodes.println(entry.getValue() + ";" + entry.getKey());
+				yed.println(entry.getValue() + " " + entry.getKey());
+			}
+			yed.println("#");
+			gephiEdges.println("Source;Target");
+			for (String reference : allRefs) {
+				String[] segments = reference.split("!");
+				String referringComponent = segments[0];
+				String referredToComponent = segments[1];
+				gephiEdges.println(refs.get(referringComponent) + ";" + refs.get(referredToComponent));
+				yed.println(refs.get(referringComponent) + " " + refs.get(referredToComponent));
 			}
 		}
 	}
