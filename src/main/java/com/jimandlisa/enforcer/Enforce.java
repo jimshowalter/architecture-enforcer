@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -153,8 +154,14 @@ public class Enforce {
 	static String legality(Reference reference) {
 		return "!" + (reference.isLayerViolation() ? "ILLEGAL" : "LEGAL");
 	}
-	
+
 	static void outputAllClassToClassReferences(Set<Reference> references, Outputs outputs) throws Exception {
+		if (outputs.allReferences() == null) {
+			return;
+		}
+		if (references.isEmpty()) {
+			return;
+		}
 		List<String> allReferences = new ArrayList<>();
 		for (Reference reference : references) {
 			allReferences.add(reference.parseableDescription() + legality(reference));
@@ -200,15 +207,36 @@ public class Enforce {
 			}
 		}
 	}
-
-	static void outputAllReferences(Set<Reference> references, Outputs outputs) throws Exception {
-		if (outputs.allReferences() == null) {
+	
+	static String kind(Reference reference) {
+		if (reference.isIntraComponentReference()) {
+			return "!INTRA";
+		}
+		if (reference.isIllegal()) {
+			return "!ILLEGAL";
+		}
+		return "!LEGAL";
+	}
+	
+	static void outputAllComponentToComponentReferences(Collection<Component> components, Outputs outputs) throws Exception {
+		if (outputs.allComponentReferences() == null) {
 			return;
 		}
-		if (references.isEmpty()) {
+		if (components.isEmpty()) {
 			return;
 		}
-		outputAllClassToClassReferences(references, outputs);
+		Set<String> refs = new HashSet<>();
+		for (Component component : components) {
+			for (Reference reference : component.references()) {
+				refs.add(component.name() + "!" + reference.referredToType().component().name() + kind(reference));
+			}
+		}
+		List<String> sorted = CollectionUtils.sort(new ArrayList<>(refs));
+		try (PrintStream ps = new PrintStream(new FileOutputStream(outputs.allComponentReferences()))) {
+			for (String ref : sorted) {
+				ps.println(ref);
+			}
+		}
 	}
 
 	static void mainImpl(Inputs inputs, Outputs outputs, PrintStream ps, Flags flags) throws Exception {
@@ -220,7 +248,8 @@ public class Enforce {
 		EnforcerUtils.correlate(types, target.components(), rollUp, references, problems, flags);
 		debug(target, types, rollUp, ps, flags, 100);
 		reportProblems(problems, ps, outputs, flags);
-		outputAllReferences(references, outputs);
+		outputAllClassToClassReferences(references, outputs);
+		outputAllComponentToComponentReferences(target.components().values(), outputs);
 	}
 
 	public static void mainImpl(String[] args, PrintStream ps) throws Exception {

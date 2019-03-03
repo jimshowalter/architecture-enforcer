@@ -292,9 +292,12 @@ public class EnforceTest {
 	}
 
 	@Test
-	public void testOutputAllReferences() throws Exception {
+	public void testOutputAllClassToClassReferences() throws Exception {
+		Set<Reference> references = new HashSet<>();
 		Outputs outputs = TestUtils.outputs();
-		Enforce.outputAllReferences(null, outputs);
+		Enforce.outputAllClassToClassReferences(references, outputs);
+		outputs.enableAllReferences();
+		Enforce.outputAllClassToClassReferences(references, outputs);
 		Layer layer1 = new Layer("One", 1, null);
 		Component comp1 = new Component("Comp1", layer1, null, null);
 		Component comp2 = new Component("Comp2", layer1, null, null);
@@ -308,20 +311,18 @@ public class EnforceTest {
 		type3.setComponent(comp2);
 		Type type4 = new Type("bum");
 		type4.setComponent(comp3);
-		Set<Reference> references = new HashSet<>();
-		outputs.enableAllReferences();
 		outputs.allReferences().delete();
-		Enforce.outputAllReferences(references, outputs);
+		Enforce.outputAllClassToClassReferences(references, outputs);
 		assertFalse(outputs.allReferences().exists());
 		Reference legalIntraComponent = new Reference(type1, type2);
 		references.add(legalIntraComponent);
-		Enforce.outputAllReferences(references, outputs);
+		Enforce.outputAllClassToClassReferences(references, outputs);
 		TestUtils.compareTargetFile(Outputs.ALL_REFERENCES_BASE_NAME + ".txt", "CannedAllReferences1.txt");
 		outputs.allReferences().delete();
 		Reference illegalInterComponentSameLayer1 = new Reference(type1, type3);
 		references.add(illegalInterComponentSameLayer1);
 		illegalInterComponentSameLayer1.setProblem(new Problem("illegalInterComponentSameLayer1", Errors.ILLEGAL_REFERENCE));
-		Enforce.outputAllReferences(references, outputs);
+		Enforce.outputAllClassToClassReferences(references, outputs);
 		TestUtils.compareTargetFile(ALL_REFERENCES_NAME, "CannedAllReferences2.txt");
 		outputs.allReferences().delete();
 		Reference illegalInterComponentSameLayer2 = new Reference(type2, type3);
@@ -332,11 +333,20 @@ public class EnforceTest {
 		Reference illegalDifferentLayersUpwards = new Reference(type1, type4);
 		illegalDifferentLayersUpwards.setProblem(new Problem("illegalDifferentLayersUpwards", Errors.ILLEGAL_REFERENCE));
 		references.add(illegalDifferentLayersUpwards);
-		Enforce.outputAllReferences(references, outputs);
+		Enforce.outputAllClassToClassReferences(references, outputs);
 		TestUtils.compareTargetFile(ALL_REFERENCES_NAME, "CannedAllReferences3.txt");
 		outputs.allReferences().delete();
 		assertEquals("!LEGAL", Enforce.legality(legalDifferentLayersDownwards));
 		assertEquals("!ILLEGAL", Enforce.legality(illegalDifferentLayersUpwards));
+	}
+	
+	@Test
+	public void testOutputAllComponentToComponentReferences() throws Exception {
+		Set<Component> components = new HashSet<>();
+		Outputs outputs = TestUtils.outputs();
+		Enforce.outputAllComponentToComponentReferences(components, outputs);
+		outputs.enableAllReferences();
+		Enforce.outputAllComponentToComponentReferences(components, outputs);
 	}
 
 	@Test
