@@ -151,10 +151,6 @@ public class Enforce {
 		}
 	}
 
-	static String legality(Reference reference) {
-		return "!" + (reference.isLayerViolation() ? "ILLEGAL" : "LEGAL");
-	}
-
 	static void outputAllClassToClassReferences(Set<Reference> references, Outputs outputs) throws Exception {
 		if (outputs.allReferences() == null) {
 			return;
@@ -164,7 +160,7 @@ public class Enforce {
 		}
 		List<String> allReferences = new ArrayList<>();
 		for (Reference reference : references) {
-			allReferences.add(reference.parseableDescription() + legality(reference));
+			allReferences.add(reference.parseableDescription() + "!" + reference.kind());
 		}
 		allReferences = CollectionUtils.sort(allReferences);
 		try (PrintStream ps = new PrintStream(new FileOutputStream(outputs.allReferences()))) {

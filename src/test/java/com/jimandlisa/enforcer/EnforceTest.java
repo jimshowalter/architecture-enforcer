@@ -333,8 +333,6 @@ public class EnforceTest {
 		Enforce.outputAllClassToClassReferences(references, outputs);
 		TestUtils.compareTargetFile(ALL_REFERENCES_NAME, "CannedAllReferences3.txt");
 		outputs.allReferences().delete();
-		assertEquals("!LEGAL", Enforce.legality(legalDifferentLayersDownwards));
-		assertEquals("!ILLEGAL", Enforce.legality(illegalDifferentLayersUpwards));
 	}
 	
 	@Test

@@ -66,14 +66,22 @@ Inter-component references are allowed, so long as the referring component is in
 
 Inter-component references that refer to components in higher layers, or in the same layer, are illegal (note that this means circular references among components are illegal). Those are the references this tool detects and reports.
 
-In a sense, the entire point of this tool is to be able to implement this function:
+In a sense, the entire point of this tool is to be able to implement these three functions:
 
 ```
+	public boolean isIntraComponentReference() {
+		return referringType.component().equals(referredToType.component());
+	}
+	
+	public boolean isInSameOrLowerLayer() {
+		return referringType.component().layer().depth() <= referredToType.component().layer().depth();
+	}
+
 	public boolean isLayerViolation() {
 		if (isIntraComponentReference()) {
 			return false;
 		}
-		return referringType.component().layer().depth() <= referredToType.component().layer().depth();
+		return isInSameOrLowerLayer();
 	}
 ```
 
@@ -202,18 +210,18 @@ for example Class.forName(someStringFromAVariable + SomeClass.someFunction(some 
 
 * Sample files are located in the src/test/resources directory. They start with "Sample".
 
-### Illegal References Formats ###
+### References Formats ###
 
-Illegal references are written in a format designed to be easy to machine read:
+References are written in a format designed to be easy to machine read:
 
 ```
-referringType!referringComponent!referringLayer!referringDepth!referredToType!referredToComponent!referredToLayer!referredToDepth
+referringType!referringComponent!referringLayer!referringDepth!referredToType!referredToComponent!referredToLayer!referredToDepth!(INTRA|LEGAL|ILLEGAL)
 ```
 
 For example:
 
 ```
-com.jimandlisa.app.one.App1!App One!App!1|com.jimandlisa.app.two.App2!App Two!App!1
+com.jimandlisa.app.one.App1!App One!App!1|com.jimandlisa.app.two.App2!App Two!App!1|ILLEGAL
 ```
 
 The Problem objects for illegal references have a detail field that presents the same information in a more human-readable format:
@@ -222,7 +230,11 @@ The Problem objects for illegal references have a detail field that presents the
 type com.jimandlisa.app.one.App1 in component 'App One' in layer 'App' depth 1 refers to type com.jimandlisa.app.two.App2 in component 'App Two' in layer 'App' depth 1
 ```
 
-Illegal references in all\_references.txt and all\_component\_references.txt end in "!LEGAL" or "!ILLEGAL".
+Component references are similar, but without class or layer information:
+
+```
+App One!App One!INTRA
+```
 
 ## Useful Patterns ##
 

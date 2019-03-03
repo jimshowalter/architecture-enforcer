@@ -68,6 +68,7 @@ public class ReferenceTest {
 		assertTrue(new Reference(type1, type1).isIntraComponentReference());
 		assertTrue(new Reference(type1, type2).isIntraComponentReference());
 		assertTrue(new Reference(type2, type1).isIntraComponentReference());
+		assertTrue(new Reference(type1, type1).isInSameOrLowerLayer());
 		assertFalse(new Reference(type1, type2).isLayerViolation());
 		assertFalse(new Reference(type2, type1).isLayerViolation());
 		type2 = new Type("bar");
@@ -82,6 +83,7 @@ public class ReferenceTest {
 		assertTrue(new Reference(type1, type1).isIntraComponentReference());
 		assertFalse(new Reference(type1, type2).isIntraComponentReference());
 		assertFalse(new Reference(type2, type1).isIntraComponentReference());
+		assertTrue(new Reference(type1, type2).isInSameOrLowerLayer());
 		assertTrue(new Reference(type1, type2).isLayerViolation());
 		assertFalse(new Reference(type2, type1).isLayerViolation());
 		assertEquals("foo!Comp1!One!1!bar!Comp3!Two!2", new Reference(type1, type2).parseableDescription());
