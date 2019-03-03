@@ -60,11 +60,14 @@ Classes typically refer to other classes.
 
 A class in a component can refer to one or more classes in another component, and/or in the same component.
 
-Intra-component references are ignored.
+The tool classifies references into one of three buckets:
 
-Inter-component references are allowed, so long as the referring component is in a layer higher than the referred-to component.
+* INTRA. Intra-component. Always legal.
 
-Inter-component references that refer to components in higher layers, or in the same layer, are illegal (note that this means circular references among components are illegal). Those are the references this tool detects and reports.
+* LEGAL. Inter-component. Legal because dependency is from higher layer to lower layer.
+
+* ILLEGAL: Inter-component. Illegal because dependency is "sideways" (between components in same layer), or from lower layer to higher layer. (Note that this means circular references among components are illegal, even in the same layer.)
+
 
 In a sense, the entire point of this tool is to be able to implement these three functions:
 
@@ -95,9 +98,9 @@ In many projects this greatly shrinks the number of references that need to be a
 
 If it is important in your project to track references at the nested-class level, you need to extract nested classes to new source files, or specify the -p option to preserve nested types.
 
-### Kinds Of References ###
+### Sneaky References ###
 
-Code does not refer to other code just by calling it.
+Code does not refer to other code just by importing or calling it.
 
 Code can refer to other code by strings, either directly via Class.forName, or indirectly by using things like JSP and Spring, which in turn wind up calling Class.forName.
 
@@ -136,9 +139,11 @@ We provide two sample yaml files. SampleTarget1.yaml is the ball-of-mud target s
 
 To run the tool with SampleTarget1.yaml, just change 2 to 1 in the above command.
 
-## Command-line Arguments ###
+For large codebases, the tool requires lots of memory. Make sure you provide enough.
 
-Run this tool with at least the first three args specified.
+For large codebases, the tool can take 30+ seconds to run.
+
+## Command-line Arguments ###
 
 The full set of args is:
 
@@ -166,6 +171,8 @@ The full set of args is:
 
 > -d (debug)
 
+Run this tool with at least the first three args specified.
+
 The first two args specify input files. The third arg specifies the directory where output files go.
 
 The remaining nine args are optional, and can appear in any order (or not at all).
@@ -182,8 +189,6 @@ Other files are generated for https://gephi.org (all\_references\_GephiNodes.csv
 Because there are numerous files and specific suffixes are required, the names of -A files cannot be specified from the command line.
 
 Notes:
-
-* For large codebases, the tool requires lots of memory. Make sure you provide enough.
 
 * Typically a project uses a bunch of third-party classes, and/or classes from inside your company but outside the project being decomposed. List packages and classes to ignore in a file you specify with the -i command-line argument.
 The syntax is full.name.of.package(.AndOptionallyTheClass). By default, the tool appends dots for you. In some cases you need to suppress dots due to some issues with pf-CDA, in which case end the package or class name with a !.
@@ -210,7 +215,7 @@ for example Class.forName(someStringFromAVariable + SomeClass.someFunction(some 
 
 * Sample files are located in the src/test/resources directory. They start with "Sample".
 
-### References Formats ###
+## References Formats ##
 
 References are written in a format designed to be easy to machine read:
 
@@ -234,13 +239,8 @@ Component references are similar, but without class or layer information:
 
 ```
 App One!App One!INTRA
+App One!App Two!INTER
 ```
-
-INTRA is short for intra-component. INTRA references are always legal.
-
-LEGAL means inter-component and legal.
-
-ILLEGAL means inter-component and illegal.
 
 ## Useful Patterns ##
 
