@@ -78,7 +78,7 @@ This tool classifies references into one of three buckets:
 
 To summarize:
 
-|Referring Component Layer|Referred To Component Layer|Legal?|
+|Referring Component Layer|Referred-To Component Layer|Legal?|
 |:------------------------|:--------------------------|:-----|
 |N+1|N|Yes|
 |N|N+1|No|
@@ -135,7 +135,7 @@ code into projects, this tool should continue to be run in CI/CD.
 
 ## Getting Started ##
 
-1. Create a war file for your project. This is necessary even if your project isn't deployed as a war, because pf-CDA requires a war (or at least works best when pointed at a war).
+1. Create a war file for your project. This is necessary even if your project isn't deployed as a war, because pf-CDA, which we use to analyze bytecode, requires a war (or at least seems to work best when pointed at a war).
 
 1. Sync and build this project. Ignore "[WARNING] The POM for org.apache.bcel:bcel:jar:6.3.PR1 is missing, no dependency information available" and "[WARNING] Classes in bundle 'Architecture Enforcer' do no [sic] match with execution data. For report generation the same class files must be used as at runtime".
 We're working on fixing those warnings (and welcome your help, if you know how to make them go away).
@@ -143,7 +143,7 @@ We're working on fixing those warnings (and welcome your help, if you know how t
 1. Verify that the project works, by running this command in the target directory (adjusted for your environment):
 
 ```
-java -jar architecture-enforcer-1.0-SNAPSHOT.jar /path/to/architecture-enforcer/src/test/resources/SampleTarget2.yaml /path/to/architecture-enforcer/target/test-classes/architecture-enforcer-sample-1.0-SNAPSHOT.war /path/to/architecture-enforcer/target -i/path/to/architecture-enforcer/target/test-classes/SampleIgnores.txt
+java -jar architecture-enforcer-1.0-SNAPSHOT.jar /path/to/architecture-enforcer/target/test-classes/SampleTarget2.yaml /path/to/architecture-enforcer/target/test-classes/architecture-enforcer-sample-1.0-SNAPSHOT.war /path/to/architecture-enforcer/target -i/path/to/architecture-enforcer/target/test-classes/SampleIgnores.txt
 ```
 
 4. (Optional) Run this tool from Eclipse or IntelliJ.
@@ -175,11 +175,11 @@ The full set of args is:
 
 > -A
 
-> -i/full/path/to/packages/and/classes/to/ignore
+> -i/full/path/to/file/of/packages/and/classes/to/ignore
 
-> -r/full/path/to/reflection/references
+> -r/full/path/to/file/of/reflection/references
 
-> -f/full/path/to/fixed/unresolveds
+> -f/full/path/to/file/of/fixed/unresolveds
 
 > -p (preserves nested types)
 
@@ -212,12 +212,12 @@ In other cases, you need to ignore a class in the default package (that is, no p
 
 * If your project uses reflection, you should add class-to-class dependencies to a file you specify with the -r command-line argument. The syntax is: full.name.of.referring.class.Foo:full.name.of.referred.to.class.Bar,full.name.of.referred.to.class.Baz....,
 where the referred-to classes are classes to which the referring class refers by reflection. At least one referred-to class is required. If there are too many referred-to classes to fit cleanly on one line, you can start multiple lines with the referring class.
-If you preserve nested types in your analysis, and you have instances of reflection references from or two nested types, include $TheNestedType in the names.
+If you preserve nested types in your analysis, and you have instances of reflection references from or to nested types, include $TheNestedType in the names.
 
 * Sometimes pf-CDA misses classes that are referred to by other classes in the war. To fix these, you should add the missing classes to a file you specify with the -f command-line argument.
 The syntax is: full.name.of.missing.class.Foo:full.name.of.referred.to.class.Bar,full.name.of.referred.to.class.Baz..., where the referred-to classes are classes to which the missing class refers.
 If there are too many referred-to classes to fit cleanly on one line, you can start multiple lines with the referring class. If the unresolved class you are adding does not refer to other classes in your project,
-you don't need to add any referred-to classes (and you don't need a colon after the referring class on the line). If you preserve nested types in your analysis, and you have instances of unresolved types from or two nested types,
+you don't need to add any referred-to classes (and you don't need a colon after the referring class on the line). If you preserve nested types in your analysis, and you have instances of unresolved types from or to nested types,
 include $TheNestedType in the names.
 
 * Adding a referred-to class to the reflections or fix-unresolveds files can introduce new unresolved classes. When that happens, you need to keep entering classes until all classes are defined.
@@ -242,7 +242,7 @@ referringType!referringComponent!referringLayer!referringDepth!referredToType!re
 For example:
 
 ```
-com.jimandlisa.app.one.App1!App One!App!1|com.jimandlisa.app.two.App2!App Two!App!1|ILLEGAL
+com.jimandlisa.app.one.App1!App One!App!1!com.jimandlisa.app.two.App2!App Two!App!1|ILLEGAL
 ```
 
 The output format can be sliced and diced by any number of analysis tools. For example, it can be sorted into a histogram of most-illegally-referred-to components, or most-offending classes, etc. This can help the team decomposing the project figure out what to focus on first.
@@ -251,7 +251,7 @@ Component references are similar, but without class or layer information:
 
 ```
 App One!App One!INTRA
-App One!App Two!INTER
+App One!App Two!ILLEGAL
 ```
 
 Focusing on illegal component-to-component references can help teams understand the challenges in the codebase without getting mired in tens of thousands of illegal class-to-class dependencies.
@@ -270,7 +270,7 @@ Components can be "simple", where both the API and implementation of the compone
 
 Paired components:
 
-* Move the codebase in the direction of dependency injection, where the implementations chosen at runtime (including during testing) can vary without consumers of the API portions of components being aware anything has changed.
+* Move the codebase in the direction of dependency injection, where the implementations chosen at runtime (including during testing) can vary without consumers of component APIs being aware anything has changed.
 
 * Enforce the idea that calls are only allowed to "come in through the front door".
 
@@ -284,7 +284,7 @@ To define your target state this way:
 
 In this scheme:
 
-* In paired components, implementations can depend on their APIs and on the APIs of other implementations, and can depend on simple components, but APIs can't depend on other APIs, and implementations can't depend on other implementations (other than by dependency injection).
+* In paired components, implementations can depend on their APIs and on the APIs of other implementations, and can depend on simple components, but APIs can't depend on other APIs, and implementations can't depend on other implementations.
 
 * Simple components can depend on other simple components below them, but never on APIs or implementations for paired components.
 
