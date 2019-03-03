@@ -56,6 +56,25 @@ public class EnforceTest {
 	public void testMisc() {
 		new Enforce();
 	}
+	
+	private static void cleanup(File file) {
+		if (file != null) {
+			file.delete();
+		}
+	}
+	
+	private static void cleanup(Outputs outputs) {
+		cleanup(outputs.unresolvedTypes());
+		cleanup(outputs.illegalReferences());
+		cleanup(outputs.allReferences());
+		cleanup(outputs.allReferencesGephiNodes());
+		cleanup(outputs.allReferencesGephiEdges());
+		cleanup(outputs.allReferencesYeD());
+		cleanup(outputs.allComponentReferences());
+		cleanup(outputs.allComponentReferencesGephiNodes());
+		cleanup(outputs.allComponentReferencesGephiEdges());
+		cleanup(outputs.allComponentReferencesYeD());
+	}
 
 	@Test
 	public void testArgs() {
@@ -193,12 +212,11 @@ public class EnforceTest {
 			Outputs outputs = new Outputs(Paths.get(TestUtils.targetDir().toString(), "reports").toFile());
 			outputs.setUnresolvedTypes(Outputs.UNRESOLVED_TYPES_DEFAULT_FILE_NAME);
 			outputs.setIllegalReferences(Outputs.ILLEGAL_REFERENCES_DEFAULT_FILE_NAME);
-			outputs.unresolvedTypes().delete();
-			outputs.illegalReferences().delete();
+			cleanup(outputs);
 			Enforce.reportProblems(problems, ps, outputs, new Flags());
 			assertFalse(outputs.unresolvedTypes().exists());
 			assertTrue(outputs.illegalReferences().exists());
-			outputs.illegalReferences().delete();
+			cleanup(outputs);
 		}
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
 			Set<Problem> problems = new LinkedHashSet<Problem>();
@@ -206,12 +224,11 @@ public class EnforceTest {
 			Outputs outputs = new Outputs(Paths.get(TestUtils.targetDir().toString(), "reports").toFile());
 			outputs.setUnresolvedTypes(Outputs.UNRESOLVED_TYPES_DEFAULT_FILE_NAME);
 			outputs.setIllegalReferences(Outputs.ILLEGAL_REFERENCES_DEFAULT_FILE_NAME);
-			outputs.unresolvedTypes().delete();
-			outputs.illegalReferences().delete();
+			cleanup(outputs);
 			Enforce.reportProblems(problems, ps, outputs, new Flags());
 			assertTrue(outputs.unresolvedTypes().exists());
 			assertFalse(outputs.illegalReferences().exists());
-			outputs.unresolvedTypes().delete();
+			cleanup(outputs);
 		}
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
 			Set<Problem> problems = new LinkedHashSet<Problem>();
@@ -220,13 +237,11 @@ public class EnforceTest {
 			Outputs outputs = new Outputs(Paths.get(TestUtils.targetDir().toString(), "reports").toFile());
 			outputs.setUnresolvedTypes(Outputs.UNRESOLVED_TYPES_DEFAULT_FILE_NAME);
 			outputs.setIllegalReferences(Outputs.ILLEGAL_REFERENCES_DEFAULT_FILE_NAME);
-			outputs.unresolvedTypes().delete();
-			outputs.illegalReferences().delete();
+			cleanup(outputs);
 			Enforce.reportProblems(problems, ps, outputs, new Flags());
 			assertTrue(outputs.unresolvedTypes().exists());
 			assertTrue(outputs.illegalReferences().exists());
-			outputs.unresolvedTypes().delete();
-			outputs.illegalReferences().delete();
+			cleanup(outputs);
 		}
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
 			Set<Problem> problems = new LinkedHashSet<Problem>();
@@ -235,13 +250,11 @@ public class EnforceTest {
 			Outputs outputs = new Outputs(Paths.get(TestUtils.targetDir().toString(), "reports").toFile());
 			outputs.setUnresolvedTypes(Outputs.UNRESOLVED_TYPES_DEFAULT_FILE_NAME);
 			outputs.setIllegalReferences(Outputs.ILLEGAL_REFERENCES_DEFAULT_FILE_NAME);
-			outputs.unresolvedTypes().delete();
-			outputs.illegalReferences().delete();
+			cleanup(outputs);
 			Enforce.reportProblems(problems, ps, outputs, new Flags());
 			assertTrue(outputs.unresolvedTypes().exists());
 			assertTrue(outputs.illegalReferences().exists());
-			outputs.unresolvedTypes().delete();
-			outputs.illegalReferences().delete();
+			cleanup(outputs);
 		}
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
 			Set<Problem> problems = new LinkedHashSet<Problem>();
@@ -249,11 +262,11 @@ public class EnforceTest {
 			Outputs outputs = new Outputs(Paths.get(TestUtils.targetDir().toString(), "reports").toFile());
 			outputs.setUnresolvedTypes(Outputs.UNRESOLVED_TYPES_DEFAULT_FILE_NAME);
 			outputs.setIllegalReferences(Outputs.ILLEGAL_REFERENCES_DEFAULT_FILE_NAME);
-			outputs.unresolvedTypes().delete();
-			outputs.illegalReferences().delete();
+			cleanup(outputs);
 			Enforce.reportProblems(problems, ps, outputs, new Flags());
 			assertFalse(outputs.unresolvedTypes().exists());
 			assertFalse(outputs.illegalReferences().exists());
+			cleanup(outputs);
 		}
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
 			Set<Problem> problems = new LinkedHashSet<Problem>();
@@ -261,12 +274,12 @@ public class EnforceTest {
 			Outputs outputs = new Outputs(Paths.get(TestUtils.targetDir().toString(), "reports").toFile());
 			outputs.setUnresolvedTypes(Outputs.UNRESOLVED_TYPES_DEFAULT_FILE_NAME);
 			outputs.setIllegalReferences(Outputs.ILLEGAL_REFERENCES_DEFAULT_FILE_NAME);
-			outputs.unresolvedTypes().delete();
-			outputs.illegalReferences().delete();
+			cleanup(outputs);
 			Enforce.reportProblems(problems, ps, outputs, new Flags());
 			assertFalse(outputs.unresolvedTypes().exists());
 			assertFalse(outputs.illegalReferences().exists());
 			TestUtils.compareTestClassesFile(baos, "CannedWarnings1.txt");
+			cleanup(outputs);
 		}
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
 			Set<Problem> problems = new LinkedHashSet<Problem>();
@@ -275,12 +288,12 @@ public class EnforceTest {
 			Outputs outputs = new Outputs(Paths.get(TestUtils.targetDir().toString(), "reports").toFile());
 			outputs.setUnresolvedTypes(Outputs.UNRESOLVED_TYPES_DEFAULT_FILE_NAME);
 			outputs.setIllegalReferences(Outputs.ILLEGAL_REFERENCES_DEFAULT_FILE_NAME);
-			outputs.unresolvedTypes().delete();
-			outputs.illegalReferences().delete();
+			cleanup(outputs);
 			Enforce.reportProblems(problems, ps, outputs, new Flags());
 			assertFalse(outputs.unresolvedTypes().exists());
 			assertFalse(outputs.illegalReferences().exists());
 			TestUtils.compareTestClassesFile(baos, "CannedWarnings2.txt");
+			cleanup(outputs);
 		}
 	}
 	
@@ -312,19 +325,19 @@ public class EnforceTest {
 		type3.setComponent(comp2);
 		Type type4 = new Type("bum");
 		type4.setComponent(comp3);
-		outputs.allReferences().delete();
+		cleanup(outputs);
 		Enforce.outputAllClassToClassReferences(references, outputs);
 		assertFalse(outputs.allReferences().exists());
 		Reference legalIntraComponent = new Reference(type1, type2);
 		references.add(legalIntraComponent);
 		Enforce.outputAllClassToClassReferences(references, outputs);
 		TestUtils.compareTargetFile(ALL_REFERENCES_NAME, "CannedAllReferences1.txt");
-		outputs.allReferences().delete();
+		cleanup(outputs);
 		Reference illegalInterComponentSameLayer1 = new Reference(type1, type3);
 		references.add(illegalInterComponentSameLayer1);
 		Enforce.outputAllClassToClassReferences(references, outputs);
 		TestUtils.compareTargetFile(ALL_REFERENCES_NAME, "CannedAllReferences2.txt");
-		outputs.allReferences().delete();
+		cleanup(outputs);
 		Reference illegalInterComponentSameLayer2 = new Reference(type2, type3);
 		references.add(illegalInterComponentSameLayer2);
 		Reference legalDifferentLayersDownwards = new Reference(type4, type1);
@@ -336,7 +349,7 @@ public class EnforceTest {
 		TestUtils.compareTargetFile(Outputs.ALL_REFERENCES_BASE_NAME + Outputs.GEPHI_NODES_SUFFIX, "CannedAllReferences3" + Outputs.GEPHI_NODES_SUFFIX);
 		TestUtils.compareTargetFile(Outputs.ALL_REFERENCES_BASE_NAME +Outputs.GEPHI_EDGES_SUFFIX, "CannedAllReferences3" + Outputs.GEPHI_EDGES_SUFFIX);
 		TestUtils.compareTargetFile(Outputs.ALL_REFERENCES_BASE_NAME + Outputs.YED_SUFFIX, "CannedAllReferences3" + Outputs.YED_SUFFIX);
-		outputs.allReferences().delete();
+		cleanup(outputs);
 	}
 	
 	@Test
@@ -359,7 +372,7 @@ public class EnforceTest {
 		type3.setComponent(comp2);
 		Type type4 = new Type("bum");
 		type4.setComponent(comp3);
-		outputs.allComponentReferences().delete();
+		cleanup(outputs);
 		Enforce.outputAllComponentToComponentReferences(components, outputs);
 		assertFalse(outputs.allComponentReferences().exists());
 		components.add(comp1);
@@ -369,12 +382,12 @@ public class EnforceTest {
 		comp1.references().add(legalIntraComponent);
 		Enforce.outputAllComponentToComponentReferences(components, outputs);
 		TestUtils.compareTargetFile(ALL_COMPONENT_REFERENCES_NAME, "CannedAllComponentReferences1.txt");
-		outputs.allComponentReferences().delete();
+		cleanup(outputs);
 		Reference illegalInterComponentSameLayer1 = new Reference(type1, type3);
 		comp1.references().add(illegalInterComponentSameLayer1);
 		Enforce.outputAllComponentToComponentReferences(components, outputs);
 		TestUtils.compareTargetFile(ALL_COMPONENT_REFERENCES_NAME, "CannedAllComponentReferences2.txt");
-		outputs.allComponentReferences().delete();
+		cleanup(outputs);
 		Reference illegalInterComponentSameLayer2 = new Reference(type2, type3);
 		comp1.references().add(illegalInterComponentSameLayer2);
 		Reference legalDifferentLayersDownwards = new Reference(type4, type1);
@@ -386,7 +399,7 @@ public class EnforceTest {
 		TestUtils.compareTargetFile(Outputs.ALL_COMPONENT_REFERENCES_BASE_NAME + Outputs.GEPHI_NODES_SUFFIX, "CannedAllComponentReferences3" + Outputs.GEPHI_NODES_SUFFIX);
 		TestUtils.compareTargetFile(Outputs.ALL_COMPONENT_REFERENCES_BASE_NAME + Outputs.GEPHI_EDGES_SUFFIX, "CannedAllComponentReferences3" + Outputs.GEPHI_EDGES_SUFFIX);
 		TestUtils.compareTargetFile(Outputs.ALL_COMPONENT_REFERENCES_BASE_NAME + Outputs.YED_SUFFIX, "CannedAllComponentReferences3" + Outputs.YED_SUFFIX);
-		outputs.allComponentReferences().delete();
+		cleanup(outputs);
 	}
 
 	@Test
