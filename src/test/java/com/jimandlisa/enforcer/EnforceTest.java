@@ -333,6 +333,9 @@ public class EnforceTest {
 		references.add(illegalDifferentLayersUpwards);
 		Enforce.outputAllClassToClassReferences(references, outputs);
 		TestUtils.compareTargetFile(ALL_REFERENCES_NAME, "CannedAllReferences3.txt");
+		TestUtils.compareTargetFile(Outputs.ALL_REFERENCES_BASE_NAME + "_GephiNodes.csv", "CannedAllReferences3_GephiNodes.csv");
+		TestUtils.compareTargetFile(Outputs.ALL_REFERENCES_BASE_NAME +"_GephiEdges.csv", "CannedAllReferences3_GephiEdges.csv");
+		TestUtils.compareTargetFile(Outputs.ALL_REFERENCES_BASE_NAME + "_yed.tgf", "CannedAllReferences3_yed.tgf");
 		outputs.allReferences().delete();
 	}
 	
@@ -358,7 +361,7 @@ public class EnforceTest {
 		type4.setComponent(comp3);
 		outputs.allComponentReferences().delete();
 		Enforce.outputAllComponentToComponentReferences(components, outputs);
-		assertFalse(outputs.allReferences().exists());
+		assertFalse(outputs.allComponentReferences().exists());
 		components.add(comp1);
 		components.add(comp2);
 		components.add(comp3);
@@ -380,7 +383,10 @@ public class EnforceTest {
 		comp1.references().add(illegalDifferentLayersUpwards);
 		Enforce.outputAllComponentToComponentReferences(components, outputs);
 		TestUtils.compareTargetFile(ALL_COMPONENT_REFERENCES_NAME, "CannedAllComponentReferences3.txt");
-		outputs.allReferences().delete();
+		TestUtils.compareTargetFile(Outputs.ALL_COMPONENT_REFERENCES_BASE_NAME + "_GephiNodes.csv", "CannedAllComponentReferences3_GephiNodes.csv");
+		TestUtils.compareTargetFile(Outputs.ALL_COMPONENT_REFERENCES_BASE_NAME + "_GephiEdges.csv", "CannedAllComponentReferences3_GephiEdges.csv");
+		TestUtils.compareTargetFile(Outputs.ALL_COMPONENT_REFERENCES_BASE_NAME + "_yed.tgf", "CannedAllComponentReferences3_yed.tgf");
+		outputs.allComponentReferences().delete();
 	}
 
 	@Test
