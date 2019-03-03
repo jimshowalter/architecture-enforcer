@@ -170,7 +170,7 @@ By default, the unresolved-types output file name is "unresolved\_types.txt", an
 
 If -A is specified, all references (not just illegal references, and including intra-component references) are output to additional files.
 The basic files are all\_references.txt, which contains all class-to-class references, and all\_component\_references.txt, which contains all component-to-component references.
-Other files are generated for https://gephi.org (all\_references\_GephiNodes.csv, all\_references\_GephiEdges.csv, all\_component\_references\_GephiNodes.csv, all\_component\_references\_GephiEdges.csv) and https://www.yworks.com/products/yed (all\_references.tgf and all\_component\_references.tgf).
+Other files are generated for https://gephi.org (all\_references\_GephiNodes.csv, all\_references\_GephiEdges.csv, all\_component\_references\_GephiNodes.csv, all\_component\_references\_GephiEdges.csv) and https://www.yworks.com/products/yed (all\_references\_yed.tgf and all\_component\_references\_yed.tgf).
 Because there are numerous files and specific suffixes are required, the names of -A files cannot be specified from the command line.
 
 Notes:

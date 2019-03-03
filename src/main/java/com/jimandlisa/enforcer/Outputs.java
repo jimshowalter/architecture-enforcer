@@ -83,11 +83,11 @@ public class Outputs {
 		allReferences = Paths.get(outputDirectory.getAbsolutePath(), ALL_REFERENCES_BASE_NAME + ".txt").toFile();
 		allReferencesGephiNodes = Paths.get(outputDirectory.getAbsolutePath(), ALL_REFERENCES_BASE_NAME + "_GephiNodes.csv").toFile();
 		allReferencesGephiEdges = Paths.get(outputDirectory.getAbsolutePath(), ALL_REFERENCES_BASE_NAME + "_GephiEdges.csv").toFile();
-		allReferencesYeD = Paths.get(outputDirectory.getAbsolutePath(), ALL_REFERENCES_BASE_NAME + ".tgf").toFile();
+		allReferencesYeD = Paths.get(outputDirectory.getAbsolutePath(), ALL_REFERENCES_BASE_NAME + "_yed.tgf").toFile();
 		allComponentReferences = Paths.get(outputDirectory.getAbsolutePath(), ALL_COMPONENT_REFERENCES_BASE_NAME + ".txt").toFile();
 		allComponentReferencesGephiNodes = Paths.get(outputDirectory.getAbsolutePath(), ALL_COMPONENT_REFERENCES_BASE_NAME + "_GephiNodes.csv").toFile();
 		allComponentReferencesGephiEdges = Paths.get(outputDirectory.getAbsolutePath(), ALL_COMPONENT_REFERENCES_BASE_NAME + "_GephiEdges.csv").toFile();
-		allComponentReferencesYeD = Paths.get(outputDirectory.getAbsolutePath(), ALL_COMPONENT_REFERENCES_BASE_NAME + ".tgf").toFile();
+		allComponentReferencesYeD = Paths.get(outputDirectory.getAbsolutePath(), ALL_COMPONENT_REFERENCES_BASE_NAME + "_yed.tgf").toFile();
 	}
 
 	public File allReferences() {

@@ -165,6 +165,7 @@ public class Enforce {
 		for (Reference reference : references) {
 			allReferences.add(reference.parseableDescription() + legality(reference));
 		}
+		allReferences = CollectionUtils.sort(allReferences);
 		try (PrintStream ps = new PrintStream(new FileOutputStream(outputs.allReferences()))) {
 			for (String reference : CollectionUtils.sort(allReferences)) {
 				ps.println(reference);
@@ -173,7 +174,7 @@ public class Enforce {
 		// Output for https://gephi.org and https://www.yworks.com/products/yed.
 		Map<String, Integer> refs = new LinkedHashMap<>();
 		int id = 0;
-		for (String reference : CollectionUtils.sort(allReferences)) {
+		for (String reference : allReferences) {
 			String[] segments = reference.split("!");
 			String referringType = segments[0];
 			String referredToType = segments[4];
@@ -187,31 +188,22 @@ public class Enforce {
 				refs.put(referredToType, id);
 			}
 		}
-		try (PrintStream ps = new PrintStream(new FileOutputStream(new File(outputs.allReferences().getAbsolutePath().replace(".txt", "_GephiNodes.csv"))))) {
-			ps.println("ID;Label");
+		try (PrintStream gephiNodes = new PrintStream(new FileOutputStream(outputs.allReferencesGephiNodes()));
+				PrintStream gephiEdges = new PrintStream(new FileOutputStream(outputs.allReferencesGephiEdges()));
+				PrintStream yed = new PrintStream(new FileOutputStream(outputs.allReferencesYeD()))) {
+			gephiNodes.println("ID;Label");
 			for (Map.Entry<String, Integer> entry : refs.entrySet()) {
-				ps.println(entry.getValue() + ";" + entry.getKey());
+				gephiNodes.println(entry.getValue() + ";" + entry.getKey());
+				yed.println(entry.getValue() + " " + entry.getKey());
 			}
-		}
-		try (PrintStream ps = new PrintStream(new FileOutputStream(new File(outputs.allReferences().getAbsolutePath().replace(".txt", "_GephiEdges.csv"))))) {
-			ps.println("Source;Target");
-			for (String reference : CollectionUtils.sort(allReferences)) {
+			yed.println("#");
+			gephiEdges.println("Source;Target");
+			for (String reference : allReferences) {
 				String[] segments = reference.split("!");
 				String referringType = segments[0];
 				String referredToType = segments[4];
-				ps.println(refs.get(referringType) + ";" + refs.get(referredToType));
-			}
-		}
-		try (PrintStream ps = new PrintStream(new FileOutputStream(new File(outputs.allReferences().getAbsolutePath().replace(".txt", "_yEd.tgf"))))) {
-			for (Map.Entry<String, Integer> entry : refs.entrySet()) {
-				ps.println(entry.getValue() + " " + entry.getKey());
-			}
-			ps.println("#");
-			for (String reference : CollectionUtils.sort(allReferences)) {
-				String[] segments = reference.split("!");
-				String referringType = segments[0];
-				String referredToType = segments[4];
-				ps.println(refs.get(referringType) + " " + refs.get(referredToType));
+				gephiEdges.println(refs.get(referringType) + ";" + refs.get(referredToType));
+				yed.println(refs.get(referringType) + " " + refs.get(referredToType));
 			}
 		}
 	}
