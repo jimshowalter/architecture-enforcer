@@ -47,4 +47,16 @@ public class FileUtils {
 			throw new EnforcerException("error validating directory " + dir + ": " + t.getMessage(), Errors.ERROR_VALIDATING_DIRECTORY, t);
 		}
 	}
+
+	static File check(File newFile, File... otherFiles) {
+		for (File otherFile : otherFiles) {
+			if (otherFile == null) {
+				continue;
+			}
+			if (newFile.getName().equals(otherFile.getName())) {
+				throw new EnforcerException("file name '" + newFile.getName() + "' conflicts with other file '" + otherFile.getName() + "'", Errors.NAME_CONFLICTS_WITH_OTHER_FILE);
+			}
+		}
+		return newFile;
+	}
 }

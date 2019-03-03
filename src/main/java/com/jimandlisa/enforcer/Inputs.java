@@ -22,11 +22,11 @@ public class Inputs {
 	private File ignores = null;
 	private File reflections = null;
 	private File fixUnresolveds = null;
-
+	
 	public Inputs(final File target, final File war) {
 		super();
-		this.target = FileUtils.checkReadFile(target);
-		this.war = FileUtils.checkReadFile(war);
+		this.target = FileUtils.check(FileUtils.checkReadFile(target), war, ignores, reflections, fixUnresolveds);
+		this.war = FileUtils.check(FileUtils.checkReadFile(war), target, ignores, reflections, fixUnresolveds);
 	}
 
 	public final File target() {
@@ -41,7 +41,7 @@ public class Inputs {
 		if (ignores() != null) {
 			throw new EnforcerException("already set ignores file " + ignores(), Errors.IGNORES_FILE_ALREADY_SPECIFIED);
 		}
-		this.ignores = FileUtils.checkReadFile(ignores);
+		this.ignores = FileUtils.check(FileUtils.checkReadFile(ignores), target, war, reflections, fixUnresolveds);
 	}
 
 	public final File ignores() {
@@ -52,7 +52,7 @@ public class Inputs {
 		if (reflections() != null) {
 			throw new EnforcerException("already set reflections file " + reflections(), Errors.REFLECTIONS_FILE_ALREADY_SPECIFIED);
 		}
-		this.reflections = FileUtils.checkReadFile(reflections);
+		this.reflections = FileUtils.check(FileUtils.checkReadFile(reflections), target, war, ignores, fixUnresolveds);
 	}
 
 	public final File reflections() {
@@ -63,7 +63,7 @@ public class Inputs {
 		if (fixUnresolveds() != null) {
 			throw new EnforcerException("already set fix-unresolveds file " + fixUnresolveds(), Errors.FIX_UNRESOLVEDS_FILE_ALREADY_SPECIFIED);
 		}
-		this.fixUnresolveds = FileUtils.checkReadFile(fixedUnresolveds);
+		this.fixUnresolveds = FileUtils.check(FileUtils.checkReadFile(fixedUnresolveds), target, war, ignores, reflections);
 	}
 
 	public final File fixUnresolveds() {

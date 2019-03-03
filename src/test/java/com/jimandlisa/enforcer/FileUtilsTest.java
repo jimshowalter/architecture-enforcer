@@ -79,5 +79,13 @@ public class FileUtilsTest {
 			assertTrue(e.getMessage().contains("error validating directory"));
 			assertEquals(Errors.ERROR_VALIDATING_DIRECTORY, e.error());
 		}
+		assertEquals(new File("foo"), FileUtils.check(new File("foo"), new File("bar"), null));
+		try {
+			FileUtils.check(new File("foo"), new File("bar"), new File("foo"), null);
+			Assert.fail();
+		} catch (EnforcerException e) {
+			assertTrue(e.getMessage().contains("conflicts with other file"));
+			assertEquals(Errors.NAME_CONFLICTS_WITH_OTHER_FILE, e.error());
+		}
 	}
 }

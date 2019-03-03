@@ -43,12 +43,22 @@ public class Outputs {
 	public File outputDirectory() {
 		return outputDirectory;
 	}
-
+	
+	static String check(String name) {
+		if (name.contains(ALL_REFERENCES_BASE_NAME)) {
+			throw new EnforcerException("file name '" + name + "' conflicts with reserved all-references base name '" + ALL_REFERENCES_BASE_NAME + "'", Errors.NAME_CONFLICTS_WITH_ALL_REFERENCES_BASE_NAME);
+		}
+		if (name.contains(ALL_COMPONENT_REFERENCES_BASE_NAME)) {
+			throw new EnforcerException("file name '" + name + "' conflicts with reserved all-component-references base name '" + ALL_COMPONENT_REFERENCES_BASE_NAME + "'", Errors.NAME_CONFLICTS_WITH_ALL_COMPONENT_REFERENCES_BASE_NAME);
+		}
+		return name;
+	}
+	
 	public void setUnresolvedTypes(String name) {
 		if (unresolvedTypes() != null) {
 			throw new EnforcerException("unresolved types output file already set", Errors.UNRESOLVED_TYPES_OUTPUT_FILE_ALREADY_SPECIFIED);
 		}
-		unresolvedTypes = Paths.get(outputDirectory.getAbsolutePath(), ArgUtils.check(name, "name")).toFile();
+		unresolvedTypes = FileUtils.check(Paths.get(outputDirectory.getAbsolutePath(), check(ArgUtils.check(name, "name"))).toFile(), illegalReferences);
 	}
 
 	public File unresolvedTypes() {
@@ -59,7 +69,7 @@ public class Outputs {
 		if (illegalReferences() != null) {
 			throw new EnforcerException("illegal references output file already set", Errors.ILLEGAL_REFERENCES_OUTPUT_FILE_ALREADY_SPECIFIED);
 		}
-		illegalReferences = Paths.get(outputDirectory.getAbsolutePath(), ArgUtils.check(name, "name")).toFile();
+		illegalReferences = FileUtils.check(Paths.get(outputDirectory.getAbsolutePath(), check(ArgUtils.check(name, "name"))).toFile(), unresolvedTypes);
 	}
 
 	public File illegalReferences() {

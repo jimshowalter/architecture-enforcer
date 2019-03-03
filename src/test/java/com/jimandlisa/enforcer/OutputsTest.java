@@ -73,5 +73,20 @@ public class OutputsTest {
 			assertTrue(e.getMessage().contains("all references already enabled"));
 			assertEquals(Errors.ALL_REFERENCES_ALREADY_ENABLED, e.error());
 		}
+		assertEquals("foo", Outputs.check("foo"));
+		try {
+			Outputs.check("foo" + Outputs.ALL_REFERENCES_BASE_NAME + "bar");
+			Assert.fail();
+		} catch (EnforcerException e) {
+			assertTrue(e.getMessage().contains("conflicts with reserved all-references base name"));
+			assertEquals(Errors.NAME_CONFLICTS_WITH_ALL_REFERENCES_BASE_NAME, e.error());
+		}
+		try {
+			Outputs.check("foo" + Outputs.ALL_COMPONENT_REFERENCES_BASE_NAME + "bar");
+			Assert.fail();
+		} catch (EnforcerException e) {
+			assertTrue(e.getMessage().contains("conflicts with reserved all-component-references base name"));
+			assertEquals(Errors.NAME_CONFLICTS_WITH_ALL_COMPONENT_REFERENCES_BASE_NAME, e.error());
+		}
 	}
 }
