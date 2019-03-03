@@ -336,8 +336,8 @@ This tool can of course be improved. Below are listed some things we know would 
 * FEATURE: Improve graphics support. For example, add arrows to edges to show depends-on direction, add "illegal" labels to illegal edges and/or color illegal edges red, and add counts of illegal references between components.
 
 * FEATURE: Provide a way to fail builds if the count of illegal references increases. Note that this is different from enabling strict mode, because in that case builds fail if there are any illegal references, so the previous count is known (it's zero).
-This requires determining that there were N illegal references in the previous build, and now there are N + M illegal references in the current build. One way to do this is to access the previous build in CI/CD using something like the Jenkins API.
-While refactoring, there are often temporary increases in the number of illegal references, so decomposition teams would need to be able to temporarily whitelist new illegal references (access to the whitelist could be restricted to just that team).
+In contrast, this feature requires determining that there were N illegal references in the previous build, and now there are N + M illegal references in the current build. One way to do this is to access the previous build in CI/CD using something like the Jenkins API.
+Note that, while refactoring, there are often temporary increases in the number of illegal references, so decomposition teams would need to be able to temporarily whitelist new illegal references (access to the whitelist could be restricted to just that team).
 
 * FEATURE: Add a Maven mojo that calls EnforcerUtils directly (instead of via args in the Enforce main method), and document how to integrate the mojo into builds. Possibly also provide gradle support.
 
@@ -345,7 +345,7 @@ While refactoring, there are often temporary increases in the number of illegal 
 
 * FEATURE: Parse Class.forName calls in JSP pages and add those references automatically, instead of requiring manual bookkeeping in the reflection-references file.
 
-* FEATURE: Identify reflection references due to Spring, and add those references automatically. (Check if an open-source project exists that can do this analysis.)
+* FEATURE: Identify reflection references due to Spring, and add those references automatically, instead of requiring manual bookkeeping in the reflection-references file. (Check if an open-source project exists that can do this analysis.)
 
 ### TODOs We're Unsure About ###
 
@@ -391,7 +391,7 @@ The following table summarizes differences between the two tools:
 |Requires Maven to run it|Can run as jar with main, or as Maven mojo|
 |Unresolved references special-cased in code|Unresolved references entered in a text file|
 |Code full of proprietary special-casing for particular company|No company-specific special-casing|
-|Parses string-based references (reflection) in Java (Class.forName), in JSP files, and in other kinds of files, plus supports manual entry of hard-to-parse cases|Requires manual entry of reflection references|
+|Parses string-based references (reflection) in Java (Class.forName), in JSP files, and in other kinds of files, plus supports manual entry of hard-to-parse cases|Requires manual entry of all reflection references|
 |Includes line numbers and text of code on line in output of illegal references|Only outputs classes and components|
 
 Why did we choose pf-CDA? It's fast, and it has a simple API (at least for what we needed to do).
@@ -413,11 +413,11 @@ And we're very grateful to Steve Hartman for his clear vision of how a target ar
 
 ## Shameless Plug ##
 
-The author of this tool is available to consult on your decomposition project, and charges reasonable fees.
+The author of this tool is available to consult on your decomposition project, and charges reasonable rates.
 
 ## Copyright/Licensing ##
 
-The pf-CDA tool is free to use in binary form (the source is not available). In case the developer changes the licensing or takes down his site, the latest free version is checked into this github.
+The pf-CDA tool is free to use in binary form (the source is not available). In case the developer changes the licensing or takes down his site, the latest free version is checked into this github, and we can revert to checking in the unpacked jars needed to build and run pf-CDA (which is how we used to do it, up until commit 0bc63b9ddcf365e846708a265cafec8cb1c138e8).
 
 All files in this github except for the pf-CDA zip and jars are subject to the following MIT license:
 
