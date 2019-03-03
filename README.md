@@ -327,13 +327,13 @@ This tool can of course be improved. Below are listed some things we know would 
 
 * WARNING: Fix the build warnings.
 
-* FEATURE: Improve graphics support. For example, add arrows to edges to show depends-on direction, add "illegal" labels to illegal edges and/or color illegal edges red, and add counts of illegal references between components.
-
 * HYGIENE: Add one or more code-quality tools to the build. For example, findbugs, errorprone, etc.
 
 * HYGIENE: There is repetitive "Utils.called" call-tracking code in the architecture-enforcer-sample project that probably could be simplified via aspects.
 
 * HYGIENE: Start tracking these todos in a bug-tracking system.
+
+* FEATURE: Improve graphics support. For example, add arrows to edges to show depends-on direction, add "illegal" labels to illegal edges and/or color illegal edges red, and add counts of illegal references between components.
 
 * FEATURE: Provide a way to fail builds if the count of illegal references increases. Note that this is different from enabling strict mode, because in that case builds fail if there are any illegal references, so the previous count is known (it's zero).
 This requires determining that there were N illegal references in the previous build, and now there are N + M illegal references in the current build. One way to do this is to access the previous build in CI/CD using something like the Jenkins API.
