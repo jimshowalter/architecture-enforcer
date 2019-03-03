@@ -245,17 +245,21 @@ For example:
 com.jimandlisa.app.one.App1!App One!App!1|com.jimandlisa.app.two.App2!App Two!App!1|ILLEGAL
 ```
 
-The Problem objects for illegal references have a detail field that presents the same information in a more human-readable format:
-
-```
-type com.jimandlisa.app.one.App1 in component 'App One' in layer 'App' depth 1 refers to type com.jimandlisa.app.two.App2 in component 'App Two' in layer 'App' depth 1
-```
+The output format can be sliced and diced by any number of analysis tools. For example, it can be sorted into a histogram of most-illegally-referred-to components, or most-offending classes, etc. This can help the team decomposing the project figure out what to focus on first.
 
 Component references are similar, but without class or layer information:
 
 ```
 App One!App One!INTRA
 App One!App Two!INTER
+```
+
+Focusing on illegal component-to-component references can help teams understand the challenges in the codebase without getting mired in tens of thousands of illegal class-to-class dependencies.
+
+The Problem objects for illegal references have a detail field that presents the same information in a more human-readable format:
+
+```
+type com.jimandlisa.app.one.App1 in component 'App One' in layer 'App' depth 1 refers to type com.jimandlisa.app.two.App2 in component 'App Two' in layer 'App' depth 1
 ```
 
 ## Useful Patterns ##
@@ -404,6 +408,12 @@ http://www.dependency-analyzer.org (pf-CDA)
 ## Credits ##
 
 We are grateful to the author of pf-CDA!
+
+And we're very grateful to Steve Hartman for his clear vision of how a target architecture should be articulated.
+
+## Shameless Plug ##
+
+The author of this tool is available to consult on your decomposition project, and charges reasonable fees.
 
 ## Copyright/Licensing ##
 
