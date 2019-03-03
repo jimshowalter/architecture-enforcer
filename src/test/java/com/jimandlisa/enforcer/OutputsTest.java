@@ -14,6 +14,8 @@
 package com.jimandlisa.enforcer;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Assert;
@@ -31,9 +33,24 @@ public class OutputsTest {
 		outputs.toString();
 		outputs.setUnresolvedTypes(Outputs.UNRESOLVED_TYPES_DEFAULT_FILE_NAME);
 		assertEquals(Outputs.UNRESOLVED_TYPES_DEFAULT_FILE_NAME, outputs.unresolvedTypes().getName());
+		assertNull(outputs.allReferences());
+		assertNull(outputs.allReferencesGephiNodes());
+		assertNull(outputs.allReferencesGephiEdges());
+		assertNull(outputs.allReferencesYeD());
+		assertNull(outputs.allComponentReferences());
+		assertNull(outputs.allComponentReferencesGephiNodes());
+		assertNull(outputs.allComponentReferencesGephiEdges());
+		assertNull(outputs.allComponentReferencesYeD());
 		outputs.toString();
-		outputs.setAllReferences(Outputs.ALL_REFERENCES_DEFAULT_FILE_NAME);
-		assertEquals(Outputs.ALL_REFERENCES_DEFAULT_FILE_NAME, outputs.allReferences().getName());
+		outputs.enableAllReferences();
+		assertNotNull(outputs.allReferences());
+		assertNotNull(outputs.allReferencesGephiNodes());
+		assertNotNull(outputs.allReferencesGephiEdges());
+		assertNotNull(outputs.allReferencesYeD());
+		assertNotNull(outputs.allComponentReferences());
+		assertNotNull(outputs.allComponentReferencesGephiNodes());
+		assertNotNull(outputs.allComponentReferencesGephiEdges());
+		assertNotNull(outputs.allComponentReferencesYeD());
 		outputs.toString();
 		try {
 			outputs.setIllegalReferences("foo");
@@ -50,11 +67,11 @@ public class OutputsTest {
 			assertEquals(Errors.UNRESOLVED_TYPES_OUTPUT_FILE_ALREADY_SPECIFIED, e.error());
 		}
 		try {
-			outputs.setAllReferences("foo");
+			outputs.enableAllReferences();
 			Assert.fail();
 		} catch (EnforcerException e) {
-			assertTrue(e.getMessage().contains("all references output file already set"));
-			assertEquals(Errors.ALL_REFERENCES_OUTPUT_FILE_ALREADY_SPECIFIED, e.error());
+			assertTrue(e.getMessage().contains("all references already enabled"));
+			assertEquals(Errors.ALL_REFERENCES_ALREADY_ENABLED, e.error());
 		}
 	}
 }

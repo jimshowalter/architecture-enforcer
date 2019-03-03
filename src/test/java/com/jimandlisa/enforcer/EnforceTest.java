@@ -33,6 +33,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class EnforceTest {
+	
+	private static final String ALL_REFERENCES_NAME = Outputs.ALL_REFERENCES_BASE_NAME + ".txt";
 
 	private static String normalize(Path path) {
 		String normalized = path.toString().replace("\\", "/");
@@ -75,13 +77,13 @@ public class EnforceTest {
 		} catch (EnforcerException e) {
 			assertEquals(Errors.ILLEGAL_REFERENCES_OUTPUT_FILE_ALREADY_SPECIFIED, e.error());
 		}
-		Enforce.parseArg(Optionals.ALL_REFERENCES_OUTPUT_FILE.indicator() + "somefile3.txt", inputs, outputs, flags);
-		assertEquals("somefile3.txt", outputs.allReferences().getName());
+		Enforce.parseArg(Optionals.ALL_REFERENCES.indicator(), inputs, outputs, flags);
+		assertEquals(ALL_REFERENCES_NAME, outputs.allReferences().getName());
 		try {
-			Enforce.parseArg(Optionals.ALL_REFERENCES_OUTPUT_FILE.indicator() + "anotherfile.txt", inputs, outputs, flags);
+			Enforce.parseArg(Optionals.ALL_REFERENCES.indicator() + "anotherfile.txt", inputs, outputs, flags);
 			Assert.fail();
 		} catch (EnforcerException e) {
-			assertEquals(Errors.ALL_REFERENCES_OUTPUT_FILE_ALREADY_SPECIFIED, e.error());
+			assertEquals(Errors.ALL_REFERENCES_ALREADY_ENABLED, e.error());
 		}
 		Enforce.parseArg(Optionals.IGNORES.indicator() + TestUtils.testClassesFile("SampleIgnores.txt").getAbsolutePath(), inputs, outputs, flags);
 		assertEquals(normalize(TestUtils.testClassesFile("SampleIgnores.txt").toPath()), normalize(inputs.ignores().toPath()));
@@ -307,20 +309,20 @@ public class EnforceTest {
 		Type type4 = new Type("bum");
 		type4.setComponent(comp3);
 		Set<Reference> references = new HashSet<>();
-		outputs.setAllReferences("all_references.txt");
+		outputs.enableAllReferences();
 		outputs.allReferences().delete();
 		Enforce.outputAllReferences(references, outputs);
 		assertFalse(outputs.allReferences().exists());
 		Reference legalIntraComponent = new Reference(type1, type2);
 		references.add(legalIntraComponent);
 		Enforce.outputAllReferences(references, outputs);
-		TestUtils.compareTargetFile("all_references.txt", "CannedAllReferences1.txt");
+		TestUtils.compareTargetFile(Outputs.ALL_REFERENCES_BASE_NAME + ".txt", "CannedAllReferences1.txt");
 		outputs.allReferences().delete();
 		Reference illegalInterComponentSameLayer1 = new Reference(type1, type3);
 		references.add(illegalInterComponentSameLayer1);
 		illegalInterComponentSameLayer1.setProblem(new Problem("illegalInterComponentSameLayer1", Errors.ILLEGAL_REFERENCE));
 		Enforce.outputAllReferences(references, outputs);
-		TestUtils.compareTargetFile("all_references.txt", "CannedAllReferences2.txt");
+		TestUtils.compareTargetFile(ALL_REFERENCES_NAME, "CannedAllReferences2.txt");
 		outputs.allReferences().delete();
 		Reference illegalInterComponentSameLayer2 = new Reference(type2, type3);
 		illegalInterComponentSameLayer2.setProblem(new Problem("illegalInterComponentSameLayer2", Errors.ILLEGAL_REFERENCE));
@@ -331,7 +333,7 @@ public class EnforceTest {
 		illegalDifferentLayersUpwards.setProblem(new Problem("illegalDifferentLayersUpwards", Errors.ILLEGAL_REFERENCE));
 		references.add(illegalDifferentLayersUpwards);
 		Enforce.outputAllReferences(references, outputs);
-		TestUtils.compareTargetFile("all_references.txt", "CannedAllReferences3.txt");
+		TestUtils.compareTargetFile(ALL_REFERENCES_NAME, "CannedAllReferences3.txt");
 		outputs.allReferences().delete();
 		assertEquals("!LEGAL", Enforce.legality(legalDifferentLayersDownwards));
 		assertEquals("!ILLEGAL", Enforce.legality(illegalDifferentLayersUpwards));
@@ -380,21 +382,21 @@ public class EnforceTest {
 		file2.delete();
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
 			Enforce.mainImpl(new String[] { TestUtils.testClassesFile("SampleTarget2.yaml").getAbsolutePath(), TestUtils.sampleWar().getAbsolutePath(), TestUtils.targetDir().getAbsolutePath(),
-					Optionals.ALL_REFERENCES_OUTPUT_FILE.indicator() + Outputs.ALL_REFERENCES_DEFAULT_FILE_NAME,
+					Optionals.ALL_REFERENCES.indicator(),
 					Optionals.IGNORES.indicator() + TestUtils.testClassesFile("SampleIgnores.txt").getAbsolutePath() }, ps);
 		}
-		File allReferences = TestUtils.targetFile(Outputs.ALL_REFERENCES_DEFAULT_FILE_NAME);
+		File allReferences = TestUtils.targetFile(ALL_REFERENCES_NAME);
 		assertTrue(allReferences.exists());
-		TestUtils.compareTargetFile(Outputs.ALL_REFERENCES_DEFAULT_FILE_NAME, "TestAllReferencesOutputCanned1.txt");
+		TestUtils.compareTargetFile(ALL_REFERENCES_NAME, "TestAllReferencesOutputCanned1.txt");
 		allReferences.delete();
 		illegalReferencesOutputFile.delete();
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
 			Enforce.mainImpl(new String[] { TestUtils.testClassesFile("SampleTarget2.yaml").getAbsolutePath(), TestUtils.sampleWar().getAbsolutePath(), TestUtils.targetDir().getAbsolutePath(),
-					Optionals.ALL_REFERENCES_OUTPUT_FILE.indicator() + Outputs.ALL_REFERENCES_DEFAULT_FILE_NAME,
+					Optionals.ALL_REFERENCES.indicator(),
 					Optionals.IGNORES.indicator() + TestUtils.testClassesFile("SampleIgnores.txt").getAbsolutePath(), "-p" }, ps);
 		}
 		assertTrue(allReferences.exists());
-		TestUtils.compareTargetFile(Outputs.ALL_REFERENCES_DEFAULT_FILE_NAME, "TestAllReferencesOutputCanned2.txt");
+		TestUtils.compareTargetFile(ALL_REFERENCES_NAME, "TestAllReferencesOutputCanned2.txt");
 		allReferences.delete();
 		illegalReferencesOutputFile.delete();
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {

@@ -28,7 +28,7 @@ import java.util.Set;
 public class Enforce {
 
 	private static final String USAGE = ": usage: /full/path/to/target/architecture/.yaml /full/path/to/.war /full/path/to/writable/output/directory " + Optionals.UNRESOLVED_TYPES_OUTPUT_FILE
-			+ "unresolvedTypesOutputFileSimpleName " + Optionals.ILLEGAL_REFERENCES_OUTPUT_FILE + "illegalReferencesOutputFileSimpleName " + Optionals.ALL_REFERENCES_OUTPUT_FILE
+			+ "unresolvedTypesOutputFileSimpleName " + Optionals.ILLEGAL_REFERENCES_OUTPUT_FILE + "illegalReferencesOutputFileSimpleName " + Optionals.ALL_REFERENCES
 			+ "allReferencesOutputFileSimpleName " + Optionals.IGNORES + "/full/path/to/packages/and/classes/to/ignore " + Optionals.REFLECTIONS + "/full/path/to/reflection/references "
 			+ Optionals.FIX_UNRESOLVEDS + "/full/path/to/fixed/unresolveds " + Optionals.PRESERVE_NESTED_TYPES + " (preserves nested types) " + Optionals.STRICT
 			+ " (strict, requires that all types resolve and no illegal references) " + Optionals.DEBUG + " (debug) [last nine args optional and unordered]";
@@ -43,8 +43,8 @@ public class Enforce {
 				outputs.setIllegalReferences(arg.replaceFirst(Optionals.ILLEGAL_REFERENCES_OUTPUT_FILE.indicator(), ""));
 				return;
 			}
-			if (arg.startsWith(Optionals.ALL_REFERENCES_OUTPUT_FILE.indicator())) {
-				outputs.setAllReferences(arg.replaceFirst(Optionals.ALL_REFERENCES_OUTPUT_FILE.indicator(), ""));
+			if (arg.startsWith(Optionals.ALL_REFERENCES.indicator())) {
+				outputs.enableAllReferences();
 				return;
 			}
 			if (arg.startsWith(Optionals.IGNORES.indicator())) {
@@ -170,7 +170,7 @@ public class Enforce {
 				ps.println(reference);
 			}
 		}
-		// Experimental output for https://gephi.org and https://www.yworks.com/products/yed.
+		// Output for https://gephi.org and https://www.yworks.com/products/yed.
 		Map<String, Integer> refs = new LinkedHashMap<>();
 		int id = 0;
 		for (String reference : CollectionUtils.sort(allReferences)) {
@@ -214,7 +214,6 @@ public class Enforce {
 				ps.println(refs.get(referringType) + " " + refs.get(referredToType));
 			}
 		}
-		// End of experimental output.
 	}
 
 	static void mainImpl(Inputs inputs, Outputs outputs, PrintStream ps, Flags flags) throws Exception {

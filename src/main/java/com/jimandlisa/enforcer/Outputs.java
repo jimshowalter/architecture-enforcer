@@ -20,12 +20,20 @@ public class Outputs {
 
 	public static final String UNRESOLVED_TYPES_DEFAULT_FILE_NAME = "unresolved_types.txt";
 	public static final String ILLEGAL_REFERENCES_DEFAULT_FILE_NAME = "illegal_references.txt";
-	public static final String ALL_REFERENCES_DEFAULT_FILE_NAME = "all_references.txt";
+	public static final String ALL_REFERENCES_BASE_NAME = "all_references";
+	public static final String ALL_COMPONENT_REFERENCES_BASE_NAME = "all_component_references";
 
 	private final File outputDirectory;
-	private File unresolvedTypes;
-	private File illegalReferences;
-	private File allReferences;
+	private File unresolvedTypes = null;
+	private File illegalReferences = null;
+	private File allReferences = null;
+	private File allReferencesGephiNodes = null;
+	private File allReferencesGephiEdges = null;
+	private File allReferencesYeD = null;
+	private File allComponentReferences = null;
+	private File allComponentReferencesGephiNodes = null;
+	private File allComponentReferencesGephiEdges = null;
+	private File allComponentReferencesYeD = null;
 
 	public Outputs(final File outputDirectory) {
 		super();
@@ -35,7 +43,7 @@ public class Outputs {
 	public File outputDirectory() {
 		return outputDirectory;
 	}
-	
+
 	public void setUnresolvedTypes(String name) {
 		if (unresolvedTypes() != null) {
 			throw new EnforcerException("unresolved types output file already set", Errors.UNRESOLVED_TYPES_OUTPUT_FILE_ALREADY_SPECIFIED);
@@ -46,7 +54,7 @@ public class Outputs {
 	public File unresolvedTypes() {
 		return unresolvedTypes;
 	}
-	
+
 	public void setIllegalReferences(String name) {
 		if (illegalReferences() != null) {
 			throw new EnforcerException("illegal references output file already set", Errors.ILLEGAL_REFERENCES_OUTPUT_FILE_ALREADY_SPECIFIED);
@@ -57,20 +65,58 @@ public class Outputs {
 	public File illegalReferences() {
 		return illegalReferences;
 	}
-	
-	public void setAllReferences(String name) {
+
+	public void enableAllReferences() {
 		if (allReferences() != null) {
-			throw new EnforcerException("all references output file already set", Errors.ALL_REFERENCES_OUTPUT_FILE_ALREADY_SPECIFIED);
+			throw new EnforcerException("all references already enabled", Errors.ALL_REFERENCES_ALREADY_ENABLED);
 		}
-		allReferences = Paths.get(outputDirectory.getAbsolutePath(), ArgUtils.check(name, "name")).toFile();
+		allReferences = Paths.get(outputDirectory.getAbsolutePath(), ALL_REFERENCES_BASE_NAME + ".txt").toFile();
+		allReferencesGephiNodes = Paths.get(outputDirectory.getAbsolutePath(), ALL_REFERENCES_BASE_NAME + "_GephiNodes.csv").toFile();
+		allReferencesGephiEdges = Paths.get(outputDirectory.getAbsolutePath(), ALL_REFERENCES_BASE_NAME + "_GephiEdges.csv").toFile();
+		allReferencesYeD = Paths.get(outputDirectory.getAbsolutePath(), ALL_REFERENCES_BASE_NAME + ".tgf").toFile();
+		allComponentReferences = Paths.get(outputDirectory.getAbsolutePath(), ALL_COMPONENT_REFERENCES_BASE_NAME + ".txt").toFile();
+		allComponentReferencesGephiNodes = Paths.get(outputDirectory.getAbsolutePath(), ALL_COMPONENT_REFERENCES_BASE_NAME + "_GephiNodes.csv").toFile();
+		allComponentReferencesGephiEdges = Paths.get(outputDirectory.getAbsolutePath(), ALL_COMPONENT_REFERENCES_BASE_NAME + "_GephiEdges.csv").toFile();
+		allComponentReferencesYeD = Paths.get(outputDirectory.getAbsolutePath(), ALL_COMPONENT_REFERENCES_BASE_NAME + ".tgf").toFile();
 	}
 
 	public File allReferences() {
 		return allReferences;
 	}
 
+	public File allReferencesGephiNodes() {
+		return allReferencesGephiNodes;
+	}
+
+	public File allReferencesGephiEdges() {
+		return allReferencesGephiEdges;
+	}
+
+	public File allReferencesYeD() {
+		return allReferencesYeD;
+	}
+
+	public File allComponentReferences() {
+		return allComponentReferences;
+	}
+
+	public File allComponentReferencesGephiNodes() {
+		return allComponentReferencesGephiNodes;
+	}
+
+	public File allComponentReferencesGephiEdges() {
+		return allComponentReferencesGephiEdges;
+	}
+
+	public File allComponentReferencesYeD() {
+		return allComponentReferencesYeD;
+	}
+
 	@Override
 	public String toString() {
-		return "unresolvedTypes=" + unresolvedTypes + ", illegalReferences=" + illegalReferences + ", allReferences=" + allReferences;
+		return "unresolvedTypes=" + unresolvedTypes + ", illegalReferences=" + illegalReferences + ", allReferences=" + allReferences + ", allReferencesGephiNodes=" + allReferencesGephiNodes
+				+ ", allReferencesGephiEdges=" + allReferencesGephiEdges + ", allReferencesYeD=" + allReferencesYeD + ", allComponentReferences=" + allComponentReferences
+				+ ", allComponentReferencesGephiNodes=" + allComponentReferencesGephiNodes + ", allComponentReferencesGephiEdges=" + allComponentReferencesGephiEdges + ", allComponentReferencesYeD="
+				+ allComponentReferencesYeD;
 	}
 }

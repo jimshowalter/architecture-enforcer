@@ -144,7 +144,7 @@ The full set of args is:
 
 > -IillegalReferencesOutputFileSimpleName
 
-> -AallReferencesOutputFileSimpleName
+> -A
 
 > -i/full/path/to/packages/and/classes/to/ignore
 
@@ -168,28 +168,10 @@ Unresolved types are written as the fully-qualified type name, one type per line
 
 By default, the unresolved-types output file name is "unresolved\_types.txt", and the illegal-references output file name is "illegal\_references.txt". These can be overridden with the -U and -I options, respectively.
 
-If -A is specified, all references (not just illegal references) are written to the specified file, including intra-component references. This can be useful to feed into other programs, for example to visualize the architecture, generate complexity metrics, etc.
-As an experiment, when -A is specified, input files for https://gephi.org (\*\_GephiNodes.csv, \*\_GephiEdges.csv) and https://www.yworks.com/products/yed (\*.tgf) are generated.
-
-References are written in a format designed to be easy to machine read:
-
-```
-referringType!referringComponent!referringLayer!referringDepth!referredToType!referredToComponent!referredToLayer!referredToDepth
-```
-
-For example:
-
-```
-com.jimandlisa.app.one.App1!App One!App!1|com.jimandlisa.app.two.App2!App Two!App!1
-```
-
-The Problem objects for illegal references have a detail field that presents the same information in a more human-readable format:
-
-```
-type com.jimandlisa.app.one.App1 in component 'App One' in layer 'App' depth 1 refers to type com.jimandlisa.app.two.App2 in component 'App Two' in layer 'App' depth 1
-```
-
-If -A is specified, the references end in "!LEGAL" or "!ILLEGAL". In all other files, and in exception messages, the suffix is superfluous because legality is clear from context.
+If -A is specified, all references (not just illegal references, and including intra-component references) are output to additional files.
+The basic files are all\_references.txt, which contains all class-to-class references, and all\_component\_references.txt, which contains all component-to-component references.
+Other files are generated for https://gephi.org (all\_references\_GephiNodes.csv, all\_references\_GephiEdges.csv, all\_component\_references\_GephiNodes.csv, all\_component\_references\_GephiEdges.csv) and https://www.yworks.com/products/yed (all\_references.tgf and all\_component\_references.tgf).
+Because there are numerous files and specific suffixes are required, the names of -A files cannot be specified from the command line.
 
 Notes:
 
@@ -219,6 +201,28 @@ for example Class.forName(someStringFromAVariable + SomeClass.someFunction(some 
 * If the target state only contains one component, there can't be any illegal references.
 
 * Sample files are located in the src/test/resources directory. They start with "Sample".
+
+### Illegal References Formats ###
+
+Illegal references are written in a format designed to be easy to machine read:
+
+```
+referringType!referringComponent!referringLayer!referringDepth!referredToType!referredToComponent!referredToLayer!referredToDepth
+```
+
+For example:
+
+```
+com.jimandlisa.app.one.App1!App One!App!1|com.jimandlisa.app.two.App2!App Two!App!1
+```
+
+The Problem objects for illegal references have a detail field that presents the same information in a more human-readable format:
+
+```
+type com.jimandlisa.app.one.App1 in component 'App One' in layer 'App' depth 1 refers to type com.jimandlisa.app.two.App2 in component 'App Two' in layer 'App' depth 1
+```
+
+Illegal references in all\_references.txt and all\_component\_references.txt end in "!LEGAL" or "!ILLEGAL".
 
 ## Useful Patterns ##
 
@@ -284,8 +288,6 @@ This tool can of course be improved. Below are listed some things we know would 
 * PERFORMANCE: Instead of creating the entire graph with pf-CDA (which can be gigantic for large codebases) and then ignoring a bunch of classes, see if there's a way to pass in a filter when initializing the pf-CDA workspace.
 
 * WARNING: Fix the build warnings.
-
-* HYGEINE: Either remove the experimental outputs for Gephi and yed, or make them first-class citizens (separate fields in Outputs object, only run through map once, etc.).
 
 * HYGIENE: Add one or more code-quality tools to the build. For example, findbugs, errorprone, etc.
 
