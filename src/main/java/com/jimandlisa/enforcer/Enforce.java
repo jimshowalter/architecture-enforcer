@@ -204,16 +204,6 @@ public class Enforce {
 		}
 	}
 	
-	static String kind(Reference reference) {
-		if (reference.isIntraComponentReference()) {
-			return "!INTRA";
-		}
-		if (reference.isIllegal()) {
-			return "!ILLEGAL";
-		}
-		return "!LEGAL";
-	}
-	
 	static void outputAllComponentToComponentReferences(Collection<Component> components, Outputs outputs) throws Exception {
 		if (outputs.allComponentReferences() == null) {
 			return;
@@ -224,7 +214,7 @@ public class Enforce {
 		Set<String> refs = new HashSet<>();
 		for (Component component : components) {
 			for (Reference reference : component.references()) {
-				refs.add(component.name() + "!" + reference.referredToType().component().name() + kind(reference));
+				refs.add(component.name() + "!" + reference.referredToType().component().name() + "!" + reference.kind());
 			}
 		}
 		List<String> sorted = CollectionUtils.sort(new ArrayList<>(refs));

@@ -236,6 +236,12 @@ Component references are similar, but without class or layer information:
 App One!App One!INTRA
 ```
 
+INTRA is short for intra-component. INTRA references are always legal.
+
+LEGAL means inter-component and legal.
+
+ILLEGAL means inter-component and illegal.
+
 ## Useful Patterns ##
 
 This tool is not prescriptive about how you define your target state. However, there are some useful patterns you might want to use.
