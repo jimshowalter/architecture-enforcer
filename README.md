@@ -48,9 +48,9 @@ best practice is for every package to belong to exactly one project/module. So, 
 
 Classes belonging to the default package (that is, not having a package) can be assigned to components by specifying them in the components.
 
-All classes must wind up in a component, or the tool fails with an error (the target state must be completely specified).
+All classes must wind up in a component, or this tool fails with an error (the target state must be completely specified).
 
-Layers, domains, packages, and classes referred to by a component must exist, or the tool fails with an error.
+Layers, domains, packages, and classes referred to by a component must exist, or this tool fails with an error.
 
 Components are somewhat analogous to Java 9 modules. We chose not to make them be modules, because large Java codebases tend to be legacy codebases, which tend to be on earlier versions of Java that don't support modules.
 
@@ -58,16 +58,17 @@ Components are somewhat analogous to Java 9 modules. We chose not to make them b
 
 Classes typically refer to other classes.
 
-A class in a component can refer to one or more classes in another component, and/or in the same component.
+A class in a component can refer to classes in the same component and in different components.
 
-The tool classifies references into one of three buckets:
+Only some references between components are legal.
 
-* INTRA. Intra-component. Always legal.
+This tool classifies references into one of three buckets:
 
-* LEGAL. Inter-component. Legal because dependency is from higher layer to lower layer.
+* INTRA: Intra-component. Always legal.
+
+* LEGAL: Inter-component. Legal because dependency is from higher layer to lower layer.
 
 * ILLEGAL: Inter-component. Illegal because dependency is "sideways" (between components in same layer), or from lower layer to higher layer. (Note that this means circular references among components are illegal, even in the same layer.)
-
 
 In a sense, the entire point of this tool is to be able to implement these three functions:
 
@@ -92,7 +93,7 @@ In a sense, the entire point of this tool is to be able to implement these three
 
 By default, nested classes are rolled up to the outermost enclosing class, and references to and from nested classes are rolled up to the outermost enclosing classes.
 
-For example, if foo.bar.utils.Utils$Common refers to foo.bar.utils.math.Math$Multiply, the tool registers this as a reference from foo.bar.utils.Utils to foo.bar.utils.math.Math.
+For example, if foo.bar.utils.Utils$Common refers to foo.bar.utils.math.Math$Multiply, this tool registers this as a reference from foo.bar.utils.Utils to foo.bar.utils.math.Math.
 
 In many projects this greatly shrinks the number of references that need to be analyzed.
 
@@ -130,18 +131,18 @@ We're working on fixing those warnings (and welcome your help, if you know how t
 java -jar architecture-enforcer-1.0-SNAPSHOT.jar /path/to/architecture-enforcer/src/test/resources/SampleTarget2.yaml /path/to/architecture-enforcer/target/test-classes/architecture-enforcer-sample-1.0-SNAPSHOT.war /path/to/architecture-enforcer/target -i/path/to/architecture-enforcer/target/test-classes/SampleIgnores.txt
 ```
 
-4. (Optional) Run the tool from Eclipse or IntelliJ.
+4. (Optional) Run this tool from Eclipse or IntelliJ.
 
 5. Using one of the provided sample yaml files as a starting point, define the target state for your project. This can take weeks for a large project, but you can start by just defining a few basic layers (for example, data, logic, and UI), then iterate.
 (It's probably better to start small anyway, instead of trying to boil the ocean in one shot.)
 
 We provide two sample yaml files. SampleTarget1.yaml is the ball-of-mud target state, where everything is in one layer and component (and no domains are used). SampleTarget2.yaml demonstrates a layered target state, with domains. You can start with either sample, plus SampleIgnores.txt, and go from there.
 
-To run the tool with SampleTarget1.yaml, just change 2 to 1 in the above command.
+To run this tool with SampleTarget1.yaml, just change 2 to 1 in the above command.
 
-For large codebases, the tool requires lots of memory. Make sure you provide enough.
+For large codebases, this tool requires lots of memory. Make sure you provide enough.
 
-For large codebases, the tool can take 30+ seconds to run.
+For large codebases, this tool can take 30+ seconds to run.
 
 ## Command-line Arguments ###
 
@@ -191,7 +192,7 @@ Because there are numerous files and specific suffixes are required, the names o
 Notes:
 
 * Typically a project uses a bunch of third-party classes, and/or classes from inside your company but outside the project being decomposed. List packages and classes to ignore in a file you specify with the -i command-line argument.
-The syntax is full.name.of.package(.AndOptionallyTheClass). By default, the tool appends dots for you. In some cases you need to suppress dots due to some issues with pf-CDA, in which case end the package or class name with a !.
+The syntax is full.name.of.package(.AndOptionallyTheClass). By default, this tool appends dots for you. In some cases you need to suppress dots due to some issues with pf-CDA, in which case end the package or class name with a !.
 In other cases, you need to ignore a class in the default package (that is, no package), in which case just list the class name, ending with a !.
 
 * If your project uses reflection, you should add class-to-class dependencies to a file you specify with the -r command-line argument. The syntax is: full.name.of.referring.class.Foo:full.name.of.referred.to.class.Bar,full.name.of.referred.to.class.Baz....,
@@ -206,7 +207,7 @@ include $TheNestedType in the names.
 
 * Adding a referred-to class to the reflections or fix-unresolveds files can introduce new unresolved classes. When that happens, you need to keep entering classes until all classes are defined.
 
-* The tool creates unresolved types and adds them to the type-lookup map so downstream analysis doesn't blow up. This is just a band-aid through, because whatever types a missing type refers to are not included in the analysis (because they aren't known).
+* This tool creates unresolved types and adds them to the type-lookup map so downstream analysis doesn't blow up. This is just a band-aid through, because whatever types a missing type refers to are not included in the analysis (because they aren't known).
 
 * pf-CDA is smart enough to add references on its own for simple Class.forName calls where the string name of the class is directly specified, as in Class.forName("com.foo.bar.Baz"), but it can't follow complicated string concatenations, strings returned by functions, etc.,
 for example Class.forName(someStringFromAVariable + SomeClass.someFunction(some args from somewhere) + SOME\_STRING\_CONSTANT + ".Foo"). That's why you have to add them manually. Also, pf-CDA doesn't parse reflection references in JSP files, Spring, etc.
