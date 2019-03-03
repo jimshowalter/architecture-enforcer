@@ -321,17 +321,14 @@ public class EnforceTest {
 		outputs.allReferences().delete();
 		Reference illegalInterComponentSameLayer1 = new Reference(type1, type3);
 		references.add(illegalInterComponentSameLayer1);
-		illegalInterComponentSameLayer1.setProblem(new Problem("illegalInterComponentSameLayer1", Errors.ILLEGAL_REFERENCE));
 		Enforce.outputAllClassToClassReferences(references, outputs);
 		TestUtils.compareTargetFile(ALL_REFERENCES_NAME, "CannedAllReferences2.txt");
 		outputs.allReferences().delete();
 		Reference illegalInterComponentSameLayer2 = new Reference(type2, type3);
-		illegalInterComponentSameLayer2.setProblem(new Problem("illegalInterComponentSameLayer2", Errors.ILLEGAL_REFERENCE));
 		references.add(illegalInterComponentSameLayer2);
 		Reference legalDifferentLayersDownwards = new Reference(type4, type1);
 		references.add(legalDifferentLayersDownwards);
 		Reference illegalDifferentLayersUpwards = new Reference(type1, type4);
-		illegalDifferentLayersUpwards.setProblem(new Problem("illegalDifferentLayersUpwards", Errors.ILLEGAL_REFERENCE));
 		references.add(illegalDifferentLayersUpwards);
 		Enforce.outputAllClassToClassReferences(references, outputs);
 		TestUtils.compareTargetFile(ALL_REFERENCES_NAME, "CannedAllReferences3.txt");

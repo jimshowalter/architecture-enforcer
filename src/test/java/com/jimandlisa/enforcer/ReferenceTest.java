@@ -15,7 +15,6 @@ package com.jimandlisa.enforcer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.HashSet;
@@ -28,15 +27,26 @@ public class ReferenceTest {
 	@SuppressWarnings("unlikely-arg-type")
 	@Test
 	public void testReference() {
-		Type type1 = new Type("com.foo.bar.Baz");
-		Type type2 = new Type("com.foo.bar.Baz2");
+		Layer layer1 = new Layer("One", 1, null);
+		Component comp1 = new Component("Comp1", layer1, null, null);
+		Component comp2 = new Component("Comp2", layer1, null, null);
+		Layer layer2 = new Layer("Two", 2, null);
+		Component comp3 = new Component("Comp3", layer2, null, null);
+		Type type1 = new Type("foo");
+		type1.setComponent(comp1);
+		Type type2 = new Type("bar");
+		type2.setComponent(comp1);
+		Type type3 = new Type("baz");
+		type3.setComponent(comp3);
 		Reference reference1 = new Reference(type1, type2);
 		Reference reference2 = new Reference(type1, type2);
+		Reference reference3 = new Reference(type3, type1);
+		Reference reference4 = new Reference(type1, type3);
 		assertEquals(type1, reference1.referringType());
 		assertEquals(type2, reference1.referredToType());
-		assertNull(reference1.problem());
 		assertFalse(reference1.isIllegal());
-		assertEquals(type1.name() + " -> " + type2.name(), reference1.toString());
+		assertEquals(ReferenceKinds.INTRA, reference1.kind());
+		assertEquals(type1.name() + " -> " + type2.name() + " [" + ReferenceKinds.INTRA + "]", reference1.toString());
 		assertEquals(reference1.referringType().hashCode() + reference1.referredToType().hashCode(), reference1.hashCode());
 		assertFalse(reference1.equals(null));
 		assertTrue(reference1.equals(reference1));
@@ -44,35 +54,17 @@ public class ReferenceTest {
 		assertTrue(reference1.equals(reference1));
 		assertTrue(reference1.equals(reference2));
 		assertEquals(0, reference1.compareTo(reference2));
+		assertEquals(type3.name() + " -> " + type1.name() + " [" + ReferenceKinds.LEGAL + "]", reference3.toString());
+		assertEquals(type1.name() + " -> " + type3.name() + " [" + ReferenceKinds.ILLEGAL + "]", reference4.toString());
 		Set<Reference> references = new HashSet<>();
 		references.add(reference1);
 		references.add(reference2);
 		assertEquals(1, references.size());
 		references.clear();
 		references.add(reference1);
-		references.add(new Reference(type1, new Type("foo.foo.Bar")));
+		references.add(reference3);
 		assertEquals(2, references.size());
-		Problem problem = new Problem("unresolved", Errors.UNRESOLVED_REFERENCE);
-		reference1.setProblem(problem);
-		assertEquals(problem, reference1.problem());
-		assertFalse(reference1.isIllegal());
-		assertEquals(type1.name() + " -> " + type2.name(), reference1.toString());
-		reference1 = new Reference(type1, type2);
-		problem = new Problem("illegal", Errors.ILLEGAL_REFERENCE);
-		reference1.setProblem(problem);
-		assertEquals(problem, reference1.problem());
-		assertTrue(reference1.isIllegal());
-		assertEquals(type1.name() + " -> " + type2.name() + " [ILLEGAL]", reference1.toString());
 		assertEquals(reference1.referringType().hashCode() + reference1.referredToType().hashCode(), reference1.hashCode());
-		Layer layer1 = new Layer("One", 1, null);
-		Component comp1 = new Component("Comp1", layer1, null, null);
-		Component comp2 = new Component("Comp2", layer1, null, null);
-		Layer layer2 = new Layer("Two", 2, null);
-		Component comp3 = new Component("Comp3", layer2, null, null);
-		type1 = new Type("foo");
-		type1.setComponent(comp1);
-		type2 = new Type("bar");
-		type2.setComponent(comp1);
 		assertTrue(new Reference(type1, type1).isIntraComponentReference());
 		assertTrue(new Reference(type1, type2).isIntraComponentReference());
 		assertTrue(new Reference(type2, type1).isIntraComponentReference());
@@ -105,21 +97,6 @@ public class ReferenceTest {
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("null referredToType"));
 			assertEquals(Errors.NULL_TYPE_ARG, e.error());
-		}
-		try {
-			reference1 = new Reference(type1, type2);
-			reference1.setProblem(null);
-		} catch (EnforcerException e) {
-			assertTrue(e.getMessage().contains("null problem"));
-			assertEquals(Errors.NULL_PROBLEM_ARG, e.error());
-		}
-		try {
-			reference1 = new Reference(type1, type2);
-			reference1.setProblem(problem);
-			reference1.setProblem(problem);
-		} catch (EnforcerException e) {
-			assertTrue(e.getMessage().contains("already set problem"));
-			assertEquals(Errors.PROBLEM_ALREADY_SPECIFIED, e.error());
 		}
 	}
 }

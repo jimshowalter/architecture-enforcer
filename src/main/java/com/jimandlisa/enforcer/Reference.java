@@ -17,10 +17,10 @@ public class Reference implements Comparable<Reference> {
 
 	private final Type referringType;
 	private final Type referredToType;
+	private final ReferenceKinds kind;
+	private final boolean isIllegal;
 	private final int hashCode;
 	private final String baseToString;
-	private Problem problem = null;
-	private boolean isIllegal = false;
 
 	public Reference(final Type referringType, final Type referredToType) {
 		super();
@@ -28,6 +28,8 @@ public class Reference implements Comparable<Reference> {
 		this.referredToType = ArgUtils.check(referredToType, "referredToType");
 		this.hashCode = referringType.hashCode() + referredToType.hashCode();
 		this.baseToString = referringType.name() + " -> " + referredToType.name();
+		this.kind = isIntraComponentReference() ? ReferenceKinds.INTRA : (isInSameOrLowerLayer() ? ReferenceKinds.ILLEGAL : ReferenceKinds.LEGAL);
+		this.isIllegal = this.kind == ReferenceKinds.ILLEGAL;
 	}
 
 	public Type referringType() {
@@ -41,26 +43,22 @@ public class Reference implements Comparable<Reference> {
 	public boolean isIntraComponentReference() {
 		return referringType.component().equals(referredToType.component());
 	}
+	
+	public boolean isInSameOrLowerLayer() {
+		return referringType.component().layer().depth() <= referredToType.component().layer().depth();
+	}
 
 	public boolean isLayerViolation() {
 		if (isIntraComponentReference()) {
 			return false;
 		}
-		return referringType.component().layer().depth() <= referredToType.component().layer().depth();
+		return isInSameOrLowerLayer();
 	}
-
-	public void setProblem(final Problem problem) {
-		if (problem() != null) {
-			throw new EnforcerException("already set problem " + problem, Errors.PROBLEM_ALREADY_SPECIFIED);
-		}
-		this.problem = ArgUtils.check(problem, "problem");
-		this.isIllegal = problem.error() == Errors.ILLEGAL_REFERENCE;
+	
+	public ReferenceKinds kind() {
+		return kind;
 	}
-
-	public Problem problem() {
-		return problem;
-	}
-
+	
 	public boolean isIllegal() {
 		return isIllegal;
 	}
@@ -91,7 +89,7 @@ public class Reference implements Comparable<Reference> {
 
 	@Override
 	public String toString() {
-		return baseToString + (isIllegal ? " [ILLEGAL]" : "");
+		return baseToString + " [" + kind + "]";
 	}
 
 	public String parseableDescription() {
