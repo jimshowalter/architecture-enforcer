@@ -35,6 +35,7 @@ import org.junit.Test;
 public class EnforceTest {
 	
 	private static final String ALL_REFERENCES_NAME = Outputs.ALL_REFERENCES_BASE_NAME + ".txt";
+	private static final String ALL_COMPONENT_REFERENCES_NAME = Outputs.ALL_COMPONENT_REFERENCES_BASE_NAME + ".txt";
 
 	private static String normalize(Path path) {
 		String normalized = path.toString().replace("\\", "/");
@@ -317,7 +318,7 @@ public class EnforceTest {
 		Reference legalIntraComponent = new Reference(type1, type2);
 		references.add(legalIntraComponent);
 		Enforce.outputAllClassToClassReferences(references, outputs);
-		TestUtils.compareTargetFile(Outputs.ALL_REFERENCES_BASE_NAME + ".txt", "CannedAllReferences1.txt");
+		TestUtils.compareTargetFile(ALL_REFERENCES_NAME, "CannedAllReferences1.txt");
 		outputs.allReferences().delete();
 		Reference illegalInterComponentSameLayer1 = new Reference(type1, type3);
 		references.add(illegalInterComponentSameLayer1);
@@ -342,6 +343,44 @@ public class EnforceTest {
 		Enforce.outputAllComponentToComponentReferences(components, outputs);
 		outputs.enableAllReferences();
 		Enforce.outputAllComponentToComponentReferences(components, outputs);
+		Layer layer1 = new Layer("One", 1, null);
+		Component comp1 = new Component("Comp1", layer1, null, null);
+		Component comp2 = new Component("Comp2", layer1, null, null);
+		Layer layer2 = new Layer("Two", 2, null);
+		Component comp3 = new Component("Comp3", layer2, null, null);
+		Type type1 = new Type("foo");
+		type1.setComponent(comp1);
+		Type type2 = new Type("bar");
+		type2.setComponent(comp1);
+		Type type3 = new Type("baz");
+		type3.setComponent(comp2);
+		Type type4 = new Type("bum");
+		type4.setComponent(comp3);
+		outputs.allComponentReferences().delete();
+		Enforce.outputAllComponentToComponentReferences(components, outputs);
+		assertFalse(outputs.allReferences().exists());
+		components.add(comp1);
+		components.add(comp2);
+		components.add(comp3);
+		Reference legalIntraComponent = new Reference(type1, type2);
+		comp1.references().add(legalIntraComponent);
+		Enforce.outputAllComponentToComponentReferences(components, outputs);
+		TestUtils.compareTargetFile(ALL_COMPONENT_REFERENCES_NAME, "CannedAllComponentReferences1.txt");
+		outputs.allComponentReferences().delete();
+		Reference illegalInterComponentSameLayer1 = new Reference(type1, type3);
+		comp1.references().add(illegalInterComponentSameLayer1);
+		Enforce.outputAllComponentToComponentReferences(components, outputs);
+		TestUtils.compareTargetFile(ALL_COMPONENT_REFERENCES_NAME, "CannedAllComponentReferences2.txt");
+		outputs.allComponentReferences().delete();
+		Reference illegalInterComponentSameLayer2 = new Reference(type2, type3);
+		comp1.references().add(illegalInterComponentSameLayer2);
+		Reference legalDifferentLayersDownwards = new Reference(type4, type1);
+		comp3.references().add(legalDifferentLayersDownwards);
+		Reference illegalDifferentLayersUpwards = new Reference(type1, type4);
+		comp1.references().add(illegalDifferentLayersUpwards);
+		Enforce.outputAllComponentToComponentReferences(components, outputs);
+		TestUtils.compareTargetFile(ALL_COMPONENT_REFERENCES_NAME, "CannedAllComponentReferences3.txt");
+		outputs.allReferences().delete();
 	}
 
 	@Test
