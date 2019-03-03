@@ -153,25 +153,18 @@ public class Enforce {
 	static String legality(Reference reference) {
 		return "!" + (reference.isLayerViolation() ? "ILLEGAL" : "LEGAL");
 	}
-
-	static void outputAllReferences(Set<Reference> references, Outputs outputs) throws Exception {
-		if (outputs.allReferences() == null) {
-			return;
-		}
-		if (references.isEmpty()) {
-			return;
-		}
+	
+	static void outputAllClassToClassReferences(Set<Reference> references, Outputs outputs) throws Exception {
 		List<String> allReferences = new ArrayList<>();
 		for (Reference reference : references) {
 			allReferences.add(reference.parseableDescription() + legality(reference));
 		}
 		allReferences = CollectionUtils.sort(allReferences);
 		try (PrintStream ps = new PrintStream(new FileOutputStream(outputs.allReferences()))) {
-			for (String reference : CollectionUtils.sort(allReferences)) {
+			for (String reference : allReferences) {
 				ps.println(reference);
 			}
 		}
-		// Output for https://gephi.org and https://www.yworks.com/products/yed.
 		Map<String, Integer> refs = new LinkedHashMap<>();
 		int id = 0;
 		for (String reference : allReferences) {
@@ -206,6 +199,16 @@ public class Enforce {
 				yed.println(refs.get(referringType) + " " + refs.get(referredToType));
 			}
 		}
+	}
+
+	static void outputAllReferences(Set<Reference> references, Outputs outputs) throws Exception {
+		if (outputs.allReferences() == null) {
+			return;
+		}
+		if (references.isEmpty()) {
+			return;
+		}
+		outputAllClassToClassReferences(references, outputs);
 	}
 
 	static void mainImpl(Inputs inputs, Outputs outputs, PrintStream ps, Flags flags) throws Exception {
