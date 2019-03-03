@@ -22,6 +22,9 @@ public class Outputs {
 	public static final String ILLEGAL_REFERENCES_DEFAULT_FILE_NAME = "illegal_references.txt";
 	public static final String ALL_REFERENCES_BASE_NAME = "all_references";
 	public static final String ALL_COMPONENT_REFERENCES_BASE_NAME = "all_component_references";
+	public static final String GEPHI_NODES_SUFFIX = "_GephiNodes.csv";
+	public static final String GEPHI_EDGES_SUFFIX = "_GephiEdges.csv";
+	public static final String YED_SUFFIX = "_yed.tgf";
 
 	private final File outputDirectory;
 	private File unresolvedTypes = null;
@@ -81,13 +84,13 @@ public class Outputs {
 			throw new EnforcerException("all references already enabled", Errors.ALL_REFERENCES_ALREADY_ENABLED);
 		}
 		allReferences = Paths.get(outputDirectory.getAbsolutePath(), ALL_REFERENCES_BASE_NAME + ".txt").toFile();
-		allReferencesGephiNodes = Paths.get(outputDirectory.getAbsolutePath(), ALL_REFERENCES_BASE_NAME + "_GephiNodes.csv").toFile();
-		allReferencesGephiEdges = Paths.get(outputDirectory.getAbsolutePath(), ALL_REFERENCES_BASE_NAME + "_GephiEdges.csv").toFile();
-		allReferencesYeD = Paths.get(outputDirectory.getAbsolutePath(), ALL_REFERENCES_BASE_NAME + "_yed.tgf").toFile();
+		allReferencesGephiNodes = Paths.get(outputDirectory.getAbsolutePath(), ALL_REFERENCES_BASE_NAME + GEPHI_NODES_SUFFIX).toFile();
+		allReferencesGephiEdges = Paths.get(outputDirectory.getAbsolutePath(), ALL_REFERENCES_BASE_NAME + GEPHI_EDGES_SUFFIX).toFile();
+		allReferencesYeD = Paths.get(outputDirectory.getAbsolutePath(), ALL_REFERENCES_BASE_NAME + YED_SUFFIX).toFile();
 		allComponentReferences = Paths.get(outputDirectory.getAbsolutePath(), ALL_COMPONENT_REFERENCES_BASE_NAME + ".txt").toFile();
-		allComponentReferencesGephiNodes = Paths.get(outputDirectory.getAbsolutePath(), ALL_COMPONENT_REFERENCES_BASE_NAME + "_GephiNodes.csv").toFile();
-		allComponentReferencesGephiEdges = Paths.get(outputDirectory.getAbsolutePath(), ALL_COMPONENT_REFERENCES_BASE_NAME + "_GephiEdges.csv").toFile();
-		allComponentReferencesYeD = Paths.get(outputDirectory.getAbsolutePath(), ALL_COMPONENT_REFERENCES_BASE_NAME + "_yed.tgf").toFile();
+		allComponentReferencesGephiNodes = Paths.get(outputDirectory.getAbsolutePath(), ALL_COMPONENT_REFERENCES_BASE_NAME + GEPHI_NODES_SUFFIX).toFile();
+		allComponentReferencesGephiEdges = Paths.get(outputDirectory.getAbsolutePath(), ALL_COMPONENT_REFERENCES_BASE_NAME + GEPHI_EDGES_SUFFIX).toFile();
+		allComponentReferencesYeD = Paths.get(outputDirectory.getAbsolutePath(), ALL_COMPONENT_REFERENCES_BASE_NAME + YED_SUFFIX).toFile();
 	}
 
 	public File allReferences() {

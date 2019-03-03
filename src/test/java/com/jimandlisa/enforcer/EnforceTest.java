@@ -333,9 +333,9 @@ public class EnforceTest {
 		references.add(illegalDifferentLayersUpwards);
 		Enforce.outputAllClassToClassReferences(references, outputs);
 		TestUtils.compareTargetFile(ALL_REFERENCES_NAME, "CannedAllReferences3.txt");
-		TestUtils.compareTargetFile(Outputs.ALL_REFERENCES_BASE_NAME + "_GephiNodes.csv", "CannedAllReferences3_GephiNodes.csv");
-		TestUtils.compareTargetFile(Outputs.ALL_REFERENCES_BASE_NAME +"_GephiEdges.csv", "CannedAllReferences3_GephiEdges.csv");
-		TestUtils.compareTargetFile(Outputs.ALL_REFERENCES_BASE_NAME + "_yed.tgf", "CannedAllReferences3_yed.tgf");
+		TestUtils.compareTargetFile(Outputs.ALL_REFERENCES_BASE_NAME + Outputs.GEPHI_NODES_SUFFIX, "CannedAllReferences3" + Outputs.GEPHI_NODES_SUFFIX);
+		TestUtils.compareTargetFile(Outputs.ALL_REFERENCES_BASE_NAME +Outputs.GEPHI_EDGES_SUFFIX, "CannedAllReferences3" + Outputs.GEPHI_EDGES_SUFFIX);
+		TestUtils.compareTargetFile(Outputs.ALL_REFERENCES_BASE_NAME + Outputs.YED_SUFFIX, "CannedAllReferences3" + Outputs.YED_SUFFIX);
 		outputs.allReferences().delete();
 	}
 	
@@ -383,9 +383,9 @@ public class EnforceTest {
 		comp1.references().add(illegalDifferentLayersUpwards);
 		Enforce.outputAllComponentToComponentReferences(components, outputs);
 		TestUtils.compareTargetFile(ALL_COMPONENT_REFERENCES_NAME, "CannedAllComponentReferences3.txt");
-		TestUtils.compareTargetFile(Outputs.ALL_COMPONENT_REFERENCES_BASE_NAME + "_GephiNodes.csv", "CannedAllComponentReferences3_GephiNodes.csv");
-		TestUtils.compareTargetFile(Outputs.ALL_COMPONENT_REFERENCES_BASE_NAME + "_GephiEdges.csv", "CannedAllComponentReferences3_GephiEdges.csv");
-		TestUtils.compareTargetFile(Outputs.ALL_COMPONENT_REFERENCES_BASE_NAME + "_yed.tgf", "CannedAllComponentReferences3_yed.tgf");
+		TestUtils.compareTargetFile(Outputs.ALL_COMPONENT_REFERENCES_BASE_NAME + Outputs.GEPHI_NODES_SUFFIX, "CannedAllComponentReferences3" + Outputs.GEPHI_NODES_SUFFIX);
+		TestUtils.compareTargetFile(Outputs.ALL_COMPONENT_REFERENCES_BASE_NAME + Outputs.GEPHI_EDGES_SUFFIX, "CannedAllComponentReferences3" + Outputs.GEPHI_EDGES_SUFFIX);
+		TestUtils.compareTargetFile(Outputs.ALL_COMPONENT_REFERENCES_BASE_NAME + Outputs.YED_SUFFIX, "CannedAllComponentReferences3" + Outputs.YED_SUFFIX);
 		outputs.allComponentReferences().delete();
 	}
 
