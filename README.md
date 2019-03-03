@@ -9,7 +9,13 @@ A companion project, https://github.com/jimshowalter/architecture-enforcer-sampl
 
 ## Defining Target State ##
 
-The target state is defined in a yaml file. The file defines layers, domains, and components, all of which are logical groupings that exist "virtually" on top of whatever snarl constitutes the current codebase.
+A target state is defined in terms of layers, domains, and components, all of which are logical groupings that exist "virtually" on top of whatever snarl constitutes the current codebase.
+
+Overlaying a virtualized target state allows you to perform iterative what-if analysis before changing any of the actual code.
+
+How you define your target state is up to you&mdash;this tool is not prescriptive, other than prohibiting illegal references.
+
+The target state is defined in a yaml file that is the single source of truth for this tool.
 
 ### Layers ###
 
@@ -69,6 +75,15 @@ This tool classifies references into one of three buckets:
 * LEGAL: Inter-component. Legal because dependency is from higher layer to lower layer.
 
 * ILLEGAL: Inter-component. Illegal because dependency is "sideways" (between components in same layer), or from lower layer to higher layer. (Note that this means circular references among components are illegal, even in the same layer.)
+
+To summarize:
+
+|Referring Component Layer|Referred To Component Layer|Legal?|
+|:------------------------|:--------------------------|:-----|
+|N+1|N|Yes|
+|N|N+1|No|
+|N|N (same component as referring component)|Yes|
+|N|N (different component than referring component)|No|
 
 In a sense, the entire point of this tool is to be able to implement these three functions:
 
@@ -142,7 +157,7 @@ To run this tool with SampleTarget1.yaml, just change 2 to 1 in the above comman
 
 For large codebases, this tool requires lots of memory. Make sure you provide enough.
 
-For large codebases, this tool can take 30+ seconds to run.
+For large codebases, this tool can take 30+ seconds to run, even when given lots of memory.
 
 ## Command-line Arguments ###
 
@@ -245,7 +260,7 @@ App One!App Two!INTER
 
 ## Useful Patterns ##
 
-This tool is not prescriptive about how you define your target state. However, there are some useful patterns you might want to use.
+When defining your target state, there are some useful patterns you might want to use.
 
 Components can be "simple", where both the API and implementation of the component are combined, or can be "paired", where the API and implementation are separated.
 
@@ -307,6 +322,8 @@ This tool can of course be improved. Below are listed some things we know would 
 * PERFORMANCE: Instead of creating the entire graph with pf-CDA (which can be gigantic for large codebases) and then ignoring a bunch of classes, see if there's a way to pass in a filter when initializing the pf-CDA workspace.
 
 * WARNING: Fix the build warnings.
+
+* FEATURE: Improve graphics support. For example, add arrows to edges to show depends-on direction, add "illegal" labels to illegal edges and/or color illegal edges red, and add counts of illegal references between components.
 
 * HYGIENE: Add one or more code-quality tools to the build. For example, findbugs, errorprone, etc.
 
