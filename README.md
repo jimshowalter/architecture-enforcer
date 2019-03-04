@@ -348,6 +348,8 @@ This tool can of course be improved. Below are listed some things we know would 
 
 * HYGIENE: Start tracking these todos in a bug-tracking system.
 
+* HYGIENE: Set up CI/CD and publish to Maven central.
+
 * FEATURE: Improve graphics support. For example, add arrows to edges to show depends-on direction, add "illegal" labels to illegal edges and/or color illegal edges red, and add counts of illegal references between components.
 
 * FEATURE: Provide a way to fail builds if the count of illegal references increases. Note that this is different from enabling strict mode, because in that case builds fail if there are any illegal references, so the previous count is known (it's zero).
