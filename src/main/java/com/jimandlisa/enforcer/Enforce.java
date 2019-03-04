@@ -28,9 +28,8 @@ import java.util.Set;
 // Handles interactions with the user, and outputs results.
 public class Enforce {
 
-	private static final String USAGE = ": usage: /full/path/to/target/architecture/.yaml /full/path/to/.war /full/path/to/writable/output/directory " + Optionals.IGNORES
-			+ "/full/path/to/file/of/packages/and/classes/to/ignore " + Optionals.REFLECTIONS + "/full/path/to/file/of/reflection/references " + Optionals.FIX_UNRESOLVEDS
-			+ "/full/path/to/file/of/fixed/unresolveds " + Optionals.PRESERVE_NESTED_TYPES + " (preserves nested types) " + Optionals.STRICT
+	private static final String USAGE = ": usage: /full/path/to/target/architecture/.yaml /full/path/to/.war /full/path/to/writable/output/directory " + Optionals.IGNORES + "/full/path/to/file/of/packages/and/classes/to/ignore "
+			+ Optionals.REFLECTIONS + "/full/path/to/file/of/reflection/references " + Optionals.FIX_UNRESOLVEDS + "/full/path/to/file/of/fixed/unresolveds " + Optionals.PRESERVE_NESTED_TYPES + " (preserves nested types) " + Optionals.STRICT
 			+ " (strict, requires that all types resolve and no illegal references) " + Optionals.DEBUG + " (debug) [last six args optional and unordered]";
 
 	static void parseArg(String arg, Inputs inputs, Flags flags) {
@@ -140,36 +139,30 @@ public class Enforce {
 		}
 	}
 
-	static void outputAllClassToClassReferences(Set<Reference> references, Outputs outputs) throws Exception {
-		Set<String> classReferences = new HashSet<>();
-		for (Reference reference : references) {
-			classReferences.add(reference.parseableDescription() + "!" + reference.kind());
-		}
-		List<String> allRefs = CollectionUtils.sort(new ArrayList<>(classReferences));
-		try (PrintStream ps = new PrintStream(new FileOutputStream(outputs.allReferences()))) {
+	static void outputAllReferences(Set<String> rawRefs, int referrerIndex, int referredToIndex, File allFile, File gephiNodesFile, File gephiEdgesFile, File yEdFile) throws Exception {
+		List<String> allRefs = CollectionUtils.sort(new ArrayList<>(rawRefs));
+		try (PrintStream ps = new PrintStream(new FileOutputStream(allFile))) {
 			for (String ref : allRefs) {
 				ps.println(ref);
 			}
 		}
 		Map<String, Integer> refs = new LinkedHashMap<>();
 		int id = 0;
-		for (String reference : allRefs) {
-			String[] segments = reference.split("!");
-			String referringType = segments[0];
-			String referredToType = segments[4];
-			if (!refs.containsKey(referringType)) {
+		for (String ref : allRefs) {
+			String[] segments = ref.split("!");
+			String referrer = segments[referrerIndex];
+			String referredTo = segments[referredToIndex];
+			if (!refs.containsKey(referrer)) {
 				id++;
-				refs.put(referringType, id);
+				refs.put(referrer, id);
 				continue;
 			}
-			if (!refs.containsKey(referredToType)) {
+			if (!refs.containsKey(referredTo)) {
 				id++;
-				refs.put(referredToType, id);
+				refs.put(referredTo, id);
 			}
 		}
-		try (PrintStream gephiNodes = new PrintStream(new FileOutputStream(outputs.allReferencesGephiNodes()));
-				PrintStream gephiEdges = new PrintStream(new FileOutputStream(outputs.allReferencesGephiEdges()));
-				PrintStream yed = new PrintStream(new FileOutputStream(outputs.allReferencesYeD()))) {
+		try (PrintStream gephiNodes = new PrintStream(new FileOutputStream(gephiNodesFile)); PrintStream gephiEdges = new PrintStream(new FileOutputStream(gephiEdgesFile)); PrintStream yed = new PrintStream(new FileOutputStream(yEdFile))) {
 			gephiNodes.println("ID;Label");
 			for (Map.Entry<String, Integer> entry : refs.entrySet()) {
 				gephiNodes.println(entry.getValue() + ";" + entry.getKey());
@@ -179,12 +172,20 @@ public class Enforce {
 			gephiEdges.println("Source;Target");
 			for (String reference : allRefs) {
 				String[] segments = reference.split("!");
-				String referringType = segments[0];
-				String referredToType = segments[4];
-				gephiEdges.println(refs.get(referringType) + ";" + refs.get(referredToType));
-				yed.println(refs.get(referringType) + " " + refs.get(referredToType));
+				String referrer = segments[referrerIndex];
+				String referredTo = segments[referredToIndex];
+				gephiEdges.println(refs.get(referrer) + ";" + refs.get(referredTo));
+				yed.println(refs.get(referrer) + " " + refs.get(referredTo));
 			}
 		}
+	}
+
+	static void outputAllClassToClassReferences(Set<Reference> references, Outputs outputs) throws Exception {
+		Set<String> classRefs = new HashSet<>();
+		for (Reference reference : references) {
+			classRefs.add(reference.parseableDescription() + "!" + reference.kind());
+		}
+		outputAllReferences(classRefs, 0, 4, outputs.allReferences(), outputs.allReferencesGephiNodes(), outputs.allReferencesGephiEdges(), outputs.allReferencesYeD());
 	}
 
 	static void outputAllComponentToComponentReferences(Collection<Component> components, Outputs outputs) throws Exception {
@@ -194,46 +195,7 @@ public class Enforce {
 				componentRefs.add(reference.parseableComponentDescription() + "!" + reference.kind());
 			}
 		}
-		List<String> allRefs = CollectionUtils.sort(new ArrayList<>(componentRefs));
-		try (PrintStream ps = new PrintStream(new FileOutputStream(outputs.allComponentReferences()))) {
-			for (String ref : allRefs) {
-				ps.println(ref);
-			}
-		}
-		Map<String, Integer> refs = new LinkedHashMap<>();
-		int id = 0;
-		for (String reference : allRefs) {
-			String[] segments = reference.split("!");
-			String referringComponent = segments[0];
-			String referredToComponent = segments[3];
-			if (!refs.containsKey(referringComponent)) {
-				id++;
-				refs.put(referringComponent, id);
-				continue;
-			}
-			if (!refs.containsKey(referredToComponent)) {
-				id++;
-				refs.put(referredToComponent, id);
-			}
-		}
-		try (PrintStream gephiNodes = new PrintStream(new FileOutputStream(outputs.allComponentReferencesGephiNodes()));
-				PrintStream gephiEdges = new PrintStream(new FileOutputStream(outputs.allComponentReferencesGephiEdges()));
-				PrintStream yed = new PrintStream(new FileOutputStream(outputs.allComponentReferencesYeD()))) {
-			gephiNodes.println("ID;Label");
-			for (Map.Entry<String, Integer> entry : refs.entrySet()) {
-				gephiNodes.println(entry.getValue() + ";" + entry.getKey());
-				yed.println(entry.getValue() + " " + entry.getKey());
-			}
-			yed.println("#");
-			gephiEdges.println("Source;Target");
-			for (String reference : allRefs) {
-				String[] segments = reference.split("!");
-				String referringComponent = segments[0];
-				String referredToComponent = segments[3];
-				gephiEdges.println(refs.get(referringComponent) + ";" + refs.get(referredToComponent));
-				yed.println(refs.get(referringComponent) + " " + refs.get(referredToComponent));
-			}
-		}
+		outputAllReferences(componentRefs, 0, 3, outputs.allComponentReferences(), outputs.allComponentReferencesGephiNodes(), outputs.allComponentReferencesGephiEdges(), outputs.allComponentReferencesYeD());
 	}
 
 	static void mainImpl(Inputs inputs, Outputs outputs, PrintStream ps, Flags flags) throws Exception {
