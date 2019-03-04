@@ -146,12 +146,16 @@ We're working on fixing those warnings (and welcome your help, if you know how t
 java -jar architecture-enforcer-1.0-SNAPSHOT.jar /path/to/architecture-enforcer/target/test-classes/SampleTarget2.yaml /path/to/architecture-enforcer/target/test-classes/architecture-enforcer-sample-1.0-SNAPSHOT.war /path/to/architecture-enforcer/target -i/path/to/architecture-enforcer/target/test-classes/SampleIgnores.txt
 ```
 
-4. (Optional) Run this tool from Eclipse or IntelliJ by running the Main class.
+4. (Optional) Run this tool from Eclipse or IntelliJ, by running the Main class.
 
 5. Using one of the provided sample yaml files as a starting point, define the target state for your project. This can take weeks for a large project, but you can start by just defining a few basic layers (for example, data, logic, and UI), then iterate.
 (It's probably better to start small anyway, instead of trying to boil the ocean in one shot.)
 
-We provide two sample yaml files. SampleTarget1.yaml is the ball-of-mud target state, where everything is in one layer and component (and no domains are used). SampleTarget2.yaml demonstrates a layered target state, with domains. You can start with either sample, plus SampleIgnores.txt, and go from there.
+We provide two sample yaml files:
+
+* SampleTarget1.yaml is the ball-of-mud target state, where everything is in one layer and component (and no domains are used).
+
+* SampleTarget2.yaml demonstrates a layered target state, with domains. You can start with either sample, plus SampleIgnores.txt, and go from there.
 
 To run this tool with SampleTarget1.yaml, just change 2 to 1 in the above command.
 
@@ -195,7 +199,7 @@ All class-to-class references (legal and illegal) are output to "all\_references
 
 All component-to-component references (legal and illegal) are output to "all\_component\_references.txt", one per line.
 
-Details on the formats for class-to-class and component-to-component references are in the section on reference formats.
+Details on the formats for class-to-class and component-to-component references are in a later section on reference formats.
 
 Other files are output for https://gephi.org ("all\_references\_GephiNodes.csv", "all\_references\_GephiEdges.csv", "all\_component\_references\_GephiNodes.csv", "all\_component\_references\_GephiEdges.csv") and https://www.yworks.com/products/yed ("all\_references\_yed.tgf" and "all\_component\_references\_yed.tgf").
 
@@ -217,7 +221,7 @@ include $TheNestedType in the names.
 
 * Adding a referred-to class to the reflections or fix-unresolveds files can introduce new unresolved classes. When that happens, you need to keep entering classes until all classes are defined.
 
-* This tool creates unresolved types and adds them to the type-lookup map so downstream analysis doesn't blow up. This is just a band-aid, because whatever types a missing type refers to are not included in the analysis (because they aren't known).
+* This tool creates placeholders for unresolved types and adds them to the type-lookup map, so downstream analysis doesn't blow up. This is just a band-aid, because whatever types a missing type refers to are not included in the analysis (because they aren't known).
 Ideally the full transitive closure of types in your project is specified.
 
 * pf-CDA is smart enough to add references on its own for simple Class.forName calls where the string name of the class is directly specified, as in Class.forName("com.foo.bar.Baz"), but it can't follow complicated string concatenations, strings returned by functions, etc.,
@@ -243,20 +247,22 @@ com.jimandlisa.app.one.App1!App One!App!1!com.jimandlisa.app.two.App2!App Two!Ap
 
 The output format can be sliced and diced by any number of analysis tools. For example, it can be sorted into a histogram of most-illegally-referred-to components, or most-offending classes, etc. This can help the team decomposing the project figure out what to focus on first.
 
-Component references are similar, but without class or layer information:
+Component references are similar, but without individual class information:
 
 ```
 App One!App!1!App One!App!1|INTRA
 App One!App!1!App Two!App!1|ILLEGAL
 ```
 
-Focusing on illegal component-to-component references can help teams understand the challenges in the codebase without getting mired in tens of thousands of illegal class-to-class dependencies.
+Focusing on coarse-grained illegal component-to-component references can help teams understand the challenges in the codebase without getting mired in tens of thousands of illegal class-to-class dependencies.
 
-The Problem objects for illegal references have a detail field that presents the same information in a more human-readable format:
+The Problem objects for illegal references have a detail field that presents reference information in a more human-readable format:
 
 ```
 type com.jimandlisa.app.one.App1 in component 'App One' in layer 'App' depth 1 refers to type com.jimandlisa.app.two.App2 in component 'App Two' in layer 'App' depth 1
 ```
+
+This can be easier to read when stepping through this tool in a debugger.
 
 ## Useful Patterns ##
 
@@ -308,6 +314,19 @@ All but two errors are always fatal:
 * Unresolved references are permitted when not in strict mode because sometimes pf-CDA misses classes that are referred to by other classes in the war. This allows a grace period while the missing types are added to the fix-unresolveds file.
 
 * Illegal references are permitted when not in strict mode, so the team working on decomposition can see the report of illegal references without blocking other development.
+
+To summarize:
+
+|Kind|Strict Enabled?|Fatal?|
+|:---|:--------------|:-----|
+|Warning|No|No|
+|Warning|Yes|No|
+|Unresolved reference|No|No]
+|Unresolved reference|Yes|Yes]
+|Illegal reference|No|No]
+|Illegal reference|Yes|Yes]
+|All other problems|No|Yes]
+|All other problems|Yes|Yes]
 
 Once all unresolved and illegal references are fixed, strict mode should be enabled.
 
