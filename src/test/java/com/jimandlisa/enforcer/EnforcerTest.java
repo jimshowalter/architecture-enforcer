@@ -26,7 +26,7 @@ public class EnforcerTest {
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
 			Flags flags = new Flags();
 			flags.enableDebug();
-			Enforce.mainImpl(TestUtils.inputs(true, true, true), TestUtils.outputs(), ps, flags);
+			Enforce.mainImpl(TestUtils.inputs(true, true, true), TestUtils.outputs(TestUtils.uniqueSubdir()), ps, flags);
 			TestUtils.compareTestClassesFile(baos, "TestEnforceCanned1.txt");
 		}
 	}

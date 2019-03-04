@@ -21,49 +21,58 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class TestUtils {
-	
-	public static File targetDir() {
-		return Paths.get(System.getProperty("user.dir"), "target").toFile();
+
+	// To avoid file collisions when running tests threaded.
+	public static String uniqueSubdir() {
+		return "subdir_" + ThreadLocalRandom.current().nextInt(1, 1000000);
 	}
-	
-	public static File targetFile(String file) {
-		return Paths.get(targetDir().toString(), file).toFile();
+
+	public static File targetDir(String subdir) {
+		if (subdir == null) {
+			throw new RuntimeException("null subdir");
+		}
+		return Paths.get(System.getProperty("user.dir"), "target", subdir).toFile();
 	}
-	
-	public static String readTargetFile(String file) throws Exception {
-		return new String(Files.readAllBytes(targetFile(file).toPath()), StandardCharsets.UTF_8.name());
+
+	public static File targetFile(String subdir, String file) {
+		return Paths.get(targetDir(subdir).toString(), file).toFile();
 	}
-	
-	public static void compareTargetFile(String file, String canned) throws Exception {
-		String s1 = readTargetFile(file).trim().replaceAll("\r\n\r\n", "\r\n");
-		String s2 = readTestClassesFile(canned).trim().replaceAll("\r\n\r\n", "\r\n");
-		assertEquals(s1, s2);
-	}
-	
+
 	public static Path testClassesPath(String file) {
-		return Paths.get(targetDir().toString(), "test-classes", file);
+		return Paths.get(System.getProperty("user.dir"), "target", "test-classes", file);
 	}
-	
+
 	public static File testClassesFile(String file) {
 		return testClassesPath(file).toFile();
 	}
-	
+
+	public static String readTargetFile(String subdir, String file) throws Exception {
+		return new String(Files.readAllBytes(targetFile(subdir, file).toPath()), StandardCharsets.UTF_8.name());
+	}
+
+	public static void compareTargetFile(String subdir, String file, String canned) throws Exception {
+		String s1 = readTargetFile(subdir, file).trim().replaceAll("\r\n\r\n", "\r\n");
+		String s2 = readTestClassesFile(canned).trim().replaceAll("\r\n\r\n", "\r\n");
+		assertEquals(s1, s2);
+	}
+
 	public static File sampleWar() {
 		return testClassesFile("architecture-enforcer-sample-1.0-SNAPSHOT.war");
 	}
-	
+
 	public static String readTestClassesFile(String file) throws Exception {
 		return new String(Files.readAllBytes(testClassesPath(file)), StandardCharsets.UTF_8.name());
 	}
-	
+
 	public static void compareTestClassesFile(ByteArrayOutputStream baos, String canned) throws Exception {
 		String out = new String(baos.toByteArray(), StandardCharsets.UTF_8).trim().replaceAll("\r\n\r\n", "\r\n");
 		String cannedOut = readTestClassesFile(canned).trim().replaceAll("\r\n\r\n", "\r\n");
 		assertEquals(out, cannedOut);
 	}
-	
+
 	public static Inputs inputs(boolean includeIgnores, boolean includeReflections, boolean includeFixUnresolveds) {
 		Inputs inputs = new Inputs(testClassesFile("SampleTarget2.yaml"), sampleWar());
 		if (includeIgnores) {
@@ -77,11 +86,8 @@ public class TestUtils {
 		}
 		return inputs;
 	}
-	
-	public static Outputs outputs() {
-		Outputs outputs = new Outputs(targetDir());
-		outputs.setUnresolvedTypes(Outputs.UNRESOLVED_TYPES_DEFAULT_FILE_NAME);
-		outputs.setIllegalReferences(Outputs.ILLEGAL_REFERENCES_DEFAULT_FILE_NAME);
-		return outputs;
+
+	public static Outputs outputs(String subdir) {
+		return new Outputs(Paths.get(targetDir(subdir).getAbsolutePath()).toFile());
 	}
 }

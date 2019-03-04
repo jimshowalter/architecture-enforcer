@@ -43,7 +43,7 @@ public class Reference implements Comparable<Reference> {
 	public boolean isIntraComponentReference() {
 		return referringType.component().equals(referredToType.component());
 	}
-	
+
 	public boolean isInSameOrLowerLayer() {
 		return referringType.component().layer().depth() <= referredToType.component().layer().depth();
 	}
@@ -54,11 +54,11 @@ public class Reference implements Comparable<Reference> {
 		}
 		return isInSameOrLowerLayer();
 	}
-	
+
 	public ReferenceKinds kind() {
 		return kind;
 	}
-	
+
 	public boolean isIllegal() {
 		return isIllegal;
 	}
@@ -97,9 +97,20 @@ public class Reference implements Comparable<Reference> {
 				+ referredToType.name() + "!" + referredToType.component().name() + "!" + referredToType.component().layer().name() + "!" + referredToType.component().layer().depth();
 	}
 
+	public String parseableComponentDescription() {
+		return referringType.component().name() + "!" + referringType.component().layer().name() + "!" + referringType.component().layer().depth() + "!" + referredToType.component().name() + "!"
+				+ referredToType.component().layer().name() + "!" + referredToType.component().layer().depth();
+	}
+
 	public String humanReadableDescription() {
 		return "type " + referringType.name() + " in component " + referringType.component().quotedName() + " in layer " + referringType.component().layer().quotedName() + " depth "
 				+ referringType.component().layer().depth() + " refers to type " + referredToType.name() + " in component " + referredToType.component().quotedName() + " in layer "
 				+ referredToType.component().layer().quotedName() + " depth " + referredToType.component().layer().depth();
+	}
+
+	public String humanReadableComponentDescription() {
+		return "component " + referringType.component().quotedName() + " in layer " + referringType.component().layer().quotedName() + " depth " + referringType.component().layer().depth()
+				+ " refers to component " + referredToType.component().quotedName() + " in layer " + referredToType.component().layer().quotedName() + " depth "
+				+ referredToType.component().layer().depth();
 	}
 }

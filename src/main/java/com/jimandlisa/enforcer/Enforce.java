@@ -28,26 +28,13 @@ import java.util.Set;
 // Handles interactions with the user, and outputs results.
 public class Enforce {
 
-	private static final String USAGE = ": usage: /full/path/to/target/architecture/.yaml /full/path/to/.war /full/path/to/writable/output/directory " + Optionals.UNRESOLVED_TYPES_OUTPUT_FILE
-			+ "unresolvedTypesOutputFileSimpleName " + Optionals.ILLEGAL_REFERENCES_OUTPUT_FILE + "illegalReferencesOutputFileSimpleName " + Optionals.ALL_REFERENCES
-			+ "allReferencesOutputFileSimpleName " + Optionals.IGNORES + "/full/path/to/packages/and/classes/to/ignore " + Optionals.REFLECTIONS + "/full/path/to/reflection/references "
-			+ Optionals.FIX_UNRESOLVEDS + "/full/path/to/fixed/unresolveds " + Optionals.PRESERVE_NESTED_TYPES + " (preserves nested types) " + Optionals.STRICT
-			+ " (strict, requires that all types resolve and no illegal references) " + Optionals.DEBUG + " (debug) [last nine args optional and unordered]";
+	private static final String USAGE = ": usage: /full/path/to/target/architecture/.yaml /full/path/to/.war /full/path/to/writable/output/directory " + Optionals.IGNORES
+			+ "/full/path/to/file/of/packages/and/classes/to/ignore " + Optionals.REFLECTIONS + "/full/path/to/file/of/reflection/references " + Optionals.FIX_UNRESOLVEDS
+			+ "/full/path/to/file/of/fixed/unresolveds " + Optionals.PRESERVE_NESTED_TYPES + " (preserves nested types) " + Optionals.STRICT
+			+ " (strict, requires that all types resolve and no illegal references) " + Optionals.DEBUG + " (debug) [last six args optional and unordered]";
 
-	static void parseArg(String arg, Inputs inputs, Outputs outputs, Flags flags) {
+	static void parseArg(String arg, Inputs inputs, Flags flags) {
 		try {
-			if (arg.startsWith(Optionals.UNRESOLVED_TYPES_OUTPUT_FILE.indicator())) {
-				outputs.setUnresolvedTypes(arg.replaceFirst(Optionals.UNRESOLVED_TYPES_OUTPUT_FILE.indicator(), ""));
-				return;
-			}
-			if (arg.startsWith(Optionals.ILLEGAL_REFERENCES_OUTPUT_FILE.indicator())) {
-				outputs.setIllegalReferences(arg.replaceFirst(Optionals.ILLEGAL_REFERENCES_OUTPUT_FILE.indicator(), ""));
-				return;
-			}
-			if (arg.startsWith(Optionals.ALL_REFERENCES.indicator())) {
-				outputs.enableAllReferences();
-				return;
-			}
 			if (arg.startsWith(Optionals.IGNORES.indicator())) {
 				inputs.setIgnores(new File(arg.replaceFirst(Optionals.IGNORES.indicator(), "")));
 				return;
@@ -96,6 +83,12 @@ public class Enforce {
 		}
 	}
 
+	static int problemsCount(boolean foundUnresolvedTypes, boolean foundIllegalReferences) {
+		int count = foundUnresolvedTypes ? 1 : 0;
+		count = foundIllegalReferences ? count + 2 : count;
+		return count;
+	}
+
 	static void reportProblems(Set<Problem> problems, Errors error, File out) throws Exception {
 		try (PrintStream ps = new PrintStream(new FileOutputStream(out))) {
 			for (Problem problem : CollectionUtils.sort(new ArrayList<>(problems))) {
@@ -104,12 +97,6 @@ public class Enforce {
 				}
 			}
 		}
-	}
-
-	static int problemsCount(boolean foundUnresolvedTypes, boolean foundIllegalReferences) {
-		int count = foundUnresolvedTypes ? 1 : 0;
-		count = foundIllegalReferences ? count + 1 : count;
-		return count;
 	}
 
 	// To have gotten here, there can't be any fatal errors. In strict mode, that means we can't get here at all if there are any problems.
@@ -121,7 +108,7 @@ public class Enforce {
 		for (Problem problem : problems) {
 			if (problem.error() == Errors.UNRESOLVED_REFERENCE) {
 				foundUnresolvedTypes = true;
-			} else if (problem.error() == Errors.ILLEGAL_REFERENCE) {
+			} else if (problem.error() == Errors.ILLEGAL_REFERENCE || problem.error() == Errors.ILLEGAL_COMPONENT_REFERENCE) {
 				foundIllegalReferences = true;
 			} else {
 				warnings.add(problem.description());
@@ -146,31 +133,27 @@ public class Enforce {
 			ps.println(outputs.unresolvedTypes().getName());
 		}
 		if (foundIllegalReferences) {
+			reportProblems(problems, Errors.ILLEGAL_COMPONENT_REFERENCE, outputs.illegalComponentReferences());
+			ps.println(outputs.illegalComponentReferences().getName());
 			reportProblems(problems, Errors.ILLEGAL_REFERENCE, outputs.illegalReferences());
 			ps.println(outputs.illegalReferences().getName());
 		}
 	}
 
 	static void outputAllClassToClassReferences(Set<Reference> references, Outputs outputs) throws Exception {
-		if (outputs.allReferences() == null) {
-			return;
-		}
-		if (references.isEmpty()) {
-			return;
-		}
-		List<String> allReferences = new ArrayList<>();
+		Set<String> classReferences = new HashSet<>();
 		for (Reference reference : references) {
-			allReferences.add(reference.parseableDescription() + "!" + reference.kind());
+			classReferences.add(reference.parseableDescription() + "!" + reference.kind());
 		}
-		allReferences = CollectionUtils.sort(allReferences);
+		List<String> allRefs = CollectionUtils.sort(new ArrayList<>(classReferences));
 		try (PrintStream ps = new PrintStream(new FileOutputStream(outputs.allReferences()))) {
-			for (String reference : allReferences) {
-				ps.println(reference);
+			for (String ref : allRefs) {
+				ps.println(ref);
 			}
 		}
 		Map<String, Integer> refs = new LinkedHashMap<>();
 		int id = 0;
-		for (String reference : allReferences) {
+		for (String reference : allRefs) {
 			String[] segments = reference.split("!");
 			String referringType = segments[0];
 			String referredToType = segments[4];
@@ -194,7 +177,7 @@ public class Enforce {
 			}
 			yed.println("#");
 			gephiEdges.println("Source;Target");
-			for (String reference : allReferences) {
+			for (String reference : allRefs) {
 				String[] segments = reference.split("!");
 				String referringType = segments[0];
 				String referredToType = segments[4];
@@ -203,18 +186,12 @@ public class Enforce {
 			}
 		}
 	}
-	
+
 	static void outputAllComponentToComponentReferences(Collection<Component> components, Outputs outputs) throws Exception {
-		if (outputs.allComponentReferences() == null) {
-			return;
-		}
-		if (components.isEmpty()) {
-			return;
-		}
 		Set<String> componentRefs = new HashSet<>();
 		for (Component component : components) {
 			for (Reference reference : component.references()) {
-				componentRefs.add(component.name() + "!" + reference.referredToType().component().name() + "!" + reference.kind());
+				componentRefs.add(reference.parseableComponentDescription() + "!" + reference.kind());
 			}
 		}
 		List<String> allRefs = CollectionUtils.sort(new ArrayList<>(componentRefs));
@@ -228,7 +205,7 @@ public class Enforce {
 		for (String reference : allRefs) {
 			String[] segments = reference.split("!");
 			String referringComponent = segments[0];
-			String referredToComponent = segments[1];
+			String referredToComponent = segments[3];
 			if (!refs.containsKey(referringComponent)) {
 				id++;
 				refs.put(referringComponent, id);
@@ -252,7 +229,7 @@ public class Enforce {
 			for (String reference : allRefs) {
 				String[] segments = reference.split("!");
 				String referringComponent = segments[0];
-				String referredToComponent = segments[1];
+				String referredToComponent = segments[3];
 				gephiEdges.println(refs.get(referringComponent) + ";" + refs.get(referredToComponent));
 				yed.println(refs.get(referringComponent) + " " + refs.get(referredToComponent));
 			}
@@ -280,26 +257,20 @@ public class Enforce {
 			if (args.length < 3) {
 				throw new EnforcerException("not enough args" + USAGE, Errors.NOT_ENOUGH_ARGS);
 			}
-			if (args.length > 12) {
+			if (args.length > 9) {
 				throw new EnforcerException("too many args" + USAGE, Errors.TOO_MANY_ARGS);
 			}
 			inputs = new Inputs(new File(args[0]), new File(args[1]));
 			outputs = new Outputs(new File(args[2]));
 			flags = new Flags();
 			for (int i = 3; i < args.length; i++) {
-				parseArg(args[i], inputs, outputs, flags);
-			}
-			if (outputs.unresolvedTypes() == null) {
-				outputs.setUnresolvedTypes(Outputs.UNRESOLVED_TYPES_DEFAULT_FILE_NAME);
-			}
-			if (outputs.illegalReferences() == null) {
-				outputs.setIllegalReferences(Outputs.ILLEGAL_REFERENCES_DEFAULT_FILE_NAME);
+				parseArg(args[i], inputs, flags);
 			}
 		} catch (Throwable t) {
 			ps.println(t.getMessage());
 			return;
 		}
-		ps.println("Analyzing/enforcing architecture with " + inputs.toString() + ", " + outputs.toString() + ", " + flags.toString() + " (may take 30+ seconds...)");
+		ps.println("Analyzing/enforcing architecture with " + inputs.toString() + ", " + outputs.toString() + ", " + flags.toString() + " (may take 60+ seconds...)");
 		mainImpl(inputs, outputs, ps, flags);
 	}
 }

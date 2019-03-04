@@ -146,7 +146,7 @@ We're working on fixing those warnings (and welcome your help, if you know how t
 java -jar architecture-enforcer-1.0-SNAPSHOT.jar /path/to/architecture-enforcer/target/test-classes/SampleTarget2.yaml /path/to/architecture-enforcer/target/test-classes/architecture-enforcer-sample-1.0-SNAPSHOT.war /path/to/architecture-enforcer/target -i/path/to/architecture-enforcer/target/test-classes/SampleIgnores.txt
 ```
 
-4. (Optional) Run this tool from Eclipse or IntelliJ.
+4. (Optional) Run this tool from Eclipse or IntelliJ by running the Main class.
 
 5. Using one of the provided sample yaml files as a starting point, define the target state for your project. This can take weeks for a large project, but you can start by just defining a few basic layers (for example, data, logic, and UI), then iterate.
 (It's probably better to start small anyway, instead of trying to boil the ocean in one shot.)
@@ -155,9 +155,7 @@ We provide two sample yaml files. SampleTarget1.yaml is the ball-of-mud target s
 
 To run this tool with SampleTarget1.yaml, just change 2 to 1 in the above command.
 
-For large codebases, this tool requires lots of memory. Make sure you provide enough.
-
-For large codebases, this tool can take 30+ seconds to run, even when given lots of memory.
+For large codebases, this tool requires lots of memory and can take a minute or more to run (the overhead is almost entirely due to pf-CDA, which has a difficult job).
 
 ## Command-line Arguments ###
 
@@ -168,12 +166,6 @@ The full set of args is:
 > /full/path/to/.war
 
 > /full/path/to/writable/output/directory
-
-> -UunresolvedTypesOutputFileSimpleName
-
-> -IillegalReferencesOutputFileSimpleName
-
-> -A
 
 > -i/full/path/to/file/of/packages/and/classes/to/ignore
 
@@ -189,20 +181,23 @@ The full set of args is:
 
 Run this tool with at least the first three args specified.
 
-The first two args specify input files. The third arg specifies the directory where output files go.
+The first two args specify input files. The third arg specifies the directory where all output files go.
 
-The remaining nine args are optional, and can appear in any order (or not at all).
+The remaining six args are optional, and can appear in any order (or not at all).
 
-Unresolved types and illegal references are written to the output directory (if strict is not specified).
+Unresolved types are output to "unresolved\_types.txt", one per line. Each line contains just the fully-qualified name of the unresolved type.
 
-Unresolved types are written as the fully-qualified type name, one type per line.
+Illegal class-to-class references are output to "illegal\_references.txt", one per line.
 
-By default, the unresolved-types output file name is "unresolved\_types.txt", and the illegal-references output file name is "illegal\_references.txt". These can be overridden with the -U and -I options, respectively.
+Illegal component-to-component references are output to "illegal\_component\_references.txt", one per line.
 
-If -A is specified, all references (not just illegal references, and including intra-component references) are output to additional files.
-The basic files are all\_references.txt, which contains all class-to-class references, and all\_component\_references.txt, which contains all component-to-component references.
-Other files are generated for https://gephi.org (all\_references\_GephiNodes.csv, all\_references\_GephiEdges.csv, all\_component\_references\_GephiNodes.csv, all\_component\_references\_GephiEdges.csv) and https://www.yworks.com/products/yed (all\_references\_yed.tgf and all\_component\_references\_yed.tgf).
-Because there are numerous files and specific suffixes are required, the names of -A files cannot be specified from the command line.
+All class-to-class references (legal and illegal) are output to "all\_references.txt", one per line.
+
+All component-to-component references (legal and illegal) are output to "all\_component\_references.txt", one per line.
+
+Details on the formats for class-to-class and component-to-component references are in the section on reference formats.
+
+Other files are output for https://gephi.org ("all\_references\_GephiNodes.csv", "all\_references\_GephiEdges.csv", "all\_component\_references\_GephiNodes.csv", "all\_component\_references\_GephiEdges.csv") and https://www.yworks.com/products/yed ("all\_references\_yed.tgf" and "all\_component\_references\_yed.tgf").
 
 Notes:
 
@@ -222,7 +217,8 @@ include $TheNestedType in the names.
 
 * Adding a referred-to class to the reflections or fix-unresolveds files can introduce new unresolved classes. When that happens, you need to keep entering classes until all classes are defined.
 
-* This tool creates unresolved types and adds them to the type-lookup map so downstream analysis doesn't blow up. This is just a band-aid through, because whatever types a missing type refers to are not included in the analysis (because they aren't known).
+* This tool creates unresolved types and adds them to the type-lookup map so downstream analysis doesn't blow up. This is just a band-aid, because whatever types a missing type refers to are not included in the analysis (because they aren't known).
+Ideally the full transitive closure of types in your project is specified.
 
 * pf-CDA is smart enough to add references on its own for simple Class.forName calls where the string name of the class is directly specified, as in Class.forName("com.foo.bar.Baz"), but it can't follow complicated string concatenations, strings returned by functions, etc.,
 for example Class.forName(someStringFromAVariable + SomeClass.someFunction(some args from somewhere) + SOME\_STRING\_CONSTANT + ".Foo"). That's why you have to add them manually. Also, pf-CDA doesn't parse reflection references in JSP files, Spring, etc.
@@ -250,8 +246,8 @@ The output format can be sliced and diced by any number of analysis tools. For e
 Component references are similar, but without class or layer information:
 
 ```
-App One!App One!INTRA
-App One!App Two!ILLEGAL
+App One!App!1!App One!App!1|INTRA
+App One!App!1!App Two!App!1|ILLEGAL
 ```
 
 Focusing on illegal component-to-component references can help teams understand the challenges in the codebase without getting mired in tens of thousands of illegal class-to-class dependencies.

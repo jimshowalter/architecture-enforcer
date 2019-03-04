@@ -18,8 +18,9 @@ import java.nio.file.Paths;
 
 public class Outputs {
 
-	public static final String UNRESOLVED_TYPES_DEFAULT_FILE_NAME = "unresolved_types.txt";
-	public static final String ILLEGAL_REFERENCES_DEFAULT_FILE_NAME = "illegal_references.txt";
+	public static final String UNRESOLVED_TYPES_FILE_NAME = "unresolved_types.txt";
+	public static final String ILLEGAL_REFERENCES_BASE_NAME = "illegal_references";
+	public static final String ILLEGAL_COMPONENT_REFERENCES_BASE_NAME = "illegal_component_references";
 	public static final String ALL_REFERENCES_BASE_NAME = "all_references";
 	public static final String ALL_COMPONENT_REFERENCES_BASE_NAME = "all_component_references";
 	public static final String GEPHI_NODES_SUFFIX = "_GephiNodes.csv";
@@ -27,62 +28,24 @@ public class Outputs {
 	public static final String YED_SUFFIX = "_yed.tgf";
 
 	private final File outputDirectory;
-	private File unresolvedTypes = null;
-	private File illegalReferences = null;
-	private File allReferences = null;
-	private File allReferencesGephiNodes = null;
-	private File allReferencesGephiEdges = null;
-	private File allReferencesYeD = null;
-	private File allComponentReferences = null;
-	private File allComponentReferencesGephiNodes = null;
-	private File allComponentReferencesGephiEdges = null;
-	private File allComponentReferencesYeD = null;
+	private final File unresolvedTypes;
+	private final File illegalReferences;
+	private final File illegalComponentReferences;
+	private final File allReferences;
+	private final File allReferencesGephiNodes;
+	private final File allReferencesGephiEdges;
+	private final File allReferencesYeD;
+	private final File allComponentReferences;
+	private final File allComponentReferencesGephiNodes;
+	private final File allComponentReferencesGephiEdges;
+	private final File allComponentReferencesYeD;
 
 	public Outputs(final File outputDirectory) {
 		super();
 		this.outputDirectory = FileUtils.checkWriteDir(outputDirectory);
-	}
-
-	public File outputDirectory() {
-		return outputDirectory;
-	}
-	
-	static String check(String name) {
-		if (name.contains(ALL_REFERENCES_BASE_NAME)) {
-			throw new EnforcerException("file name '" + name + "' conflicts with reserved all-references base name '" + ALL_REFERENCES_BASE_NAME + "'", Errors.NAME_CONFLICTS_WITH_ALL_REFERENCES_BASE_NAME);
-		}
-		if (name.contains(ALL_COMPONENT_REFERENCES_BASE_NAME)) {
-			throw new EnforcerException("file name '" + name + "' conflicts with reserved all-component-references base name '" + ALL_COMPONENT_REFERENCES_BASE_NAME + "'", Errors.NAME_CONFLICTS_WITH_ALL_COMPONENT_REFERENCES_BASE_NAME);
-		}
-		return name;
-	}
-	
-	public void setUnresolvedTypes(String name) {
-		if (unresolvedTypes() != null) {
-			throw new EnforcerException("unresolved types output file already set", Errors.UNRESOLVED_TYPES_OUTPUT_FILE_ALREADY_SPECIFIED);
-		}
-		unresolvedTypes = FileUtils.check(Paths.get(outputDirectory.getAbsolutePath(), check(ArgUtils.check(name, "name"))).toFile(), illegalReferences);
-	}
-
-	public File unresolvedTypes() {
-		return unresolvedTypes;
-	}
-
-	public void setIllegalReferences(String name) {
-		if (illegalReferences() != null) {
-			throw new EnforcerException("illegal references output file already set", Errors.ILLEGAL_REFERENCES_OUTPUT_FILE_ALREADY_SPECIFIED);
-		}
-		illegalReferences = FileUtils.check(Paths.get(outputDirectory.getAbsolutePath(), check(ArgUtils.check(name, "name"))).toFile(), unresolvedTypes);
-	}
-
-	public File illegalReferences() {
-		return illegalReferences;
-	}
-
-	public void enableAllReferences() {
-		if (allReferences() != null) {
-			throw new EnforcerException("all references already enabled", Errors.ALL_REFERENCES_ALREADY_ENABLED);
-		}
+		unresolvedTypes = Paths.get(outputDirectory.getAbsolutePath(), UNRESOLVED_TYPES_FILE_NAME).toFile();
+		illegalReferences = Paths.get(outputDirectory.getAbsolutePath(), ILLEGAL_REFERENCES_BASE_NAME + ".txt").toFile();
+		illegalComponentReferences = Paths.get(outputDirectory.getAbsolutePath(), ILLEGAL_COMPONENT_REFERENCES_BASE_NAME + ".txt").toFile();
 		allReferences = Paths.get(outputDirectory.getAbsolutePath(), ALL_REFERENCES_BASE_NAME + ".txt").toFile();
 		allReferencesGephiNodes = Paths.get(outputDirectory.getAbsolutePath(), ALL_REFERENCES_BASE_NAME + GEPHI_NODES_SUFFIX).toFile();
 		allReferencesGephiEdges = Paths.get(outputDirectory.getAbsolutePath(), ALL_REFERENCES_BASE_NAME + GEPHI_EDGES_SUFFIX).toFile();
@@ -91,6 +54,22 @@ public class Outputs {
 		allComponentReferencesGephiNodes = Paths.get(outputDirectory.getAbsolutePath(), ALL_COMPONENT_REFERENCES_BASE_NAME + GEPHI_NODES_SUFFIX).toFile();
 		allComponentReferencesGephiEdges = Paths.get(outputDirectory.getAbsolutePath(), ALL_COMPONENT_REFERENCES_BASE_NAME + GEPHI_EDGES_SUFFIX).toFile();
 		allComponentReferencesYeD = Paths.get(outputDirectory.getAbsolutePath(), ALL_COMPONENT_REFERENCES_BASE_NAME + YED_SUFFIX).toFile();
+	}
+
+	public File outputDirectory() {
+		return outputDirectory;
+	}
+
+	public File unresolvedTypes() {
+		return unresolvedTypes;
+	}
+
+	public File illegalReferences() {
+		return illegalReferences;
+	}
+
+	public File illegalComponentReferences() {
+		return illegalComponentReferences;
 	}
 
 	public File allReferences() {
@@ -127,9 +106,9 @@ public class Outputs {
 
 	@Override
 	public String toString() {
-		return "unresolvedTypes=" + unresolvedTypes + ", illegalReferences=" + illegalReferences + ", allReferences=" + allReferences + ", allReferencesGephiNodes=" + allReferencesGephiNodes
-				+ ", allReferencesGephiEdges=" + allReferencesGephiEdges + ", allReferencesYeD=" + allReferencesYeD + ", allComponentReferences=" + allComponentReferences
-				+ ", allComponentReferencesGephiNodes=" + allComponentReferencesGephiNodes + ", allComponentReferencesGephiEdges=" + allComponentReferencesGephiEdges + ", allComponentReferencesYeD="
-				+ allComponentReferencesYeD;
+		return "unresolvedTypes=" + unresolvedTypes + ", illegalReferences=" + illegalReferences + ", illegalComponentReferences=" + illegalComponentReferences + ", allReferences=" + allReferences
+				+ ", allReferencesGephiNodes=" + allReferencesGephiNodes + ", allReferencesGephiEdges=" + allReferencesGephiEdges + ", allReferencesYeD=" + allReferencesYeD
+				+ ", allComponentReferences=" + allComponentReferences + ", allComponentReferencesGephiNodes=" + allComponentReferencesGephiNodes + ", allComponentReferencesGephiEdges="
+				+ allComponentReferencesGephiEdges + ", allComponentReferencesYeD=" + allComponentReferencesYeD;
 	}
 }
