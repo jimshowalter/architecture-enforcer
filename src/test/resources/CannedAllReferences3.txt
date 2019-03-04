@@ -1,5 +1,5 @@
-bar!Comp1!One!1!baz!Comp2!One!1!ILLEGAL
-cat!Comp3!Two!2!foo!Comp1!One!1!LEGAL
-foo!Comp1!One!1!bar!Comp1!One!1!INTRA
-foo!Comp1!One!1!baz!Comp2!One!1!ILLEGAL
-foo!Comp1!One!1!cat!Comp3!Two!2!ILLEGAL
+bar!Comp1!One!1!baz!Comp2!One!1!INTER_COMPONENT_SAME_LAYER!ILLEGAL
+cat!Comp3!Two!2!foo!Comp1!One!1!INTER_COMPONENT_HIGHER_TO_LOWER!LEGAL
+foo!Comp1!One!1!bar!Comp1!One!1!INTRA_COMPONENT!LEGAL
+foo!Comp1!One!1!baz!Comp2!One!1!INTER_COMPONENT_SAME_LAYER!ILLEGAL
+foo!Comp1!One!1!cat!Comp3!Two!2!INTER_COMPONENT_LOWER_TO_HIGHER!ILLEGAL

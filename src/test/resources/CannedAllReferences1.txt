@@ -1,1 +1,1 @@
-foo!Comp1!One!1!bar!Comp1!One!1!INTRA
+foo!Comp1!One!1!bar!Comp1!One!1!INTRA_COMPONENT!LEGAL

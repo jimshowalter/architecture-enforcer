@@ -20,7 +20,7 @@ public class Reference implements Comparable<Reference> {
 	private final ReferenceKinds kind;
 	private final int hashCode;
 	private final String baseToString;
-	
+
 	static ReferenceKinds kind(final Type referringType, final Type referredToType) {
 		if (referringType.component().equals(referredToType.component())) {
 			return ReferenceKinds.INTRA_COMPONENT;
@@ -88,12 +88,13 @@ public class Reference implements Comparable<Reference> {
 
 	public String parseableDescription(boolean includeClasses, boolean includeKind) {
 		return (includeClasses ? referringType.name() + "!" : "") + referringType.component().name() + "!" + referringType.component().layer().name() + "!" + referringType.component().layer().depth() + "!"
-				+ (includeClasses ? referredToType.name() + "!" : "") + referredToType.component().name() + "!" + referredToType.component().layer().name() + "!" + referredToType.component().layer().depth() + (includeKind ? "!" + kind() : "");
+				+ (includeClasses ? referredToType.name() + "!" : "") + referredToType.component().name() + "!" + referredToType.component().layer().name() + "!" + referredToType.component().layer().depth()
+				+ (includeKind ? "!" + kind() + "!" + (kind.isLegal() ? "LEGAL" : "ILLEGAL") : "");
 	}
 
 	public String humanReadableDescription(boolean includeClasses, boolean includeKind) {
 		return (includeClasses ? "type " + referringType.name() + " in " : "") + "component " + referringType.component().quotedName() + " in layer " + referringType.component().layer().quotedName() + " depth "
 				+ referringType.component().layer().depth() + " refers to " + (includeClasses ? "type " + referredToType.name() + " in " : "") + "component " + referredToType.component().quotedName() + " in layer "
-				+ referredToType.component().layer().quotedName() + " depth " + referredToType.component().layer().depth() + (includeKind ? " [" + kind + "]" : "");
+				+ referredToType.component().layer().quotedName() + " depth " + referredToType.component().layer().depth() + (includeKind ? " [" + kind + " (" + (kind.isLegal() ? "LEGAL" : "ILLEGAL") + ")]" : "");
 	}
 }

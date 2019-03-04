@@ -86,13 +86,21 @@ public class ReferenceTest {
 		references.add(reference3);
 		assertEquals(2, references.size());
 		assertEquals("Comp1!One!1!Comp1!One!1", reference1.parseableDescription(false, false));
-		assertEquals("Comp1!One!1!Comp1!One!1!INTRA_COMPONENT", reference1.parseableDescription(false, true));
+		assertEquals("Comp1!One!1!Comp1!One!1!INTRA_COMPONENT!LEGAL", reference1.parseableDescription(false, true));
 		assertEquals("foo!Comp1!One!1!bar!Comp1!One!1", reference1.parseableDescription(true, false));
-		assertEquals("foo!Comp1!One!1!bar!Comp1!One!1!INTRA_COMPONENT", reference1.parseableDescription(true, true));
+		assertEquals("foo!Comp1!One!1!bar!Comp1!One!1!INTRA_COMPONENT!LEGAL", reference1.parseableDescription(true, true));
 		assertEquals("component 'Comp1' in layer 'One' depth 1 refers to component 'Comp1' in layer 'One' depth 1", reference1.humanReadableDescription(false, false));
-		assertEquals("component 'Comp1' in layer 'One' depth 1 refers to component 'Comp1' in layer 'One' depth 1 [INTRA_COMPONENT]", reference1.humanReadableDescription(false, true));
+		assertEquals("component 'Comp1' in layer 'One' depth 1 refers to component 'Comp1' in layer 'One' depth 1 [INTRA_COMPONENT (LEGAL)]", reference1.humanReadableDescription(false, true));
 		assertEquals("type foo in component 'Comp1' in layer 'One' depth 1 refers to type bar in component 'Comp1' in layer 'One' depth 1", reference1.humanReadableDescription(true, false));
-		assertEquals("type foo in component 'Comp1' in layer 'One' depth 1 refers to type bar in component 'Comp1' in layer 'One' depth 1 [INTRA_COMPONENT]", reference1.humanReadableDescription(true, true));
+		assertEquals("type foo in component 'Comp1' in layer 'One' depth 1 refers to type bar in component 'Comp1' in layer 'One' depth 1 [INTRA_COMPONENT (LEGAL)]", reference1.humanReadableDescription(true, true));
+		assertEquals("Comp1!One!1!Comp2!One!1", reference3.parseableDescription(false, false));
+		assertEquals("Comp1!One!1!Comp2!One!1!INTER_COMPONENT_SAME_LAYER!ILLEGAL", reference3.parseableDescription(false, true));
+		assertEquals("foo!Comp1!One!1!baz!Comp2!One!1", reference3.parseableDescription(true, false));
+		assertEquals("foo!Comp1!One!1!baz!Comp2!One!1!INTER_COMPONENT_SAME_LAYER!ILLEGAL", reference3.parseableDescription(true, true));
+		assertEquals("component 'Comp1' in layer 'One' depth 1 refers to component 'Comp2' in layer 'One' depth 1", reference3.humanReadableDescription(false, false));
+		assertEquals("component 'Comp1' in layer 'One' depth 1 refers to component 'Comp2' in layer 'One' depth 1 [INTER_COMPONENT_SAME_LAYER (ILLEGAL)]", reference3.humanReadableDescription(false, true));
+		assertEquals("type foo in component 'Comp1' in layer 'One' depth 1 refers to type baz in component 'Comp2' in layer 'One' depth 1", reference3.humanReadableDescription(true, false));
+		assertEquals("type foo in component 'Comp1' in layer 'One' depth 1 refers to type baz in component 'Comp2' in layer 'One' depth 1 [INTER_COMPONENT_SAME_LAYER (ILLEGAL)]", reference3.humanReadableDescription(true, true));
 		try {
 			new Reference(null, null);
 		} catch (EnforcerException e) {

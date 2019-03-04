@@ -1,2 +1,2 @@
-foo!Comp1!One!1!bar!Comp1!One!1!INTRA
-foo!Comp1!One!1!baz!Comp2!One!1!ILLEGAL
+foo!Comp1!One!1!bar!Comp1!One!1!INTRA_COMPONENT!LEGAL
+foo!Comp1!One!1!baz!Comp2!One!1!INTER_COMPONENT_SAME_LAYER!ILLEGAL

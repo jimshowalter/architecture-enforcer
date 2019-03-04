@@ -224,7 +224,7 @@ for example Class.forName(someStringFromAVariable + SomeClass.someFunction(some 
 References are written in a format designed to be easy to machine read:
 
 ```
-referringType!referringComponent!referringLayer!referringDepth!referredToType!referredToComponent!referredToLayer!referredToDepth!<kind>
+referringType!referringComponent!referringLayer!referringDepth!referredToType!referredToComponent!referredToLayer!referredToDepth!<kind>!<legality>
 ```
 
 where kind is:
@@ -233,10 +233,16 @@ where kind is:
 (INTRA_COMPONENT|INTER_COMPONENT_SAME_LAYER|INTER_COMPONENT_LOWER_TO_HIGHER|INTER_COMPONENT_HIGHER_TO_LOWER)
 ```
 
+and legality is:
+
+```
+(LEGAL|ILLEGAL)
+```
+
 For example:
 
 ```
-com.jimandlisa.app.one.App1!App One!App!1!com.jimandlisa.app.two.App2!App Two!App!1|INTER_COMPONENT_SAME_LAYER
+com.jimandlisa.app.one.App1!App One!App!1!com.jimandlisa.app.two.App2!App Two!App!1!INTER_COMPONENT_SAME_LAYER!LEGAL
 ```
 
 The output format can be sliced and diced by any number of analysis tools. For example, it can be sorted into a histogram of most-illegally-referred-to components, or most-offending classes, etc. This can help the team decomposing the project figure out what to focus on first.
@@ -244,8 +250,8 @@ The output format can be sliced and diced by any number of analysis tools. For e
 Component references are similar, but without individual class information:
 
 ```
-App One!App!1!App One!App!1|INTRA_COMPONENT
-App One!App!1!App Two!App!1|INTER_COMPONENT_SAME_LAYER
+App One!App!1!App One!App!1!INTRA_COMPONENT!LEGAL
+App One!App!1!App Two!App!1!INTER_COMPONENT_SAME_LAYER!ILLEGAL
 ```
 
 Focusing on coarse-grained illegal component-to-component references can help teams understand the challenges in the codebase without getting mired in tens of thousands of illegal class-to-class dependencies.
