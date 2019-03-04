@@ -151,7 +151,7 @@ public class Enforce {
 		return descriptions;
 	}
 	
-	static Map<String, Integer> nodes(List<Reference> references, boolean includeClasses) { // For nice-looking output, references must be sorted.
+	static Map<String, Integer> nodes(List<Reference> references, boolean includeClasses) {
 		Map<String, Integer> nodes = new HashMap<>();
 		int id = 0;
 		for (Reference reference : references) {
@@ -181,7 +181,7 @@ public class Enforce {
 		try (PrintStream ps = new PrintStream(new FileOutputStream(allFile))) {
 			output(descriptions(references, includeClasses), ps);
 		}
-		// Output for graphics tools.
+		// Output for graphics tools. Sorting makes output deterministic.
 		List<Reference> allRefs = CollectionUtils.sort(new ArrayList<>(references));
 		Map<String, Integer> nodes = nodes(allRefs, includeClasses);
 		try (PrintStream gephiNodes = new PrintStream(new FileOutputStream(gephiNodesFile)); PrintStream gephiEdges = new PrintStream(new FileOutputStream(gephiEdgesFile)); PrintStream yed = new PrintStream(new FileOutputStream(yEdFile))) {
