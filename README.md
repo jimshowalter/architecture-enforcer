@@ -321,12 +321,12 @@ To summarize:
 |:---|:--------------|:-----|
 |Warning|No|No|
 |Warning|Yes|No|
-|Unresolved reference|No|No]
-|Unresolved reference|Yes|Yes]
-|Illegal reference|No|No]
-|Illegal reference|Yes|Yes]
-|All other problems|No|Yes]
-|All other problems|Yes|Yes]
+|Unresolved reference|No|No|
+|Unresolved reference|Yes|Yes|
+|Illegal reference|No|No|
+|Illegal reference|Yes|Yes|
+|All other problems|No|Yes|
+|All other problems|Yes|Yes|
 
 Once all unresolved and illegal references are fixed, strict mode should be enabled.
 
