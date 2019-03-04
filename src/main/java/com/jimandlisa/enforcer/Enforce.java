@@ -136,17 +136,25 @@ public class Enforce {
 		}
 	}
 	
-	static void output(Set<String> text, PrintStream ps) {
-		for (String line : CollectionUtils.sort(new ArrayList<>(text))) {
+	static void output(Set<String> content, PrintStream ps) {
+		for (String line : CollectionUtils.sort(new ArrayList<>(content))) {
 			ps.println(line);
 		}
-		text.clear();
+		content.clear();
 	}
 	
-	static Map<String, Integer> nodes(List<Reference> allRefs, boolean includeClasses) {
+	static Set<String> descriptions(Set<Reference> references, boolean includeClasses) {
+		Set<String> descriptions = new HashSet<>();
+		for (Reference reference : references) {
+			descriptions.add(reference.parseableDescription(includeClasses, true));
+		}
+		return descriptions;
+	}
+	
+	static Map<String, Integer> nodes(List<Reference> references, boolean includeClasses) { // For nice-looking output, references must be sorted.
 		Map<String, Integer> nodes = new HashMap<>();
 		int id = 0;
-		for (Reference reference : allRefs) {
+		for (Reference reference : references) {
 			String referrer = name(reference.referringType(), includeClasses);
 			if (!nodes.containsKey(referrer)) {
 				id++;
@@ -169,16 +177,12 @@ public class Enforce {
 	}
 
 	static void outputReferences(Set<Reference> references, boolean includeClasses, File allFile, File gephiNodesFile, File gephiEdgesFile, File yEdFile) throws Exception {
-		List<Reference> allRefs = CollectionUtils.sort(new ArrayList<>(references));
 		// Main output.
-		Set<String> descriptions = new HashSet<>();
-		for (Reference ref : allRefs) {
-			descriptions.add(ref.parseableDescription(includeClasses, true));
-		}
 		try (PrintStream ps = new PrintStream(new FileOutputStream(allFile))) {
-			output(descriptions, ps);
+			output(descriptions(references, includeClasses), ps);
 		}
 		// Output for graphics tools.
+		List<Reference> allRefs = CollectionUtils.sort(new ArrayList<>(references));
 		Map<String, Integer> nodes = nodes(allRefs, includeClasses);
 		try (PrintStream gephiNodes = new PrintStream(new FileOutputStream(gephiNodesFile)); PrintStream gephiEdges = new PrintStream(new FileOutputStream(gephiEdgesFile)); PrintStream yed = new PrintStream(new FileOutputStream(yEdFile))) {
 			gephiNodes.println("ID;Label");

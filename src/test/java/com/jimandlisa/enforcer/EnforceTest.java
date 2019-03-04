@@ -22,9 +22,12 @@ import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -235,6 +238,43 @@ public class EnforceTest {
 	}
 	
 	@Test
+	public void testNodes() {
+		Layer layer1 = new Layer("One", 1, null);
+		Component comp1 = new Component("Comp1", layer1, null, null);
+		Component comp2 = new Component("Comp2", layer1, null, null);
+		Layer layer2 = new Layer("Two", 2, null);
+		Component comp3 = new Component("Comp3", layer2, null, null);
+		Type type1 = new Type("foo");
+		type1.setComponent(comp1);
+		Type type2 = new Type("bar");
+		type2.setComponent(comp1);
+		Type type3 = new Type("baz");
+		type3.setComponent(comp2);
+		Type type4 = new Type("cat");
+		type4.setComponent(comp3);
+		List<Reference> references = new ArrayList<>();
+		Map<String, Integer> nodes = Enforce.nodes(references, true);
+		assertTrue(nodes.isEmpty());
+		Reference legalIntraComponent = new Reference(type1, type2);
+		references.add(legalIntraComponent);
+		Reference illegalInterComponentSameLayer1 = new Reference(type1, type3);
+		references.add(illegalInterComponentSameLayer1);
+		Reference illegalInterComponentSameLayer2 = new Reference(type2, type3);
+		references.add(illegalInterComponentSameLayer2);
+		Reference legalDifferentLayersDownwards = new Reference(type4, type1);
+		references.add(legalDifferentLayersDownwards);
+		Reference illegalDifferentLayersUpwards = new Reference(type1, type4);
+		references.add(illegalDifferentLayersUpwards);
+		references = CollectionUtils.sort(references);
+		nodes = Enforce.nodes(references, true);
+		assertEquals(4, nodes.size());
+		assertEquals((Integer)1, nodes.get("bar"));
+		assertEquals((Integer)2, nodes.get("baz"));
+		assertEquals((Integer)3, nodes.get("cat"));
+		assertEquals((Integer)4, nodes.get("foo"));
+	}
+	
+	@Test
 	public void testName() {
 		Layer layer1 = new Layer("One", 1, null);
 		Component comp1 = new Component("Comp1", layer1, null, null);
@@ -242,6 +282,22 @@ public class EnforceTest {
 		type1.setComponent(comp1);
 		assertEquals(comp1.name(), Enforce.name(type1, false));
 		assertEquals(type1.name(), Enforce.name(type1, true));
+	}
+	
+	@Test
+	public void testOutput() throws Exception {
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
+			Set<String> content = new HashSet<>();
+			Enforce.output(content, ps);
+			TestUtils.compareTestClassesFile(baos, "TestOutputCanned1.txt");
+			assertTrue(content.isEmpty());
+		}
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
+			Set<String> content = new HashSet<>(Arrays.asList(new String[] {"q", "a", "z"}));
+			Enforce.output(content, ps);
+			TestUtils.compareTestClassesFile(baos, "TestOutputCanned2.txt");
+			assertTrue(content.isEmpty());
+		}
 	}
 
 	@Test

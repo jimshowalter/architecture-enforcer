@@ -76,9 +76,7 @@ public class EnforcerUtils {
 
 	static String denest(String typeName, Flags flags) {
 		if (typeName.startsWith("$")) {
-			// TODO: Classes can start with dollar signs, so this is a problem. See if
-			// pf-CDA provides a way to determine if a class is nested, and, if so, to get
-			// its outermost class.
+			// TODO: Classes can start with dollar signs, so this is a problem. See if pf-CDA provides a way to determine if a class is nested, and, if so, to get its outermost class.
 			throw new EnforcerException("malformed class name '" + typeName + "'", Errors.MALFORMED_CLASS_NAME);
 		}
 		if (flags.preserveNestedTypes()) {
