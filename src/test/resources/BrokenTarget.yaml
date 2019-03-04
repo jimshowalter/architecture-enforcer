@@ -1,0 +1,58 @@
+# Example target-state specification.
+layers:
+  - name: Utils
+    depth: 10
+  - name: Data
+    depth: 8
+    description: Data layer.
+  - name: App
+    depth: 5
+    description: Application logic and service APIs.
+  - name: UI
+    depth: 2
+    description: User interface.
+domains:
+  - name: Utils
+  - name: Data
+    description: Data.
+  - name: One
+    description: Domain 1.
+  - name: Two
+    description: Domain 2.
+components:
+  - name: Utils
+    layer: Utils
+    domain: Utils
+    packages:
+      - com.jimandlisa.utils
+  - name: Data
+    layer: Data
+    domain: Data
+    packages:
+      - com.jimandlisa.data
+  - name: App One
+    layer: App
+    domain: One
+    description: Middle tier of app one.
+    packages:
+      - com.jimandlisa.app.one
+      - com.jimandlisa.service.one
+  - name: App Two
+    layer: App
+    domain: Two
+    description: Middle tier of app two.
+    packages:
+      - com.jimandlisa.app.two
+      - com.jimandlisa.service
+  - name: UI One
+    layer: UI
+    domain: One
+    description: UI for app one.
+    packages:
+      - com.jimandlisa.ui.one
+  - name: UI Two
+    layer: UI
+    domain: Two
+    description: UI for app two.
+    packages:
+      - com.jimandlisa.ui.two

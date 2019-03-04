@@ -159,6 +159,8 @@ We provide two sample yaml files:
 
 To run this tool with SampleTarget1.yaml, just change 2 to 1 in the above command.
 
+We also provide a deliberately screwed-up target state, BrokenTarget.yaml. It is just SampleTarget2.yaml, but with the layers reversed. It is provided to show what a bunch of illegal references look like.
+
 For large codebases, this tool requires lots of memory and can take a minute or more to run (the overhead is almost entirely due to pf-CDA, which has a difficult job).
 
 ## Command-line Arguments ###
