@@ -78,12 +78,12 @@ This tool classifies references into one of three buckets:
 
 To summarize:
 
-|Referring Component Layer|Referred-To Component Layer|Legal?|
-|:------------------------|:--------------------------|:-----|
-|N+1|N|Yes|
-|N|N+1|No|
-|N|N (same component as referring component)|Yes|
-|N|N (different component than referring component)|No|
+|Referring Component Layer|Referred-To Component Layer|Legal?|Classification|
+|:------------------------|:--------------------------|:-----|:-------------|
+|N+1|N|Yes|LEGAL|
+|N|N+1|No|ILLEGAL|
+|N|N (same component as referring component)|Yes|INTRA|
+|N|N (different component than referring component)|No|ILLEGAL|
 
 In a sense, the entire point of this tool is to be able to implement these three functions:
 
