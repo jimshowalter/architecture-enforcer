@@ -27,7 +27,7 @@ public class TestUtils {
 
 	// To avoid file collisions when running tests threaded.
 	public static String uniqueSubdir() {
-		return "subdir_" + ThreadLocalRandom.current().nextInt(1, 1000000);
+		return "subdir_" + ThreadLocalRandom.current().nextInt(1, Integer.MAX_VALUE);
 	}
 
 	public static File targetDir(String subdir) {

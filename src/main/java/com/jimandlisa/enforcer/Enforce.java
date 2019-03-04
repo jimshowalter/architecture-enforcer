@@ -199,8 +199,11 @@ public class Enforce {
 			gephiEdges.println("Source;Target");
 			for (Reference reference : allRefs) {
 				String referrer = name(reference.referringType(), includeClasses);
-				int referrerNodeId = nodes.get(referrer);
 				String referredTo = name(reference.referredToType(), includeClasses);
+				if (referrer.equals(referredTo)) {
+					continue;
+				}
+				int referrerNodeId = nodes.get(referrer);
 				int referredToNodeId = nodes.get(referredTo);
 				gephiText.add(referrerNodeId + ";" + referredToNodeId);
 				yedText.add(referrerNodeId + " " + referredToNodeId);
