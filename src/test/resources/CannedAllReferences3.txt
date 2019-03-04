@@ -1,5 +1,5 @@
 bar!Comp1!One!1!baz!Comp2!One!1!ILLEGAL
-bum!Comp3!Two!2!foo!Comp1!One!1!LEGAL
+cat!Comp3!Two!2!foo!Comp1!One!1!LEGAL
 foo!Comp1!One!1!bar!Comp1!One!1!INTRA
 foo!Comp1!One!1!baz!Comp2!One!1!ILLEGAL
-foo!Comp1!One!1!bum!Comp3!Two!2!ILLEGAL
+foo!Comp1!One!1!cat!Comp3!Two!2!ILLEGAL

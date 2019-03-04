@@ -92,25 +92,14 @@ public class Reference implements Comparable<Reference> {
 		return baseToString + " [" + kind + "]";
 	}
 
-	public String parseableDescription() {
-		return referringType.name() + "!" + referringType.component().name() + "!" + referringType.component().layer().name() + "!" + referringType.component().layer().depth() + "!"
-				+ referredToType.name() + "!" + referredToType.component().name() + "!" + referredToType.component().layer().name() + "!" + referredToType.component().layer().depth();
+	public String parseableDescription(boolean includeClasses, boolean includeKind) {
+		return (includeClasses ? referringType.name() + "!" : "") + referringType.component().name() + "!" + referringType.component().layer().name() + "!" + referringType.component().layer().depth() + "!"
+				+ (includeClasses ? referredToType.name() + "!" : "") + referredToType.component().name() + "!" + referredToType.component().layer().name() + "!" + referredToType.component().layer().depth() + (includeKind ? "!" + kind() : "");
 	}
 
-	public String parseableComponentDescription() {
-		return referringType.component().name() + "!" + referringType.component().layer().name() + "!" + referringType.component().layer().depth() + "!" + referredToType.component().name() + "!"
-				+ referredToType.component().layer().name() + "!" + referredToType.component().layer().depth();
-	}
-
-	public String humanReadableDescription() {
-		return "type " + referringType.name() + " in component " + referringType.component().quotedName() + " in layer " + referringType.component().layer().quotedName() + " depth "
-				+ referringType.component().layer().depth() + " refers to type " + referredToType.name() + " in component " + referredToType.component().quotedName() + " in layer "
-				+ referredToType.component().layer().quotedName() + " depth " + referredToType.component().layer().depth();
-	}
-
-	public String humanReadableComponentDescription() {
-		return "component " + referringType.component().quotedName() + " in layer " + referringType.component().layer().quotedName() + " depth " + referringType.component().layer().depth()
-				+ " refers to component " + referredToType.component().quotedName() + " in layer " + referredToType.component().layer().quotedName() + " depth "
-				+ referredToType.component().layer().depth();
+	public String humanReadableDescription(boolean includeClasses, boolean includeKind) {
+		return (includeClasses ? "type " + referringType.name() + " in " : "") + "component " + referringType.component().quotedName() + " in layer " + referringType.component().layer().quotedName() + " depth "
+				+ referringType.component().layer().depth() + " refers to " + (includeClasses ? "type " + referredToType.name() + " in " : "") + "component " + referredToType.component().quotedName() + " in layer "
+				+ referredToType.component().layer().quotedName() + " depth " + referredToType.component().layer().depth() + (includeKind ? " [" + kind + "]" : "");
 	}
 }

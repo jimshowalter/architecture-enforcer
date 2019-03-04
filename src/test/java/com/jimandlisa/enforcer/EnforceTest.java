@@ -233,13 +233,19 @@ public class EnforceTest {
 		assertEquals(1, Enforce.problemsCount(true, false));
 		assertEquals(3, Enforce.problemsCount(true, true));
 	}
+	
+	@Test
+	public void testName() {
+		Layer layer1 = new Layer("One", 1, null);
+		Component comp1 = new Component("Comp1", layer1, null, null);
+		Type type1 = new Type("foo");
+		type1.setComponent(comp1);
+		assertEquals(comp1.name(), Enforce.name(type1, false));
+		assertEquals(type1.name(), Enforce.name(type1, true));
+	}
 
 	@Test
-	public void testOutputAllClassToClassReferences() throws Exception {
-		Set<Reference> references = new HashSet<>();
-		String subdir = TestUtils.uniqueSubdir();
-		Outputs outputs = TestUtils.outputs(subdir);
-		Enforce.outputAllClassToClassReferences(references, outputs);
+	public void testOutputAllReferences() throws Exception {
 		Layer layer1 = new Layer("One", 1, null);
 		Component comp1 = new Component("Comp1", layer1, null, null);
 		Component comp2 = new Component("Comp2", layer1, null, null);
@@ -251,16 +257,19 @@ public class EnforceTest {
 		type2.setComponent(comp1);
 		Type type3 = new Type("baz");
 		type3.setComponent(comp2);
-		Type type4 = new Type("bum");
+		Type type4 = new Type("cat");
 		type4.setComponent(comp3);
-		Enforce.outputAllClassToClassReferences(references, outputs);
+		Set<Reference> references = new HashSet<>();
+		String subdir = TestUtils.uniqueSubdir();
+		Outputs outputs = TestUtils.outputs(subdir);
+		Enforce.outputReferences(references, true, outputs.allReferences(), outputs.allReferencesGephiNodes(), outputs.allReferencesGephiEdges(), outputs.allReferencesYeD());
 		Reference legalIntraComponent = new Reference(type1, type2);
 		references.add(legalIntraComponent);
-		Enforce.outputAllClassToClassReferences(references, outputs);
+		Enforce.outputReferences(references, true, outputs.allReferences(), outputs.allReferencesGephiNodes(), outputs.allReferencesGephiEdges(), outputs.allReferencesYeD());
 		TestUtils.compareTargetFile(subdir, ALL_REFERENCES_NAME, "CannedAllReferences1.txt");
 		Reference illegalInterComponentSameLayer1 = new Reference(type1, type3);
 		references.add(illegalInterComponentSameLayer1);
-		Enforce.outputAllClassToClassReferences(references, outputs);
+		Enforce.outputReferences(references, true, outputs.allReferences(), outputs.allReferencesGephiNodes(), outputs.allReferencesGephiEdges(), outputs.allReferencesYeD());
 		TestUtils.compareTargetFile(subdir, ALL_REFERENCES_NAME, "CannedAllReferences2.txt");
 		Reference illegalInterComponentSameLayer2 = new Reference(type2, type3);
 		references.add(illegalInterComponentSameLayer2);
@@ -268,51 +277,25 @@ public class EnforceTest {
 		references.add(legalDifferentLayersDownwards);
 		Reference illegalDifferentLayersUpwards = new Reference(type1, type4);
 		references.add(illegalDifferentLayersUpwards);
-		Enforce.outputAllClassToClassReferences(references, outputs);
+		Enforce.outputReferences(references, true, outputs.allReferences(), outputs.allReferencesGephiNodes(), outputs.allReferencesGephiEdges(), outputs.allReferencesYeD());
 		TestUtils.compareTargetFile(subdir, ALL_REFERENCES_NAME, "CannedAllReferences3.txt");
 		TestUtils.compareTargetFile(subdir, Outputs.ALL_REFERENCES_BASE_NAME + Outputs.GEPHI_NODES_SUFFIX, "CannedAllReferences3" + Outputs.GEPHI_NODES_SUFFIX);
 		TestUtils.compareTargetFile(subdir, Outputs.ALL_REFERENCES_BASE_NAME + Outputs.GEPHI_EDGES_SUFFIX, "CannedAllReferences3" + Outputs.GEPHI_EDGES_SUFFIX);
 		TestUtils.compareTargetFile(subdir, Outputs.ALL_REFERENCES_BASE_NAME + Outputs.YED_SUFFIX, "CannedAllReferences3" + Outputs.YED_SUFFIX);
-	}
-
-	@Test
-	public void testOutputAllComponentToComponentReferences() throws Exception {
-		Set<Component> components = new HashSet<>();
-		String subdir = TestUtils.uniqueSubdir();
-		Outputs outputs = TestUtils.outputs(subdir);
-		Enforce.outputAllComponentToComponentReferences(components, outputs);
-		Layer layer1 = new Layer("One", 1, null);
-		Component comp1 = new Component("Comp1", layer1, null, null);
-		Component comp2 = new Component("Comp2", layer1, null, null);
-		Layer layer2 = new Layer("Two", 2, null);
-		Component comp3 = new Component("Comp3", layer2, null, null);
-		Type type1 = new Type("foo");
-		type1.setComponent(comp1);
-		Type type2 = new Type("bar");
-		type2.setComponent(comp1);
-		Type type3 = new Type("baz");
-		type3.setComponent(comp2);
-		Type type4 = new Type("bum");
-		type4.setComponent(comp3);
-		Enforce.outputAllComponentToComponentReferences(components, outputs);
-		components.add(comp1);
-		components.add(comp2);
-		components.add(comp3);
-		Reference legalIntraComponent = new Reference(type1, type2);
-		comp1.references().add(legalIntraComponent);
-		Enforce.outputAllComponentToComponentReferences(components, outputs);
+		references.clear();
+		subdir = TestUtils.uniqueSubdir();
+		outputs = TestUtils.outputs(subdir);
+		Enforce.outputReferences(references, false, outputs.allComponentReferences(), outputs.allComponentReferencesGephiNodes(), outputs.allComponentReferencesGephiEdges(), outputs.allComponentReferencesYeD());
+		references.add(legalIntraComponent);
+		Enforce.outputReferences(references, false, outputs.allComponentReferences(), outputs.allComponentReferencesGephiNodes(), outputs.allComponentReferencesGephiEdges(), outputs.allComponentReferencesYeD());
 		TestUtils.compareTargetFile(subdir, ALL_COMPONENT_REFERENCES_NAME, "CannedAllComponentReferences1.txt");
-		Reference illegalInterComponentSameLayer1 = new Reference(type1, type3);
-		comp1.references().add(illegalInterComponentSameLayer1);
-		Enforce.outputAllComponentToComponentReferences(components, outputs);
+		references.add(illegalInterComponentSameLayer1);
+		Enforce.outputReferences(references, false, outputs.allComponentReferences(), outputs.allComponentReferencesGephiNodes(), outputs.allComponentReferencesGephiEdges(), outputs.allComponentReferencesYeD());
 		TestUtils.compareTargetFile(subdir, ALL_COMPONENT_REFERENCES_NAME, "CannedAllComponentReferences2.txt");
-		Reference illegalInterComponentSameLayer2 = new Reference(type2, type3);
-		comp1.references().add(illegalInterComponentSameLayer2);
-		Reference legalDifferentLayersDownwards = new Reference(type4, type1);
-		comp3.references().add(legalDifferentLayersDownwards);
-		Reference illegalDifferentLayersUpwards = new Reference(type1, type4);
-		comp1.references().add(illegalDifferentLayersUpwards);
-		Enforce.outputAllComponentToComponentReferences(components, outputs);
+		references.add(illegalInterComponentSameLayer2);
+		references.add(legalDifferentLayersDownwards);
+		references.add(illegalDifferentLayersUpwards);
+		Enforce.outputReferences(references, false, outputs.allComponentReferences(), outputs.allComponentReferencesGephiNodes(), outputs.allComponentReferencesGephiEdges(), outputs.allComponentReferencesYeD());
 		TestUtils.compareTargetFile(subdir, ALL_COMPONENT_REFERENCES_NAME, "CannedAllComponentReferences3.txt");
 		TestUtils.compareTargetFile(subdir, Outputs.ALL_COMPONENT_REFERENCES_BASE_NAME + Outputs.GEPHI_NODES_SUFFIX, "CannedAllComponentReferences3" + Outputs.GEPHI_NODES_SUFFIX);
 		TestUtils.compareTargetFile(subdir, Outputs.ALL_COMPONENT_REFERENCES_BASE_NAME + Outputs.GEPHI_EDGES_SUFFIX, "CannedAllComponentReferences3" + Outputs.GEPHI_EDGES_SUFFIX);

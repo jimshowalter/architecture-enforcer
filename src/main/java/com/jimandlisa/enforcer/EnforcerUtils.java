@@ -275,8 +275,8 @@ public class EnforcerUtils {
 				references.add(reference);
 				referringType.component().references().add(reference);
 				if (reference.isLayerViolation()) {
-					problems.add(new Problem(reference.parseableDescription(), Errors.ILLEGAL_REFERENCE, reference.humanReadableDescription()));
-					problems.add(new Problem(reference.parseableComponentDescription(), Errors.ILLEGAL_COMPONENT_REFERENCE, reference.humanReadableComponentDescription()));
+					problems.add(new Problem(reference.parseableDescription(true, false), Errors.ILLEGAL_REFERENCE, reference.humanReadableDescription(true, false)));
+					problems.add(new Problem(reference.parseableDescription(false, false), Errors.ILLEGAL_COMPONENT_REFERENCE, reference.humanReadableDescription(false, false)));
 				}
 			}
 		}

@@ -86,8 +86,14 @@ public class ReferenceTest {
 		assertTrue(new Reference(type1, type2).isInSameOrLowerLayer());
 		assertTrue(new Reference(type1, type2).isLayerViolation());
 		assertFalse(new Reference(type2, type1).isLayerViolation());
-		assertEquals("foo!Comp1!One!1!bar!Comp3!Two!2", new Reference(type1, type2).parseableDescription());
-		assertEquals("type foo in component 'Comp1' in layer 'One' depth 1 refers to type bar in component 'Comp3' in layer 'Two' depth 2", new Reference(type1, type2).humanReadableDescription());
+		assertEquals("Comp1!One!1!Comp3!Two!2", new Reference(type1, type2).parseableDescription(false, false));
+		assertEquals("Comp1!One!1!Comp3!Two!2!ILLEGAL", new Reference(type1, type2).parseableDescription(false, true));
+		assertEquals("foo!Comp1!One!1!bar!Comp3!Two!2", new Reference(type1, type2).parseableDescription(true, false));
+		assertEquals("foo!Comp1!One!1!bar!Comp3!Two!2!ILLEGAL", new Reference(type1, type2).parseableDescription(true, true));
+		assertEquals("component 'Comp1' in layer 'One' depth 1 refers to component 'Comp3' in layer 'Two' depth 2", new Reference(type1, type2).humanReadableDescription(false, false));
+		assertEquals("component 'Comp1' in layer 'One' depth 1 refers to component 'Comp3' in layer 'Two' depth 2 [ILLEGAL]", new Reference(type1, type2).humanReadableDescription(false, true));
+		assertEquals("type foo in component 'Comp1' in layer 'One' depth 1 refers to type bar in component 'Comp3' in layer 'Two' depth 2", new Reference(type1, type2).humanReadableDescription(true, false));
+		assertEquals("type foo in component 'Comp1' in layer 'One' depth 1 refers to type bar in component 'Comp3' in layer 'Two' depth 2 [ILLEGAL]", new Reference(type1, type2).humanReadableDescription(true, true));
 		try {
 			new Reference(null, null);
 		} catch (EnforcerException e) {
