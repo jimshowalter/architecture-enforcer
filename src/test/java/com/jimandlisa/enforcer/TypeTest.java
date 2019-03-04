@@ -31,6 +31,7 @@ public class TypeTest {
 	public void doTest() {
 		Type type1 = new Type("foo");
 		Type type2 = new Type("foo");
+		assertFalse(type1.isSynthesized());
 		assertEquals("foo", type1.name());
 		assertEquals("foo", type1.toString());
 		assertNull(type1.component());
@@ -65,6 +66,7 @@ public class TypeTest {
 		types.add(type1);
 		types.add(type2);
 		assertEquals(1, types.size());
+		assertTrue(new Type("baz", true).isSynthesized());
 		try {
 			new Type(null);
 			Assert.fail();

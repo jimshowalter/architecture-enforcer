@@ -19,17 +19,27 @@ import java.util.Set;
 public class Type implements Comparable<Type> {
 
 	private final String name;
+	private final boolean isSynthesized;
 	private final Set<String> referenceNames = new HashSet<>();
 	private final Set<Type> references = new HashSet<>();
 	private Component component = null;
-
-	public Type(final String name) {
+	
+	public Type(final String name, final boolean isSynthesized) {
 		super();
 		this.name = ArgUtils.check(name, "name");
+		this.isSynthesized = isSynthesized;
+	}
+
+	public Type(final String name) {
+		this(name, false);
 	}
 
 	public String name() {
 		return name;
+	}
+	
+	public boolean isSynthesized() {
+		return isSynthesized;
 	}
 
 	public Set<String> referenceNames() {

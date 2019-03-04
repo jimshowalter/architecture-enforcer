@@ -177,7 +177,7 @@ public class EnforcerUtils {
 				Type reference = types.get(referenceName);
 				if (reference == null) {
 					problems.add(new Problem(referenceName, Errors.UNRESOLVED_REFERENCE));
-					synthetics.add(new Type(referenceName));
+					synthetics.add(new Type(referenceName, true));
 					continue;
 				}
 				type.references().add(reference);
