@@ -18,9 +18,23 @@ public class Reference implements Comparable<Reference> {
 	private final Type referringType;
 	private final Type referredToType;
 	private final ReferenceKinds kind;
-	private final boolean isIllegal;
 	private final int hashCode;
 	private final String baseToString;
+	
+	static ReferenceKinds kind(final Type referringType, final Type referredToType) {
+		if (referringType.component().equals(referredToType.component())) {
+			return ReferenceKinds.INTRA_COMPONENT;
+		}
+		int referringDepth = referringType.component().layer().depth();
+		int referredToDepth = referredToType.component().layer().depth();
+		if (referringDepth == referredToDepth) {
+			return ReferenceKinds.INTER_COMPONENT_SAME_LAYER;
+		}
+		if (referringDepth < referredToDepth) {
+			return ReferenceKinds.INTER_COMPONENT_LOWER_TO_HIGHER;
+		}
+		return ReferenceKinds.INTER_COMPONENT_HIGHER_TO_LOWER;
+	}
 
 	public Reference(final Type referringType, final Type referredToType) {
 		super();
@@ -28,8 +42,7 @@ public class Reference implements Comparable<Reference> {
 		this.referredToType = ArgUtils.check(referredToType, "referredToType");
 		this.hashCode = referringType.hashCode() + referredToType.hashCode();
 		this.baseToString = referringType.name() + " -> " + referredToType.name();
-		this.kind = isIntraComponentReference() ? ReferenceKinds.INTRA : (isInSameOrLowerLayer() ? ReferenceKinds.ILLEGAL : ReferenceKinds.LEGAL);
-		this.isIllegal = this.kind == ReferenceKinds.ILLEGAL;
+		this.kind = kind(referringType, referredToType);
 	}
 
 	public Type referringType() {
@@ -40,27 +53,8 @@ public class Reference implements Comparable<Reference> {
 		return referredToType;
 	}
 
-	public boolean isIntraComponentReference() {
-		return referringType.component().equals(referredToType.component());
-	}
-
-	public boolean isInSameOrLowerLayer() {
-		return referringType.component().layer().depth() <= referredToType.component().layer().depth();
-	}
-
-	public boolean isLayerViolation() {
-		if (isIntraComponentReference()) {
-			return false;
-		}
-		return isInSameOrLowerLayer();
-	}
-
 	public ReferenceKinds kind() {
 		return kind;
-	}
-
-	public boolean isIllegal() {
-		return isIllegal;
 	}
 
 	@Override

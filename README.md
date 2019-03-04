@@ -68,39 +68,25 @@ A class in a component can refer to classes in the same component and in differe
 
 Only some references between components are legal.
 
-This tool classifies references into one of three buckets:
+This tool classifies references into one of four buckets:
 
-* INTRA: Intra-component. Always legal.
+|Referring Component Layer|Referred-To Component Layer|Same Component?|Classification|Legal?|
+|:------------------------|:--------------------------|:--------------|:-------------|:-----|
+|N|N|Yes|INTRA\_COMPONENT|Yes|
+|N|N|No|INTER\_COMPONENT\_SAME\_LAYER|No|
+|N+1|N|No|INTER\_COMPONENT\_HIGHER\_TO\_LOWER|Yes|
+|N|N+1|No|INTER\_COMPONENT\_LOWER\_TO\_HIGHER|No|
 
-* LEGAL: Inter-component. Legal because dependency is from higher layer to lower layer.
+Note that circular references among components are illegal, even in the same layer.
 
-* ILLEGAL: Inter-component. Illegal because dependency is "sideways" (between components in same layer), or from lower layer to higher layer. (Note that this means circular references among components are illegal, even in the same layer.)
-
-To summarize:
-
-|Referring Component Layer|Referred-To Component Layer|Legal?|Classification|
-|:------------------------|:--------------------------|:-----|:-------------|
-|N+1|N|Yes|LEGAL|
-|N|N+1|No|ILLEGAL|
-|N|N (same component as referring component)|Yes|INTRA|
-|N|N (different component than referring component)|No|ILLEGAL|
-
-In a sense, the entire point of this tool is to be able to implement these three functions:
+In a sense, the entire point of this tool is to be able to implement this function:
 
 ```
-public boolean isIntraComponentReference() {
-	return referringType.component().equals(referredToType.component());
-}
-
-public boolean isInSameOrLowerLayer() {
-	return referringType.component().layer().depth() <= referredToType.component().layer().depth();
-}
-
 public boolean isLayerViolation() {
-	if (isIntraComponentReference()) {
+	if (referringType.component().equals(referredToType.component())) {
 		return false;
 	}
-	return isInSameOrLowerLayer();
+	return referringType.component().layer().depth() <= referredToType.component().layer().depth();
 }
 ```
 
@@ -238,13 +224,19 @@ for example Class.forName(someStringFromAVariable + SomeClass.someFunction(some 
 References are written in a format designed to be easy to machine read:
 
 ```
-referringType!referringComponent!referringLayer!referringDepth!referredToType!referredToComponent!referredToLayer!referredToDepth!(INTRA|LEGAL|ILLEGAL)
+referringType!referringComponent!referringLayer!referringDepth!referredToType!referredToComponent!referredToLayer!referredToDepth!<kind>
+```
+
+where kind is:
+
+```
+(INTRA_COMPONENT|INTER_COMPONENT_SAME_LAYER|INTER_COMPONENT_LOWER_TO_HIGHER|INTER_COMPONENT_HIGHER_TO_LOWER)
 ```
 
 For example:
 
 ```
-com.jimandlisa.app.one.App1!App One!App!1!com.jimandlisa.app.two.App2!App Two!App!1|ILLEGAL
+com.jimandlisa.app.one.App1!App One!App!1!com.jimandlisa.app.two.App2!App Two!App!1|INTER_COMPONENT_SAME_LAYER
 ```
 
 The output format can be sliced and diced by any number of analysis tools. For example, it can be sorted into a histogram of most-illegally-referred-to components, or most-offending classes, etc. This can help the team decomposing the project figure out what to focus on first.
@@ -252,19 +244,18 @@ The output format can be sliced and diced by any number of analysis tools. For e
 Component references are similar, but without individual class information:
 
 ```
-App One!App!1!App One!App!1|INTRA
-App One!App!1!App Two!App!1|ILLEGAL
+App One!App!1!App One!App!1|INTRA_COMPONENT
+App One!App!1!App Two!App!1|INTER_COMPONENT_SAME_LAYER
 ```
 
 Focusing on coarse-grained illegal component-to-component references can help teams understand the challenges in the codebase without getting mired in tens of thousands of illegal class-to-class dependencies.
 
-The Problem objects for illegal references have a detail field that presents reference information in a more human-readable format:
+The Problem objects for illegal references have a detail field that presents information in a more human-readable format, for both class-to-class and component-to-component references:
 
 ```
 type com.jimandlisa.app.one.App1 in component 'App One' in layer 'App' depth 1 refers to type com.jimandlisa.app.two.App2 in component 'App Two' in layer 'App' depth 1
+component 'App One' in layer 'App' depth 1 refers to component 'App Two' in layer 'App' depth 1
 ```
-
-This can be easier to read when stepping through this tool in a debugger.
 
 ## Useful Patterns ##
 

@@ -15,7 +15,18 @@ package com.jimandlisa.enforcer;
 
 public enum ReferenceKinds {
 
-	INTRA, // Intra-component, always legal.
-	LEGAL, // Legal inter-component reference.
-	ILLEGAL // Illegal inter-component reference.
+	INTRA_COMPONENT(true), // Intra-component reference.
+	INTER_COMPONENT_HIGHER_TO_LOWER(true), // Legal inter-component reference from higher layer to lower layer.
+	INTER_COMPONENT_SAME_LAYER(false), // Illegal inter-component reference in same layer.
+	INTER_COMPONENT_LOWER_TO_HIGHER(false); // Illegal inter-component reference from lower layer to higher layer.
+	
+	private final boolean isLegal;
+	
+	private ReferenceKinds(final boolean isLegal) {
+		this.isLegal = isLegal;
+	}
+	
+	public boolean isLegal() {
+		return isLegal;
+	}
 }
