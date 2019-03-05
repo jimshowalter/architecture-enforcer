@@ -74,17 +74,6 @@ public class EnforcerUtils {
 		return skip(referredToTypeName, ignores);
 	}
 
-	static String denest(String typeName, Flags flags) {
-		if (typeName.startsWith("$")) {
-			// TODO: Classes can start with dollar signs, so this is a problem. See if pf-CDA provides a way to determine if a class is nested, and, if so, to get its outermost class.
-			throw new EnforcerException("malformed class name '" + typeName + "'", Errors.MALFORMED_CLASS_NAME);
-		}
-		if (flags.preserveNestedTypes()) {
-			return typeName;
-		}
-		return typeName.replaceAll("[$].*$", "");
-	}
-
 	static Type get(String typeName, Map<String, Type> types) {
 		Type type = types.get(typeName);
 		if (type == null) {
@@ -92,6 +81,19 @@ public class EnforcerUtils {
 			types.put(type.name(), type);
 		}
 		return type;
+	}
+
+	// Denesting is a lot trickier than it should be, because any number of $ signs can be used in class names, even if they aren't nested. For example, $$$Foo$$$Bar.java is a perfectly legal source file.
+	// When we have nothing structured to work with, as is the case here (where we just have a string), we can only do best-effort, and then throw up our hands if that doesn't work.
+	static String denest(String typeName, Flags flags) {
+		if (flags.preserveNestedTypes()) {
+			return typeName;
+		}
+		if (typeName.startsWith("$")) {
+			// If you get this exception, you need to add special-casing to this method for your types that have weird names. Or maybe rename them.
+			throw new EnforcerException("malformed class name '" + typeName + "'", Errors.MALFORMED_CLASS_NAME);
+		}
+		return typeName.replaceAll("[$].*$", "");
 	}
 
 	static void parse(File file, Map<String, Type> types, Set<String> ignores, Set<Problem> problems, String entryName, boolean requireReferredTo, Flags flags) throws Exception {
@@ -135,6 +137,25 @@ public class EnforcerUtils {
 				}
 			}
 		}
+	}
+
+	// See comments on other denest method explaining why this is problematic. At least here we have some structure to work with, although pf-CDA doesn't seem to provide a getEnclosingType method, which would have been useful.
+	static String denest(ClassInformation classInfo, Workset workset, Flags flags) {
+		if (flags.preserveNestedTypes()) {
+			return classInfo.getName();
+		}
+		if (!classInfo.isInnerClass()) {
+			return classInfo.getName();
+		}
+		ClassInformation current = classInfo;
+		while (current.isInnerClass()) {
+			ClassInformation probe = null;
+			while (probe == null) {
+				probe = workset.getClassInfo(current.getName().replaceAll("[$][^$]*$", ""));
+			}
+			current = probe;
+		}
+		return current.getName();
 	}
 
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
@@ -210,14 +231,15 @@ public class EnforcerUtils {
 			WorksetInitializer wsInitializer = new WorksetInitializer(workset);
 			wsInitializer.initializeWorksetAndWait(null);
 			for (ClassInformation classInfo : workset.getAllContainedClasses()) {
-				String referringClass = denest(classInfo.getName().trim(), flags);
+				String referringClass = denest(classInfo, workset, flags);
 				// TODO: Instead of creating the entire graph and then ignoring, see if there's a way to pass in a filter when initializing the workspace.
 				if (skip(referringClass, ignores)) {
 					continue;
 				}
 				Type type = get(referringClass, types);
 				for (IType dependency : classInfo.getDirectReferredTypes()) {
-					String referredToClass = denest(dependency.getName().trim(), flags);
+					ClassInformation dependencyClassInfo = workset.getClassInfo(dependency.getName());
+					String referredToClass = denest(dependencyClassInfo, workset, flags);
 					if (skip(type.name(), referredToClass, ignores)) {
 						continue;
 					}

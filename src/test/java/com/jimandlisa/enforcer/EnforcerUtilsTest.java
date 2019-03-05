@@ -17,6 +17,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,6 +28,7 @@ import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.pfsw.tools.cda.base.model.ClassInformation;
 import org.pfsw.tools.cda.base.model.Workset;
 
 public class EnforcerUtilsTest {
@@ -56,7 +58,7 @@ public class EnforcerUtilsTest {
 	}
 
 	@Test
-	public void testDenest() {
+	public void testDenest1() {
 		assertEquals("com.foo.Bar", EnforcerUtils.denest("com.foo.Bar$Baz", new Flags()));
 		Flags flags = new Flags();
 		flags.enablePreserveNestedTypes();
@@ -68,6 +70,15 @@ public class EnforcerUtilsTest {
 			assertTrue(e.getMessage().contains("malformed class name"));
 			assertEquals(Errors.MALFORMED_CLASS_NAME, e.error());
 		}
+	}
+	
+	@Test
+	public void testDenest2() {
+		ClassInformation mockClassInformation = Mockito.mock(ClassInformation.class);
+		when(mockClassInformation.getName()).thenReturn("foo");
+		Flags flags = new Flags();
+		flags.enablePreserveNestedTypes();
+		assertEquals("foo", EnforcerUtils.denest(mockClassInformation, null, flags));
 	}
 
 	@Test

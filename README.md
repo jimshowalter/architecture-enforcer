@@ -209,6 +209,8 @@ include $TheNestedType in the names.
 
 * Adding a referred-to class to the reflections or fix-unresolveds files can introduce new unresolved classes. When that happens, you need to keep entering classes until all classes are defined.
 
+* If you get an error about "malformed class name", you have a class in one of the input files that starts with a $ sign. In that case, see the comments on EnforcerUtils.denest.
+
 * This tool creates placeholders for unresolved types and adds them to the type-lookup map, so downstream analysis doesn't blow up. This is just a band-aid, because whatever types a missing type refers to are not included in the analysis (because they aren't known).
 Ideally the full transitive closure of types in your project is specified.
 
@@ -219,7 +221,7 @@ for example Class.forName(someStringFromAVariable + SomeClass.someFunction(some 
 
 * Sample files are located in the src/test/resources directory. They start with "Sample".
 
-## References Formats ##
+## Reference Formats ##
 
 References are written in a format designed to be easy to machine read:
 
@@ -335,45 +337,31 @@ This tool can of course be improved. Below are listed some things we know would 
 
 ### TODOs We Like ###
 
-* BUG: Classes can start with dollar signs, so the current approach to denesting is erroneous. See if pf-CDA provides a way to determine if a class is nested, and, if so, to get its outermost class.
-
-* PERFORMANCE: Instead of creating the entire graph with pf-CDA (which can be gigantic for large codebases) and then ignoring a bunch of classes, see if there's a way to pass in a filter when initializing the pf-CDA workspace.
-
-* WARNING: Fix the build warnings.
-
-* HYGIENE: Add one or more code-quality tools to the build. For example, findbugs, errorprone, etc.
-
-* HYGIENE: There is repetitive "Utils.called" call-tracking code in the architecture-enforcer-sample project that probably could be simplified via aspects.
-
-* HYGIENE: Start tracking these todos in a bug-tracking system.
-
-* HYGIENE: Set up CI/CD and publish to Maven central.
-
-* FEATURE: Improve graphics support. For example, add arrows to edges to show depends-on direction, add "illegal" labels to illegal edges and/or color illegal edges red, and add counts of illegal references between components.
-
-* FEATURE: Provide a way to fail builds if the count of illegal references increases. Note that this is different from enabling strict mode, because in that case builds fail if there are any illegal references, so the previous count is known (it's zero).
-In contrast, this feature requires determining that there were N illegal references in the previous build, and now there are N + M illegal references in the current build. One way to do this is to access the previous build in CI/CD using something like the Jenkins API.
-Note that, while refactoring, there are often temporary increases in the number of illegal references, so decomposition teams would need to be able to temporarily whitelist new illegal references (access to the whitelist could be restricted to just that team).
-
-* FEATURE: Add a Maven mojo that calls EnforcerUtils directly (instead of via args in the Enforce main method), and document how to integrate the mojo into builds. Possibly also provide gradle support.
-
-* FEATURE: Provide front-end code that displays a burndown chart based on the count of illegal references, and provide a way to integrate this into CI/CD pipelines.
-
-* FEATURE: Parse Class.forName calls in JSP pages and add those references automatically, instead of requiring manual bookkeeping in the reflection-references file.
-
-* FEATURE: Identify reflection references due to Spring, and add those references automatically, instead of requiring manual bookkeeping in the reflection-references file. (Check if an open-source project exists that can do this analysis.)
+|Kind|Description|
+|:---|:----------|
+|PERFORMANCE|Instead of creating the entire graph with pf-CDA (which can be gigantic for large codebases) and then ignoring a bunch of classes, see if there's a way to pass in a filter when initializing the pf-CDA workspace.|
+|WARNING|Fix the build warnings.|
+|HYGIENE|Start tracking these todos in a bug-tracking system.|
+|HYGIENE|Set up CI/CD and publish to Maven central.|
+|HYGIENE|Add one or more code-quality tools to the build. For example, findbugs, errorprone, etc.|
+|HYGIENE|There is repetitive "Utils.called" call-tracking code in the architecture-enforcer-sample project that probably could be simplified via aspects.|
+|FEATURE|Improve graphics support. For example, add arrows to edges to show depends-on direction, add "illegal" labels to illegal edges and/or color illegal edges red, and add counts of illegal references between components.|
+|FEATURE|Provide a way to fail builds if the count of illegal references increases. Note that this is different from enabling strict mode, because in that case builds fail if there are any illegal references, so the previous count is known (it's zero). In contrast, this feature requires determining that there were N illegal references in the previous build, and now there are N + M illegal references in the current build. One way to do this is to access the previous build in CI/CD using something like the Jenkins API. Note that, while refactoring, there are often temporary increases in the number of illegal references, so decomposition teams would need to be able to temporarily whitelist new illegal references (access to the whitelist could be restricted to just that team).|
+|FEATURE|Add a Maven mojo that calls EnforcerUtils directly (instead of via args in the Enforce main method), and document how to integrate the mojo into builds. Possibly also provide gradle support.|
+|FEATURE|Provide front-end code that displays a burndown chart based on the count of illegal references, and provide a way to integrate this into CI/CD pipelines.|
+|FEATURE|Parse Class.forName calls in JSP pages and add those references automatically, instead of requiring manual bookkeeping in the reflection-references file.|
+|FEATURE|Identify reflection references due to Spring, and add those references automatically, instead of requiring manual bookkeeping in the reflection-references file. (Check if an open-source project exists that can do this analysis.)|
 
 ### TODOs We're Unsure About ###
 
 These range from ideas that might be good, but we're not sure have a use, so we're using YAGNI to defer implementation, to ideas that might be awful.
 
-* FEATURE: For teams that want things to be more prescriptive, add component keywords "simple", "api", and "impl", and provide a way to pair related apis and impls (and to enforce rules about no access to impls).
-
-* FEATURE: For teams that need to support multiple implementation layers, add a "private" component keyword, so implementations in layer N + 1 can't call implementations in layer N, even though N + 1 is higher.
-
-* FEATURE: For teams that want to use domains more for tagging/labeling than for grouping, allow components to belong to multiple domains.
-
-* FEATURE: Support regular expressions where currently individual packages or classes have to be specified. Important note: This will break how we roll up to the nearest enclosing package, plus more than one pattern might resolve to the same classes, which would need to be reported as an error; so this might be a bad idea.
+|Kind|Description|
+|:---|:----------|
+|FEATURE|For teams that want things to be more prescriptive, add component keywords "simple", "api", and "impl", and provide a way to pair related apis and impls (and to enforce rules about no access to impls).|
+|FEATURE|For teams that need to support multiple implementation layers, add a "private" component keyword, so implementations in layer N + 1 can't call implementations in layer N, even though N + 1 is higher.|
+|FEATURE|For teams that want to use domains more for tagging/labeling than for grouping, allow components to belong to multiple domains.|
+|FEATURE|Support regular expressions where currently individual packages or classes have to be specified. Important note: This will break how we roll up to the nearest enclosing package, plus more than one pattern might resolve to the same classes, which would need to be reported as an error; so this might be a bad idea.|
 
 ## Caveats ##
 
