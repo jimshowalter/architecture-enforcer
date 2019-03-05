@@ -217,7 +217,7 @@ Ideally the full transitive closure of types in your project is specified.
 * pf-CDA is smart enough to add references on its own for simple Class.forName calls where the string name of the class is directly specified, as in Class.forName("com.foo.bar.Baz"), but it can't follow complicated string concatenations, strings returned by functions, etc.,
 for example Class.forName(someStringFromAVariable + SomeClass.someFunction(some args from somewhere) + SOME\_STRING\_CONSTANT + ".Foo"). That's why you have to add them manually. Also, pf-CDA doesn't parse reflection references in JSP files, Spring, etc.
 
-* If the target state only contains one component, there can't be any illegal references.
+* If the target state only contains one component, there can't be any illegal references (but that's not a very useful target state).
 
 * Sample files are located in the src/test/resources directory. They start with "Sample".
 
@@ -232,7 +232,7 @@ referringType!referringComponent!referringLayer!referringDepth!referredToType!re
 where kind is:
 
 ```
-(INTRA_COMPONENT|INTER_COMPONENT_SAME_LAYER|INTER_COMPONENT_LOWER_TO_HIGHER|INTER_COMPONENT_HIGHER_TO_LOWER)
+(INTRA_COMPONENT|INTER_COMPONENT_SAME_LAYER|INTER_COMPONENT_HIGHER_TO_LOWER|INTER_COMPONENT_LOWER_TO_HIGHER)
 ```
 
 and legality is:
@@ -244,7 +244,7 @@ and legality is:
 For example:
 
 ```
-com.jimandlisa.app.one.App1!App One!App!1!com.jimandlisa.app.two.App2!App Two!App!1!INTER_COMPONENT_SAME_LAYER!LEGAL
+com.jimandlisa.app.one.App1!App One!App!1!com.jimandlisa.app.two.App2!App Two!App!1!INTER_COMPONENT_SAME_LAYER!ILLEGAL
 ```
 
 The output format can be sliced and diced by any number of analysis tools. For example, it can be sorted into a histogram of most-illegally-referred-to components, or most-offending classes, etc. This can help the team decomposing the project figure out what to focus on first.
@@ -261,9 +261,11 @@ Focusing on coarse-grained illegal component-to-component references can help te
 The Problem objects for illegal references have a detail field that presents information in a more human-readable format, for both class-to-class and component-to-component references:
 
 ```
-type com.jimandlisa.app.one.App1 in component 'App One' in layer 'App' depth 1 refers to type com.jimandlisa.app.two.App2 in component 'App Two' in layer 'App' depth 1
-component 'App One' in layer 'App' depth 1 refers to component 'App Two' in layer 'App' depth 1
+ILLEGAL_REFERENCE: type com.jimandlisa.app.one.App1 in component 'App One' in layer 'App' depth 1 refers to type com.jimandlisa.app.two.App2 in component 'App Two' in layer 'App' depth 1
+ILLEGAL_COMPONENT_REFERENCE: component 'App One' in layer 'App' depth 1 refers to component 'App Two' in layer 'App' depth 1
 ```
+
+The human-readable details can be useful when stepping through this tool in a debugger.
 
 ## Useful Patterns ##
 
@@ -297,7 +299,7 @@ Notes:
 
 * Teams that wish to avoid the tedium of specifying N low-level simple components in M little layers can just define a single "platform" component that contains all shared types, utilities, etc. in one layer. However, depending on the codebase, this can create a single component containing a million lines (or more) of code.
 
-* Incremental compilation is a nice side effect of this approach. So long as a programmer only changes the code in the implementation of a paired component, recompilation is limited to just that implementation.
+* Incremental compilation is a nice side effect of this approach. When a programmer only changes the code in the implementation of a paired component, recompilation is limited to just that implementation.
 Once Mavenized (or moved into modules) this can reduce cycle time from minutes to seconds (not counting time to redeploy).
 
 * You may need to define some "shim" layers between APIs and impls, for example to share some common types that you don't want to push down below the APIs. That's fine&mdash;do whatever makes sense for your target state.
@@ -337,9 +339,8 @@ This tool can of course be improved. Below are listed some things we know would 
 
 ### TODOs We Like ###
 
-|Kind|Description|
+|Category|Description|
 |:---|:----------|
-|PERFORMANCE|Instead of creating the entire graph with pf-CDA (which can be gigantic for large codebases) and then ignoring a bunch of classes, see if there's a way to pass in a filter when initializing the pf-CDA workspace.|
 |WARNING|Fix the build warnings.|
 |HYGIENE|Start tracking these todos in a bug-tracking system.|
 |HYGIENE|Set up CI/CD and publish to Maven central.|
@@ -361,7 +362,7 @@ These range from ideas that might be good, but we're not sure have a use, so we'
 |FEATURE|For teams that want things to be more prescriptive, add component keywords "simple", "api", and "impl", and provide a way to pair related apis and impls (and to enforce rules about no access to impls).|
 |FEATURE|For teams that need to support multiple implementation layers, add a "private" component keyword, so implementations in layer N + 1 can't call implementations in layer N, even though N + 1 is higher.|
 |FEATURE|For teams that want to use domains more for tagging/labeling than for grouping, allow components to belong to multiple domains.|
-|FEATURE|Support regular expressions where currently individual packages or classes have to be specified. Important note: This will break how we roll up to the nearest enclosing package, plus more than one pattern might resolve to the same classes, which would need to be reported as an error; so this might be a bad idea.|
+|FEATURE|Support regular expressions where currently individual packages or classes have to be specified. Important note: This will break how we roll up to the nearest enclosing package, plus more than one pattern might resolve to the same classes, which would need to be reported as an error, so this might be a bad idea.|
 
 ## Caveats ##
 

@@ -22,6 +22,7 @@ public class Problem implements Comparable<Problem> {
 	private final String detail;
 	private final int hashCode;
 	private final String toString;
+	private final String humanReadableToString;
 
 	public Problem(final String description, final Errors error, final String detail) {
 		super();
@@ -30,6 +31,7 @@ public class Problem implements Comparable<Problem> {
 		this.detail = detail;
 		this.hashCode = error.hashCode() + description.hashCode();
 		this.toString = error + ": " + description;
+		this.humanReadableToString = error + ": " + detail;
 	}
 
 	Problem(final String description, final Errors error) {
@@ -82,6 +84,6 @@ public class Problem implements Comparable<Problem> {
 	}
 
 	public String humanReadableToString() {
-		return error + ": " + detail;
+		return humanReadableToString;
 	}
 }

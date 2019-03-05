@@ -233,7 +233,6 @@ public class EnforcerUtils {
 			wsInitializer.initializeWorksetAndWait(null);
 			for (ClassInformation classInfo : workset.getAllContainedClasses()) {
 				String referringClass = denest(classInfo, workset, flags);
-				// TODO: Instead of creating the entire graph and then ignoring, see if there's a way to pass in a filter when initializing the workspace.
 				if (skip(referringClass, ignores)) {
 					continue;
 				}
