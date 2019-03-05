@@ -140,6 +140,7 @@ public class EnforcerUtils {
 	}
 
 	// See comments on other denest method explaining why this is problematic. At least here we have some structure to work with, although pf-CDA doesn't seem to provide a getEnclosingType method, which would have been useful.
+	// Instead, we have to peel one $ sign off at a time, and see if the result comes back as a class or not. If not, we keep going. If so, we check if the class is no longer nested.
 	static String denest(ClassInformation classInfo, Workset workset, Flags flags) {
 		if (flags.preserveNestedTypes()) {
 			return classInfo.getName();
