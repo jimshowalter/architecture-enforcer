@@ -27,7 +27,7 @@ import java.util.Set;
 // Handles interactions with the user, and outputs results.
 public class Enforce {
 
-	private static final String USAGE = ": usage: /full/path/to/target/architecture/.yaml /full/path/to/.war /full/path/to/writable/output/directory " + Optionals.IGNORES + "/full/path/to/file/of/packages/and/classes/to/ignore "
+	private static final String USAGE = ": usage: /full/path/to/target/architecture/.yaml /full/path/to/(.war|" + Outputs.ALL_REFERENCES_BASE_NAME + ".txt" + ") /full/path/to/writable/output/directory " + Optionals.IGNORES + "/full/path/to/file/of/packages/and/classes/to/ignore "
 			+ Optionals.REFLECTIONS + "/full/path/to/file/of/reflection/references " + Optionals.FIX_UNRESOLVEDS + "/full/path/to/file/of/fixed/unresolveds " + Optionals.PRESERVE_NESTED_TYPES + " (preserves nested types) " + Optionals.STRICT
 			+ " (strict, requires that all types resolve and no illegal references) " + Optionals.DEBUG + " (debug) [last six args optional and unordered]";
 

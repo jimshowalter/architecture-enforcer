@@ -157,13 +157,15 @@ We also provide a deliberately screwed-up target state, BrokenTarget.yaml. It is
 
 For large codebases, this tool requires lots of memory and can take a minute or more to run (the overhead is almost entirely due to pf-CDA, which has a difficult job).
 
+To support rapid iteration while developing the target state, the output from a previous run of this tool can be specified as the input to the current run, which eliminates the pf-CDA overhead, so each run takes just a few seconds.
+
 ## Command-line Arguments ###
 
 The full set of args is:
 
 > /full/path/to/target/architecture/.yaml
 
-> /full/path/to/.war
+> /full/path/to/.war OR /full/path/to/all\_references.txt generated in a previous run of this tool
 
 > /full/path/to/writable/output/directory
 

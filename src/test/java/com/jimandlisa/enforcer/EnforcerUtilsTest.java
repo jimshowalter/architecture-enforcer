@@ -58,7 +58,7 @@ public class EnforcerUtilsTest {
 	}
 
 	@Test
-	public void testDenest1() {
+	public void testDenestString() {
 		assertEquals("com.foo.Bar", EnforcerUtils.denest("com.foo.Bar$Baz", new Flags()));
 		Flags flags = new Flags();
 		flags.enablePreserveNestedTypes();
@@ -73,7 +73,7 @@ public class EnforcerUtilsTest {
 	}
 	
 	@Test
-	public void testDenest2() {
+	public void testDenestClassInfo() {
 		ClassInformation mockClassInformation = Mockito.mock(ClassInformation.class);
 		when(mockClassInformation.getName()).thenReturn("foo");
 		Flags flags = new Flags();
@@ -205,8 +205,16 @@ public class EnforcerUtilsTest {
 	}
 
 	@Test
-	public void testResolve2() throws Exception {
-		EnforcerUtils.resolve(TestUtils.inputs(true, true, true), new HashSet<>(), new Flags());
+	public void testResolveWithInputs() throws Exception {
+		Set<Problem> problems = new LinkedHashSet<>();
+		Map<String, Type> types = EnforcerUtils.resolve(TestUtils.inputsWithWAR(true, true, true), problems, new Flags());
+		assertTrue(problems.isEmpty());
+		assertEquals(9, types.size());
+		assertTrue(types.keySet().contains("com.jimandlisa.app.two.App2"));
+		types = EnforcerUtils.resolve(TestUtils.inputsWithAllReferences(true, true, true), problems, new Flags());
+		assertTrue(problems.isEmpty());
+		assertEquals(9, types.size());
+		assertTrue(types.keySet().contains("com.jimandlisa.app.two.App2"));
 	}
 
 	@Test

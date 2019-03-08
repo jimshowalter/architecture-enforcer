@@ -14,6 +14,7 @@
 package com.jimandlisa.enforcer;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -27,9 +28,10 @@ public class InputsTest {
 
 	@Test
 	public void doTest() {
-		Inputs inputs = TestUtils.inputs(false, false, false);
+		Inputs inputs = TestUtils.inputsWithWAR(false, false, false);
 		assertNotNull(inputs.target());
-		assertNotNull(inputs.war());
+		assertNotNull(inputs.data());
+		assertTrue(inputs.isWar());
 		inputs.toString();
 		assertNull(inputs.ignores());
 		inputs.setIgnores(TestUtils.testClassesFile("SampleIgnores.txt"));
@@ -43,8 +45,10 @@ public class InputsTest {
 		inputs.setFixUnresolveds(TestUtils.testClassesFile("SampleFixUnresolveds.txt"));
 		assertNotNull(inputs.fixUnresolveds());
 		inputs.toString();
-		inputs = TestUtils.inputs(true, true, true);
+		inputs = TestUtils.inputsWithWAR(true, true, true);
 		inputs.toString();
+		inputs = TestUtils.inputsWithAllReferences(true, true, true);
+		assertFalse(inputs.isWar());
 		try {
 			inputs.setIgnores(new File("foo"));
 			Assert.fail();

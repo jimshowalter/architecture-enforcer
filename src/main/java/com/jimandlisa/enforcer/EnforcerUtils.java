@@ -220,14 +220,13 @@ public class EnforcerUtils {
 			problems.add(new Problem("unable to release workset " + workset.getName() + ": " + t.getMessage(), Errors.UNABLE_TO_RELEASE_WORKSET));
 		}
 	}
-
-	public static Map<String, Type> resolve(Inputs inputs, Set<Problem> problems, Flags flags) throws Exception {
-		Set<String> ignores = ignores(inputs.ignores());
+	
+	static Map<String, Type> typesFromWar(File war, Set<String> ignores, Set<Problem> problems, Flags flags) throws Exception {
 		Map<String, Type> types = new HashMap<>();
 		Workset workset = null;
 		try {
 			workset = new Workset("ArchitectureEnforcer");
-			ClasspathPartDefinition partDefinition = new ClasspathPartDefinition(inputs.war().getAbsolutePath());
+			ClasspathPartDefinition partDefinition = new ClasspathPartDefinition(war.getAbsolutePath());
 			workset.addClasspathPartDefinition(partDefinition);
 			WorksetInitializer wsInitializer = new WorksetInitializer(workset);
 			wsInitializer.initializeWorksetAndWait(null);
@@ -249,6 +248,28 @@ public class EnforcerUtils {
 		} finally {
 			release(workset, problems);
 		}
+		return types;
+	}
+	
+	static Map<String, Type> typesFromAllReferences(File allReferences, Set<String> ignores, Set<Problem> problems, Flags flags) throws Exception {
+		Map<String, Type> types = new HashMap<>();
+		try (BufferedReader reader = new BufferedReader(new FileReader(allReferences))) {
+			String line = null;
+			while ((line = reader.readLine()) != null) {
+				String[] segments = line.split("!");
+				String referringClass = denest(segments[0], flags);
+				Type referringType = get(referringClass, types);
+				String referredToClass = denest(segments[4], flags);
+				Type referredToType = get(referredToClass, types);
+				referringType.referenceNames().add(referredToType.name());
+			}
+		}
+		return types;
+	}
+
+	public static Map<String, Type> resolve(Inputs inputs, Set<Problem> problems, Flags flags) throws Exception {
+		Set<String> ignores = ignores(inputs.ignores());
+		Map<String, Type> types = inputs.isWar() ? typesFromWar(inputs.data(), ignores, problems, flags) : typesFromAllReferences(inputs.data(), ignores, problems, flags);
 		parse(inputs.reflections(), types, ignores, problems, "reflection", true, flags); // Get reflection-based referring and referred-to classes from reflections file.
 		parse(inputs.fixUnresolveds(), types, ignores, problems, "fix-unresolved", false, flags); // Get referring and referred-to classes from fix-unresolveds file.
 		reportFatalErrors(problems, flags);

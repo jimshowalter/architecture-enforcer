@@ -62,37 +62,37 @@ public class EnforceTest {
 
 	@Test
 	public void testArgs() {
-		Inputs inputs = TestUtils.inputs(false, false, false);
+		Inputs inputs = TestUtils.inputsWithWAR(false, false, false);
 		Flags flags = new Flags();
 		Enforce.parseArg(Optionals.IGNORES.indicator() + TestUtils.testClassesFile("SampleIgnores.txt").getAbsolutePath(), inputs, flags);
 		assertEquals(normalize(TestUtils.testClassesFile("SampleIgnores.txt").toPath()), normalize(inputs.ignores().toPath()));
 		try {
-			Enforce.parseArg(Optionals.IGNORES.indicator() + "foo", TestUtils.inputs(true, false, false), flags);
+			Enforce.parseArg(Optionals.IGNORES.indicator() + "foo", TestUtils.inputsWithWAR(true, false, false), flags);
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertEquals(Errors.IGNORES_FILE_ALREADY_SPECIFIED, e.error());
 		}
-		inputs = TestUtils.inputs(false, false, false);
+		inputs = TestUtils.inputsWithWAR(false, false, false);
 		flags = new Flags();
 		Enforce.parseArg(Optionals.REFLECTIONS.indicator() + TestUtils.testClassesFile("SampleReflections.txt").getAbsolutePath(), inputs, flags);
 		assertEquals(normalize(TestUtils.testClassesFile("SampleReflections.txt").toPath()), normalize(inputs.reflections().toPath()));
 		try {
-			Enforce.parseArg(Optionals.REFLECTIONS.indicator() + "foo", TestUtils.inputs(false, true, false), flags);
+			Enforce.parseArg(Optionals.REFLECTIONS.indicator() + "foo", TestUtils.inputsWithWAR(false, true, false), flags);
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertEquals(Errors.REFLECTIONS_FILE_ALREADY_SPECIFIED, e.error());
 		}
-		inputs = TestUtils.inputs(false, false, false);
+		inputs = TestUtils.inputsWithWAR(false, false, false);
 		flags = new Flags();
 		Enforce.parseArg(Optionals.FIX_UNRESOLVEDS.indicator() + TestUtils.testClassesFile("SampleFixUnresolveds.txt").getAbsolutePath(), inputs, flags);
 		assertEquals(normalize(TestUtils.testClassesFile("SampleFixUnresolveds.txt").toPath()), normalize(inputs.fixUnresolveds().toPath()));
 		try {
-			Enforce.parseArg(Optionals.FIX_UNRESOLVEDS.indicator() + "foo", TestUtils.inputs(false, false, true), flags);
+			Enforce.parseArg(Optionals.FIX_UNRESOLVEDS.indicator() + "foo", TestUtils.inputsWithWAR(false, false, true), flags);
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertEquals(Errors.FIX_UNRESOLVEDS_FILE_ALREADY_SPECIFIED, e.error());
 		}
-		inputs = TestUtils.inputs(false, false, false);
+		inputs = TestUtils.inputsWithWAR(false, false, false);
 		flags = new Flags();
 		Enforce.parseArg(Optionals.PRESERVE_NESTED_TYPES.indicator(), inputs, flags);
 		assertTrue(flags.preserveNestedTypes());
@@ -102,7 +102,7 @@ public class EnforceTest {
 		} catch (EnforcerException e) {
 			assertEquals(Errors.PRESERVE_NESTED_TYPES_ALREADY_SPECIFIED, e.error());
 		}
-		inputs = TestUtils.inputs(false, false, false);
+		inputs = TestUtils.inputsWithWAR(false, false, false);
 		flags = new Flags();
 		Enforce.parseArg(Optionals.STRICT.indicator(), inputs, flags);
 		assertTrue(flags.strict());
@@ -112,7 +112,7 @@ public class EnforceTest {
 		} catch (EnforcerException e) {
 			assertEquals(Errors.STRICT_ALREADY_SPECIFIED, e.error());
 		}
-		inputs = TestUtils.inputs(false, false, false);
+		inputs = TestUtils.inputsWithWAR(false, false, false);
 		flags = new Flags();
 		Enforce.parseArg(Optionals.DEBUG.indicator(), inputs, flags);
 		assertTrue(flags.debug());
@@ -123,7 +123,7 @@ public class EnforceTest {
 			assertEquals(Errors.DEBUG_ALREADY_SPECIFIED, e.error());
 		}
 		try {
-			Enforce.parseArg("foo", TestUtils.inputs(false, false, false), flags);
+			Enforce.parseArg("foo", TestUtils.inputsWithWAR(false, false, false), flags);
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertEquals(Errors.UNRECOGNIZED_COMMAND_LINE_OPTION, e.error());

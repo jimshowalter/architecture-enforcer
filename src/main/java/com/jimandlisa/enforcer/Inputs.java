@@ -18,30 +18,36 @@ import java.io.File;
 public class Inputs {
 
 	private final File target;
-	private final File war;
+	private final File data;
+	private final boolean isWar;
 	private File ignores = null;
 	private File reflections = null;
 	private File fixUnresolveds = null;
 	
-	public Inputs(final File target, final File war) {
+	public Inputs(final File target, final File data) {
 		super();
-		this.target = FileUtils.check(FileUtils.checkReadFile(target), war, ignores, reflections, fixUnresolveds);
-		this.war = FileUtils.check(FileUtils.checkReadFile(war), target, ignores, reflections, fixUnresolveds);
+		this.target = FileUtils.check(FileUtils.checkReadFile(target), data, ignores, reflections, fixUnresolveds);
+		this.data = FileUtils.check(FileUtils.checkReadFile(data), target, ignores, reflections, fixUnresolveds);
+		this.isWar = data.getName().endsWith(".war");
 	}
 
 	public final File target() {
 		return target;
 	}
 
-	public final File war() {
-		return war;
+	public final File data() {
+		return data;
+	}
+	
+	public boolean isWar() {
+		return isWar;
 	}
 
 	public final void setIgnores(File ignores) {
 		if (ignores() != null) {
 			throw new EnforcerException("already set ignores file " + ignores(), Errors.IGNORES_FILE_ALREADY_SPECIFIED);
 		}
-		this.ignores = FileUtils.check(FileUtils.checkReadFile(ignores), target, war, reflections, fixUnresolveds);
+		this.ignores = FileUtils.check(FileUtils.checkReadFile(ignores), target, data, reflections, fixUnresolveds);
 	}
 
 	public final File ignores() {
@@ -52,7 +58,7 @@ public class Inputs {
 		if (reflections() != null) {
 			throw new EnforcerException("already set reflections file " + reflections(), Errors.REFLECTIONS_FILE_ALREADY_SPECIFIED);
 		}
-		this.reflections = FileUtils.check(FileUtils.checkReadFile(reflections), target, war, ignores, fixUnresolveds);
+		this.reflections = FileUtils.check(FileUtils.checkReadFile(reflections), target, data, ignores, fixUnresolveds);
 	}
 
 	public final File reflections() {
@@ -63,7 +69,7 @@ public class Inputs {
 		if (fixUnresolveds() != null) {
 			throw new EnforcerException("already set fix-unresolveds file " + fixUnresolveds(), Errors.FIX_UNRESOLVEDS_FILE_ALREADY_SPECIFIED);
 		}
-		this.fixUnresolveds = FileUtils.check(FileUtils.checkReadFile(fixedUnresolveds), target, war, ignores, reflections);
+		this.fixUnresolveds = FileUtils.check(FileUtils.checkReadFile(fixedUnresolveds), target, data, ignores, reflections);
 	}
 
 	public final File fixUnresolveds() {
@@ -72,6 +78,6 @@ public class Inputs {
 
 	@Override
 	public String toString() {
-		return "target=" + target + ", war=" + war + ", ignores=" + ignores + ", reflections=" + reflections + ", fix-unresolveds=" + fixUnresolveds;
+		return "target=" + target + ", data=" + data + ", isWar=" + isWar() + ", ignores=" + ignores + ", reflections=" + reflections + ", fix-unresolveds=" + fixUnresolveds;
 	}
 }

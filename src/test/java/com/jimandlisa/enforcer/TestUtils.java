@@ -62,6 +62,10 @@ public class TestUtils {
 	public static File sampleWar() {
 		return testClassesFile("architecture-enforcer-sample-1.0-SNAPSHOT.war");
 	}
+	
+	public static File sampleAllReferences() {
+		return testClassesFile(Outputs.ALL_REFERENCES_BASE_NAME + ".txt");
+	}
 
 	public static String readTestClassesFile(String file) throws Exception {
 		return new String(Files.readAllBytes(testClassesPath(file)), StandardCharsets.UTF_8.name());
@@ -72,9 +76,9 @@ public class TestUtils {
 		String cannedOut = readTestClassesFile(canned).trim().replaceAll("\r\n\r\n", "\r\n");
 		assertEquals(out, cannedOut);
 	}
-
-	public static Inputs inputs(boolean includeIgnores, boolean includeReflections, boolean includeFixUnresolveds) {
-		Inputs inputs = new Inputs(testClassesFile("SampleTarget2.yaml"), sampleWar());
+	
+	public static Inputs inputs(File data, boolean includeIgnores, boolean includeReflections, boolean includeFixUnresolveds) {
+		Inputs inputs = new Inputs(testClassesFile("SampleTarget2.yaml"), data);
 		if (includeIgnores) {
 			inputs.setIgnores(testClassesFile("SampleIgnores.txt"));
 		}
@@ -85,6 +89,14 @@ public class TestUtils {
 			inputs.setFixUnresolveds(testClassesFile("SampleFixUnresolveds.txt"));
 		}
 		return inputs;
+	}
+
+	public static Inputs inputsWithWAR(boolean includeIgnores, boolean includeReflections, boolean includeFixUnresolveds) {
+		return inputs(sampleWar(), includeIgnores, includeReflections, includeFixUnresolveds);
+	}
+	
+	public static Inputs inputsWithAllReferences(boolean includeIgnores, boolean includeReflections, boolean includeFixUnresolveds) {
+		return inputs(sampleAllReferences(), includeIgnores, includeReflections, includeFixUnresolveds);
 	}
 
 	public static Outputs outputs(String subdir) {
