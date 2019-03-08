@@ -50,9 +50,12 @@ public class ProblemTest {
 		assertEquals(Errors.CANNOT_READ_FILE.toString() + ": bar", problem1.toString());
 		problem1 = new Problem("foo", Errors.UNABLE_TO_RELEASE_WORKSET);
 		assertEquals("foo", problem1.description());
+		assertEquals(Errors.UNABLE_TO_RELEASE_WORKSET.toString() + ": foo", problem1.toString());
+		assertEquals(Errors.UNABLE_TO_RELEASE_WORKSET.toString() + ": foo", problem1.humanReadableToString());
 		assertFalse(problem1.isFatal(false));
 		assertFalse(problem1.isFatal(true));
 		problem1 = new Problem("foo", Errors.ILLEGAL_REFERENCE, "big long explanation");
+		assertEquals(Errors.ILLEGAL_REFERENCE.toString() + ": foo", problem1.toString());
 		assertEquals("big long explanation", problem1.detail());
 		assertEquals(Errors.ILLEGAL_REFERENCE.toString() + ": big long explanation", problem1.humanReadableToString());
 		Problem problem2 = new Problem("foo", Errors.ILLEGAL_REFERENCE, "big long explanation");

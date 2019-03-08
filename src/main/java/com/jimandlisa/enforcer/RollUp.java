@@ -63,10 +63,10 @@ public class RollUp {
 		}
 	}
 
-	void dump(PrintStream ps) {
-		ps.println("Packages and components:");
+	void dump(PrintStream console) {
+		console.println("Packages and components:");
 		for (String pkg : packages) {
-			ps.println("\t" + pkg + ": " + packagesToComponents.get(pkg).name());
+			console.println("\t" + pkg + ": " + packagesToComponents.get(pkg).name());
 		}
 	}
 }

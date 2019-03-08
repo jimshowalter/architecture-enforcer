@@ -31,7 +31,7 @@ public class Problem implements Comparable<Problem> {
 		this.detail = detail;
 		this.hashCode = error.hashCode() + description.hashCode();
 		this.toString = error + ": " + description;
-		this.humanReadableToString = error + ": " + detail;
+		this.humanReadableToString = error + ": " + (isWarning() ? description : detail);
 	}
 
 	Problem(final String description, final Errors error) {
@@ -48,6 +48,10 @@ public class Problem implements Comparable<Problem> {
 
 	public String detail() {
 		return detail;
+	}
+	
+	public boolean isWarning() {
+		return error.isWarning();
 	}
 
 	public boolean isFatal(boolean strict) {

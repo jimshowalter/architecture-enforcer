@@ -1,2 +1,1 @@
-WARNING:
-foo
+WARNING, SEE warnings.txt

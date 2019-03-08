@@ -48,8 +48,8 @@ public class RollUpTest {
 		assertEquals(component1, rollUp.get("com.foo.bar"));
 		assertEquals(component1, rollUp.get("com.foo.bar.Baz"));
 		assertEquals(component2, rollUp.get("com.other.XYZ"));
-		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
-			rollUp.dump(ps);
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream console = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
+			rollUp.dump(console);
 			TestUtils.compareTestClassesFile(baos, "RollUpCanned.txt");
 		}
 		Set<Problem> problems = new HashSet<>();

@@ -40,8 +40,8 @@ public class TargetUtilsTest {
 	public void doTest() throws Exception {
 		new TargetUtils();
 		Target target = TargetUtils.parse(TestUtils.testClassesFile("TestTarget.yaml"));
-		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
-			TargetUtils.dump(target, ps);
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream console = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
+			TargetUtils.dump(target, console);
 			TestUtils.compareTestClassesFile(baos, "TestTargetCanned.txt");
 		}
 		Map<String, Object> map = new HashMap<>();

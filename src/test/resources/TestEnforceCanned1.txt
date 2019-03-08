@@ -85,6 +85,5 @@ Total outermost types: 9
 	com.jimandlisa.utils.Unresolved
 		com.jimandlisa.utils.Utils
 	com.jimandlisa.utils.Utils
-PROBLEMS FOUND, SEE OUTPUT FILES:
-illegal_component_references.txt
-illegal_references.txt
+ILLEGAL REFERENCES (2), SEE illegal_references.txt
+ILLEGAL COMPONENT REFERENCES (2), SEE illegal_component_references.txt

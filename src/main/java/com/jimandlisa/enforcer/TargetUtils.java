@@ -193,7 +193,7 @@ public class TargetUtils {
 		return target;
 	}
 	
-	public static void dump(Target target, PrintStream ps) throws Exception {
+	public static void dump(Target target, PrintStream console) throws Exception {
 		List<Layer> layers = new ArrayList<Layer>(target.layers().values());
 		Collections.sort(layers, new Comparator<Layer>(){
 			@Override
@@ -212,28 +212,28 @@ public class TargetUtils {
 			public int compare(Component d1, Component d2) {
 				return d1.name().compareTo(d2.name());
 			}});
-		ps.println("Target-state specification:");
-		ps.println("\tLAYERS:");
+		console.println("Target-state specification:");
+		console.println("\tLAYERS:");
 		for (Layer layer : layers) {
-			ps.println("\t\t" + layer);
-			ps.println("\t\t\t" + layer.description());
+			console.println("\t\t" + layer);
+			console.println("\t\t\t" + layer.description());
 		}
-		ps.println("\tDOMAINS:");
+		console.println("\tDOMAINS:");
 		for (Domain domain : domains) {
-			ps.println("\t\t" + domain);
-			ps.println("\t\t\t" + domain.description());
+			console.println("\t\t" + domain);
+			console.println("\t\t\t" + domain.description());
 		}
-		ps.println("\tCOMPONENTS:");
+		console.println("\tCOMPONENTS:");
 		for (Component component : components) {
-			ps.println("\t\t" + component);
-			ps.println("\t\t\t" + component.description());
-			ps.println("\t\t\tpackages:");
+			console.println("\t\t" + component);
+			console.println("\t\t\t" + component.description());
+			console.println("\t\t\tpackages:");
 			for (String pkg : component.packages()) {
-				ps.println("\t\t\t\t" + pkg);
+				console.println("\t\t\t\t" + pkg);
 			}
-			ps.println("\t\t\tclasses:");
+			console.println("\t\t\tclasses:");
 			for (String clazz : component.classes()) {
-				ps.println("\t\t\t\t" + clazz);
+				console.println("\t\t\t\t" + clazz);
 			}
 		}
 	}

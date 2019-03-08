@@ -23,10 +23,10 @@ public class EnforcerTest {
 
 	@Test
 	public void doTest() throws Exception {
-		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream console = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
 			Flags flags = new Flags();
 			flags.enableDebug();
-			Enforce.mainImpl(TestUtils.inputsWithWAR(true, true, true), TestUtils.outputs(TestUtils.uniqueSubdir()), ps, flags);
+			Enforce.mainImpl(TestUtils.inputsWithWAR(true, true, true), TestUtils.outputs(TestUtils.uniqueSubdir()), console, flags);
 			TestUtils.compareTestClassesFile(baos, "TestEnforceCanned1.txt");
 		}
 	}

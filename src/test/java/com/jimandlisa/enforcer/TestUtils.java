@@ -72,7 +72,7 @@ public class TestUtils {
 	}
 
 	public static void compareTestClassesFile(ByteArrayOutputStream baos, String canned) throws Exception {
-		String out = new String(baos.toByteArray(), StandardCharsets.UTF_8).trim().replaceAll("\r\n\r\n", "\r\n");
+		String out = new String(baos.toByteArray(), StandardCharsets.UTF_8).trim().replaceAll("\r\n\r\n", "\r\n").replace("\\", "/").replaceAll("SEE .*/subdir_.*/", "SEE ");
 		String cannedOut = readTestClassesFile(canned).trim().replaceAll("\r\n\r\n", "\r\n");
 		assertEquals(out, cannedOut);
 	}

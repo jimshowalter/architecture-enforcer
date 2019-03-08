@@ -78,6 +78,10 @@ public enum Errors {
 		return severity;
 	}
 	
+	public boolean isWarning() {
+		return severity == Severities.WARNING;
+	}
+	
 	public boolean isFatal(boolean strict) {
 		if (severity == Severities.WARNING) {
 			return false;

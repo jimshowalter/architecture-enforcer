@@ -27,9 +27,9 @@ import java.util.Set;
 // Handles interactions with the user, and outputs results.
 public class Enforce {
 
-	private static final String USAGE = ": usage: /full/path/to/target/architecture/.yaml /full/path/to/(.war|" + Outputs.ALL_REFERENCES_BASE_NAME + ".txt" + ") /full/path/to/writable/output/directory " + Optionals.IGNORES + "/full/path/to/file/of/packages/and/classes/to/ignore "
-			+ Optionals.REFLECTIONS + "/full/path/to/file/of/reflection/references " + Optionals.FIX_UNRESOLVEDS + "/full/path/to/file/of/fixed/unresolveds " + Optionals.PRESERVE_NESTED_TYPES + " (preserves nested types) " + Optionals.STRICT
-			+ " (strict, requires that all types resolve and no illegal references) " + Optionals.DEBUG + " (debug) [last six args optional and unordered]";
+	private static final String USAGE = ": usage: /full/path/to/target/architecture/.yaml /full/path/to/(.war|" + Outputs.ALL_REFERENCES_BASE_NAME + ".txt" + ") /full/path/to/writable/output/directory " + Optionals.IGNORES
+			+ "/full/path/to/file/of/packages/and/classes/to/ignore " + Optionals.REFLECTIONS + "/full/path/to/file/of/reflection/references " + Optionals.FIX_UNRESOLVEDS + "/full/path/to/file/of/fixed/unresolveds " + Optionals.PRESERVE_NESTED_TYPES
+			+ " (preserves nested types) " + Optionals.STRICT + " (strict, requires that all types resolve and no illegal references) " + Optionals.DEBUG + " (debug) [last six args optional and unordered]";
 
 	static void parseArg(String arg, Inputs inputs, Flags flags) {
 		try {
@@ -63,86 +63,92 @@ public class Enforce {
 		throw new EnforcerException("unrecognized option " + arg + USAGE, Errors.UNRECOGNIZED_COMMAND_LINE_OPTION);
 	}
 
-	static void debug(Target target, Map<String, Type> types, RollUp rollUp, PrintStream ps, Flags flags, int max) throws Exception {
+	static void debug(Target target, Map<String, Type> types, RollUp rollUp, PrintStream console, Flags flags, int max) throws Exception {
 		if (!flags.debug()) {
 			return;
 		}
-		TargetUtils.dump(target, ps);
-		rollUp.dump(ps);
-		ps.println("Total outermost types: " + types.size());
+		TargetUtils.dump(target, console);
+		rollUp.dump(console);
+		console.println("Total outermost types: " + types.size());
 		if (types.size() > max) {
 			return;
 		}
 		for (String typeName : CollectionUtils.sort(new ArrayList<>(types.keySet()))) {
-			ps.println("\t" + typeName);
+			console.println("\t" + typeName);
 			for (String referenceName : CollectionUtils.sort(new ArrayList<>(types.get(typeName).referenceNames()))) {
-				ps.println("\t\t" + referenceName);
+				console.println("\t\t" + referenceName);
 			}
 		}
 	}
 
-	static int problemsCount(boolean foundUnresolvedTypes, boolean foundIllegalReferences) {
-		int count = foundUnresolvedTypes ? 1 : 0;
-		count = foundIllegalReferences ? count + 2 : count;
-		return count;
+	static boolean output(Errors error, Problem problem) {
+		if (error == null) {
+			return problem.isWarning();
+		}
+		return problem.error() == error;
 	}
 
-	static void reportProblems(Set<Problem> problems, Errors error, File out) throws Exception {
-		try (PrintStream ps = new PrintStream(new FileOutputStream(out))) {
+	static String suffix(int count, File file) {
+		if (count == 1) {
+			return ", SEE " + file.getAbsolutePath();
+		}
+		return "S (" + count + "), SEE " + file.getAbsolutePath();
+	}
+
+	static String heading(Errors error, int count, File problemsFile) {
+		if (error == null) {
+			return "WARNING" + suffix(count, problemsFile);
+		}
+		return error.name().replace("_", " ") + suffix(count, problemsFile);
+	}
+
+	static void reportProblems(Set<Problem> problems, Errors error, int count, PrintStream console, File problemsFile) throws Exception {
+		if (count == 0) {
+			return;
+		}
+		try (PrintStream out = new PrintStream(new FileOutputStream(problemsFile))) {
+			console.println(heading(error, count, problemsFile));
 			for (Problem problem : CollectionUtils.sort(new ArrayList<>(problems))) {
-				if (problem.error() == error) {
-					ps.println(problem.description());
+				if (output(error, problem)) {
+					if (problem.isWarning()) {
+						out.println(problem.humanReadableToString());
+					} else {
+						out.println(problem.description());
+					}
 				}
 			}
 		}
 	}
 
-	static void reportProblems(Set<Problem> problems, PrintStream ps, Outputs outputs, Flags flags) throws Exception {
-		boolean foundUnresolvedTypes = false;
-		boolean foundIllegalReferences = false;
-		List<String> warnings = new ArrayList<>();
+	static void reportProblems(Set<Problem> problems, PrintStream console, Outputs outputs, Flags flags) throws Exception {
+		int warningsCount = 0;
+		int unresolvedTypesCount = 0;
+		int illegalReferencesCount = 0;
+		int illegalComponentReferencesCount = 0;
 		for (Problem problem : problems) {
 			if (problem.error() == Errors.UNRESOLVED_REFERENCE) {
-				foundUnresolvedTypes = true;
-			} else if (problem.error() == Errors.ILLEGAL_REFERENCE || problem.error() == Errors.ILLEGAL_COMPONENT_REFERENCE) {
-				foundIllegalReferences = true;
+				unresolvedTypesCount++;
+			} else if (problem.error() == Errors.ILLEGAL_REFERENCE) {
+				illegalReferencesCount++;
+			} else if (problem.error() == Errors.ILLEGAL_COMPONENT_REFERENCE) {
+				illegalComponentReferencesCount++;
 			} else {
-				warnings.add(problem.description());
+				warningsCount++; // There are only three errors that aren't immediately fatal, and they're handled above, so this has to be a warning.
 			}
 		}
-		if (warnings.size() == 1) {
-			ps.println("WARNING:");
-			ps.println(warnings.iterator().next());
-		} else if (warnings.size() > 1) {
-			ps.println("WARNINGS:");
-			for (String warning : warnings) {
-				ps.println(warning);
-			}
-		}
-		int count = problemsCount(foundUnresolvedTypes, foundIllegalReferences);
-		if (count == 0) {
-			return;
-		}
-		ps.println("PROBLEMS FOUND, SEE OUTPUT FILE" + (count == 1 ? "" : "S") + ":");
-		if (foundUnresolvedTypes) {
-			reportProblems(problems, Errors.UNRESOLVED_REFERENCE, outputs.unresolvedTypes());
-			ps.println(outputs.unresolvedTypes().getName());
-		}
-		if (foundIllegalReferences) {
-			reportProblems(problems, Errors.ILLEGAL_COMPONENT_REFERENCE, outputs.illegalComponentReferences());
-			ps.println(outputs.illegalComponentReferences().getName());
-			reportProblems(problems, Errors.ILLEGAL_REFERENCE, outputs.illegalReferences());
-			ps.println(outputs.illegalReferences().getName());
-		}
+		reportProblems(problems, null, warningsCount, console, outputs.warnings());
+		reportProblems(problems, Errors.UNRESOLVED_REFERENCE, unresolvedTypesCount, console, outputs.unresolvedTypes());
+		reportProblems(problems, Errors.ILLEGAL_REFERENCE, illegalReferencesCount, console, outputs.illegalReferences());
+		reportProblems(problems, Errors.ILLEGAL_COMPONENT_REFERENCE, illegalComponentReferencesCount, console, outputs.illegalComponentReferences());
 	}
-	
-	static void output(Set<String> content, PrintStream ps) {
+
+	static void output(Set<String> content, PrintStream output) {
 		for (String line : CollectionUtils.sort(new ArrayList<>(content))) {
-			ps.println(line);
+			output.println(line);
 		}
 		content.clear();
 	}
-	
+
 	static Set<String> descriptions(Set<Reference> references, boolean includeClasses) {
 		Set<String> descriptions = new HashSet<>();
 		for (Reference reference : references) {
@@ -150,7 +156,7 @@ public class Enforce {
 		}
 		return descriptions;
 	}
-	
+
 	static Map<String, Integer> nodes(List<Reference> references, boolean includeClasses) {
 		Map<String, Integer> nodes = new HashMap<>();
 		int id = 0;
@@ -178,8 +184,8 @@ public class Enforce {
 
 	static void outputReferences(Set<Reference> references, boolean includeClasses, File allFile, File gephiNodesFile, File gephiEdgesFile, File yEdFile) throws Exception {
 		// Main output.
-		try (PrintStream ps = new PrintStream(new FileOutputStream(allFile))) {
-			output(descriptions(references, includeClasses), ps);
+		try (PrintStream out = new PrintStream(new FileOutputStream(allFile))) {
+			output(descriptions(references, includeClasses), out);
 		}
 		// Output for graphics tools. Sorting makes output deterministic.
 		List<Reference> allRefs = CollectionUtils.sort(new ArrayList<>(references));
@@ -213,20 +219,20 @@ public class Enforce {
 		}
 	}
 
-	static void mainImpl(Inputs inputs, Outputs outputs, PrintStream ps, Flags flags) throws Exception {
+	static void mainImpl(Inputs inputs, Outputs outputs, PrintStream console, Flags flags) throws Exception {
 		Target target = TargetUtils.parse(inputs.target());
 		Set<Problem> problems = new LinkedHashSet<>();
 		Map<String, Type> types = EnforcerUtils.resolve(inputs, problems, flags);
 		RollUp rollUp = new RollUp();
 		Set<Reference> references = new HashSet<>();
 		EnforcerUtils.correlate(types, target.components(), rollUp, references, problems, flags);
-		debug(target, types, rollUp, ps, flags, 100);
-		reportProblems(problems, ps, outputs, flags);
+		debug(target, types, rollUp, console, flags, 100);
+		reportProblems(problems, console, outputs, flags);
 		outputReferences(references, true, outputs.allReferences(), outputs.allReferencesGephiNodes(), outputs.allReferencesGephiEdges(), outputs.allReferencesYeD());
 		outputReferences(references, false, outputs.allComponentReferences(), outputs.allComponentReferencesGephiNodes(), outputs.allComponentReferencesGephiEdges(), outputs.allComponentReferencesYeD());
 	}
 
-	public static void mainImpl(String[] args, PrintStream ps) throws Exception {
+	public static void mainImpl(String[] args, PrintStream console) throws Exception {
 		Inputs inputs = null;
 		Outputs outputs = null;
 		Flags flags = null;
@@ -244,10 +250,10 @@ public class Enforce {
 				parseArg(args[i], inputs, flags);
 			}
 		} catch (Throwable t) {
-			ps.println(t.getMessage());
+			console.println(t.getMessage());
 			return;
 		}
-		ps.println("Analyzing/enforcing architecture with " + inputs.toString() + ", " + outputs.toString() + ", " + flags.toString() + " (may take 60+ seconds...)");
-		mainImpl(inputs, outputs, ps, flags);
+		console.println("Analyzing/enforcing architecture with " + inputs.toString() + ", " + outputs.toString() + ", " + flags.toString() + " (may take 60+ seconds...)");
+		mainImpl(inputs, outputs, console, flags);
 	}
 }

@@ -25,10 +25,17 @@ import org.junit.Test;
 
 public class OutputsTest {
 
-	private static void add(File file, Set<String> names) {
+	private static void add(File file, boolean checkExists, Set<String> names) {
 		assertNotNull(file);
 		assertFalse(names.contains(file.getAbsolutePath()));
+		if (checkExists) {
+			assertFalse(file.exists());
+		}
 		names.add(file.getAbsolutePath());
+	}
+	
+	private static void add(File file, Set<String> names) {
+		add(file, true, names);
 	}
 
 	@Test
@@ -37,7 +44,8 @@ public class OutputsTest {
 		Outputs outputs = new Outputs(targetDir);
 		assertEquals(targetDir, outputs.outputDirectory());
 		Set<String> names = new HashSet<>();
-		add(outputs.outputDirectory(), names);
+		add(outputs.outputDirectory(), false, names);
+		add(outputs.warnings(), names);
 		add(outputs.unresolvedTypes(), names);
 		add(outputs.illegalReferences(), names);
 		add(outputs.illegalComponentReferences(), names);
@@ -49,7 +57,7 @@ public class OutputsTest {
 		add(outputs.allComponentReferencesGephiNodes(), names);
 		add(outputs.allComponentReferencesGephiEdges(), names);
 		add(outputs.allComponentReferencesYeD(), names);
-		assertEquals(12, names.size());
+		assertEquals(13, names.size());
 		outputs.toString();
 	}
 }

@@ -14,6 +14,7 @@
 package com.jimandlisa.enforcer;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
@@ -27,11 +28,16 @@ import org.mockito.Mockito;
 public class FileUtilsTest {
 
 	@Test
-	public void doTest() {
+	public void doTest() throws Exception {
 		new FileUtils();
 		File file = FileUtils.checkReadFile(TestUtils.testClassesFile("SampleIgnores.txt"));
 		assertNotNull(file);
 		assertTrue(file.isFile());
+		File copy = new File(file.getAbsolutePath().replace(".txt", "_copy.txt"));
+		copy.createNewFile();
+		assertTrue(copy.exists());
+		copy = FileUtils.clear(copy);
+		assertFalse(copy.exists());
 		try {
 			FileUtils.checkReadFile(new File(TestUtils.testClassesPath("SampleIgnores.txt") + "bogus"));
 			Assert.fail();
