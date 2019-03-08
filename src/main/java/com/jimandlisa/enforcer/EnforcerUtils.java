@@ -258,13 +258,16 @@ public class EnforcerUtils {
 	}
 
 	static void correlateComponentClassesToTypes(Map<String, Type> types, Map<String, Component> components, Set<Problem> problems) {
+		Set<String> matchedClasses = new HashSet<>();
 		for (Component component : components.values()) {
 			for (String className : component.classes()) {
 				Type type = types.get(className);
 				if (type == null) {
 					problems.add(new Problem("unable to resolve class to type " + className, Errors.CLASS_NOT_RESOLVED_TO_TYPE));
+					matchedClasses.add(className);
 					continue;
 				}
+				matchedClasses.add(className);
 				component.add(type);
 				type.setComponent(component);
 			}
@@ -277,15 +280,15 @@ public class EnforcerUtils {
 			if (type.component() != null) {
 				continue; // Was already resolved by class name.
 			}
-			String componentName = rollUp.get(type.name());
-			if (componentName == null) {
+			Component component = rollUp.get(type.name());
+			if (component == null) {
 				problems.add(new Problem("unable to resolve type " + type.name() + " to component", Errors.TYPE_NOT_RESOLVED_TO_COMPONENT));
 				continue;
 			}
-			Component component = components.get(componentName);
 			component.add(type);
 			type.setComponent(component);
 		}
+		rollUp.validate(problems);
 	}
 
 	static void correlateTypesToReferences(Map<String, Type> types, Set<Reference> references, Set<Problem> problems) {

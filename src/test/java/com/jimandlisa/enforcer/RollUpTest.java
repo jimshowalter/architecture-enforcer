@@ -15,6 +15,7 @@ package com.jimandlisa.enforcer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -44,12 +45,23 @@ public class RollUpTest {
 		rollUp.add(components);
 		assertNull(rollUp.get("com.no.match"));
 		assertNull(rollUp.get("NoPackage"));
-		assertEquals("Comp1", rollUp.get("com.foo.bar"));
-		assertEquals("Comp1", rollUp.get("com.foo.bar.Baz"));
-		assertEquals("Comp2", rollUp.get("com.other.XYZ"));
+		assertEquals(component1, rollUp.get("com.foo.bar"));
+		assertEquals(component1, rollUp.get("com.foo.bar.Baz"));
+		assertEquals(component2, rollUp.get("com.other.XYZ"));
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
 			rollUp.dump(ps);
 			TestUtils.compareTestClassesFile(baos, "RollUpCanned.txt");
 		}
+		Set<Problem> problems = new HashSet<>();
+		rollUp.validate(problems);
+		assertTrue(problems.isEmpty());
+		Component component3 = new Component("Comp3", layer2, null, null);
+		component3.packages().add("com.unseen");
+		components.add(component3);
+		rollUp.add(components);
+		rollUp.validate(problems);
+		assertEquals(1, problems.size());
+		assertEquals(Errors.UNUSED_PACKAGE, problems.iterator().next().error());
+		assertTrue(problems.iterator().next().description().contains("unused package"));
 	}
 }

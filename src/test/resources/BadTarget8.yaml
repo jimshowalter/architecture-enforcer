@@ -1,0 +1,13 @@
+layers:
+  - name: Everything
+    depth: 0
+    description: Start with everything in one layer.
+# Start with no domains.
+#domains:
+components:
+  - name: Everything
+    layer: Everything
+    description: Start with everything in one component.
+    packages:
+      - com.jimandlisa
+      - com.nosuchpackage

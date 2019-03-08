@@ -50,8 +50,7 @@ public class EnforceTest {
 	}
 
 	private static void compare(ByteArrayOutputStream baos, String canned) throws Exception {
-		String out = new String(baos.toByteArray(), StandardCharsets.UTF_8).trim().replaceAll("\r\n\r\n", "\r\n").replace("\\", "/").replaceAll("=[^=]+/architecture-enforcer/target/subdir_[0-9]+",
-				"=/architecture-enforcer/target/subdir_N");
+		String out = new String(baos.toByteArray(), StandardCharsets.UTF_8).trim().replaceAll("\r\n\r\n", "\r\n").replace("\\", "/").replaceAll("=[^=]+/architecture-enforcer/target/subdir_[0-9]+", "=/architecture-enforcer/target/subdir_N");
 		String cannedOut = TestUtils.readTestClassesFile(canned).trim().replaceAll("\r\n\r\n", "\r\n");
 		assertEquals(out, cannedOut);
 	}
@@ -236,7 +235,7 @@ public class EnforceTest {
 		assertEquals(1, Enforce.problemsCount(true, false));
 		assertEquals(3, Enforce.problemsCount(true, true));
 	}
-	
+
 	@Test
 	public void testNodes() {
 		Layer layer1 = new Layer("One", 1, null);
@@ -273,7 +272,7 @@ public class EnforceTest {
 		assertEquals((Integer)3, nodes.get("cat"));
 		assertEquals((Integer)4, nodes.get("foo"));
 	}
-	
+
 	@Test
 	public void testName() {
 		Layer layer1 = new Layer("One", 1, null);
@@ -283,7 +282,7 @@ public class EnforceTest {
 		assertEquals(comp1.name(), Enforce.name(type1, false));
 		assertEquals(type1.name(), Enforce.name(type1, true));
 	}
-	
+
 	@Test
 	public void testOutput() throws Exception {
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
@@ -293,7 +292,7 @@ public class EnforceTest {
 			assertTrue(content.isEmpty());
 		}
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
-			Set<String> content = new HashSet<>(Arrays.asList(new String[] {"q", "a", "z"}));
+			Set<String> content = new HashSet<>(Arrays.asList(new String[] { "q", "a", "z" }));
 			Enforce.output(content, ps);
 			TestUtils.compareTestClassesFile(baos, "TestOutputCanned2.txt");
 			assertTrue(content.isEmpty());
@@ -390,9 +389,17 @@ public class EnforceTest {
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("FATAL ERRORS:"));
-			assertTrue(e.getMessage().contains(
-					"ILLEGAL_REFERENCE: type com.jimandlisa.app.one.App1 in component 'App One' in layer 'App' depth 1 refers to type com.jimandlisa.app.two.App2 in component 'App Two' in layer 'App' depth 1"));
+			assertTrue(e.getMessage().contains("ILLEGAL_REFERENCE: type com.jimandlisa.app.one.App1 in component 'App One' in layer 'App' depth 1 refers to type com.jimandlisa.app.two.App2 in component 'App Two' in layer 'App' depth 1"));
 			assertTrue(e.getMessage().contains("ILLEGAL_COMPONENT_REFERENCE: App One!App!1!App Two!App!1"));
+		}
+		subdir = TestUtils.uniqueSubdir();
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream ps = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
+			Enforce.mainImpl(new String[] { TestUtils.testClassesFile("BadTarget8.yaml").getAbsolutePath(), TestUtils.sampleWar().getAbsolutePath(), TestUtils.targetDir(subdir).getAbsolutePath(),
+					Optionals.IGNORES.indicator() + TestUtils.testClassesFile("SampleIgnores.txt").getAbsolutePath() }, ps);
+			Assert.fail();
+		} catch (EnforcerException e) {
+			assertTrue(e.getMessage().contains("FATAL ERROR:"));
+			assertTrue(e.getMessage().contains("UNUSED_PACKAGE: unused package com.nosuchpackage in component 'Everything'"));
 		}
 	}
 }

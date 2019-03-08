@@ -54,11 +54,19 @@ best practice is for every package to belong to exactly one project/module. So, 
 
 Classes belonging to the default package (that is, not having a package) can be assigned to components by specifying them in the components.
 
-All classes must wind up in a component, or this tool fails with an error (the target state must be completely specified).
+This tool imposes a number of consistency checks, and fails with errors if any are violated:
 
-Layers, domains, packages, and classes referred to by a component must exist, or this tool fails with an error.
+* The target state must be consistent: Layers, domains, packages, and classes referred to by a component must be defined.
 
-Components are somewhat analogous to Java 9 modules. We chose not to make them be modules, because large Java codebases tend to be legacy codebases, which tend to be on earlier versions of Java that don't support modules.
+* The target state must be completely specified: All classes in the war that are not ignored must match to a component.
+
+* The target state cannot be ambiguous: All classes in the war that are not ignored cannot match to more than one component.
+
+* All classes and packages in the target state must be matched to non-ignored classes and packages in the war (the target state must be kept up to date, including when classes and packages are renamed or deleted during refactoring).
+
+* The target state must not be contradictory: Classes cannot be both referring and ignored, and cannot be both referred-to and ignored.
+
+Note: Components are somewhat analogous to Java 9 modules. We chose not to make them be modules, because large Java codebases tend to be legacy codebases, which tend to be on earlier versions of Java that don't support modules.
 
 ## References ##
 

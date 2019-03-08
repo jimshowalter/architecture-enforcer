@@ -246,6 +246,8 @@ public class EnforcerUtilsTest {
 		type1.references().add(type2);
 		Type type3 = new Type("NoPackage");
 		types.put(type3.name(), type3);
+		Type type4 = new Type("com.other.Foo");
+		types.put(type4.name(), type4);
 		Layer layer1 = new Layer("L1", 1, null);
 		Layer layer2 = new Layer("L2", 2, null);
 		Map<String, Component> components = new HashMap<>();
@@ -264,7 +266,7 @@ public class EnforcerUtilsTest {
 	}
 
 	@Test
-	public void testFailedCorrelateWithClasses() {
+	public void testFailedCorrelateClassToType() {
 		Map<String, Type> types = new HashMap<>();
 		Set<Reference> references = new LinkedHashSet<>();
 		Set<Problem> problems = new LinkedHashSet<>();

@@ -18,40 +18,55 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class RollUp {
 
-	private final List<String> packagesAndComponents = new ArrayList<>();
+	private final List<String> packages = new ArrayList<>();
+	private final Map<String, Component> packagesToComponents = new HashMap<>();
+	private final Set<String> matchedPackages = new HashSet<>();
 
 	public void add(Collection<Component> components) {
 		for (Component component : components) {
 			for (String pkg : component.packages()) {
-				packagesAndComponents.add(pkg + "!" + component.name());
+				packages.add(pkg);
+				packagesToComponents.put(pkg, component);
 			}
 		}
-		Collections.sort(packagesAndComponents, new Comparator<String>() {
+		Collections.sort(packages, new Comparator<String>() {
 			@Override
 			public int compare(String s1, String s2) {
 				return s2.compareTo(s1); // Reverse sort so longest matches are found first.
 			}
 		});
 	}
-	
-	public String get(String packageName) {
-		for (String packageAndComponent : packagesAndComponents) {
-			String[] segments = packageAndComponent.split("!");
-			if (packageName.startsWith(segments[0])) {
-				return segments[1];
+
+	public Component get(String packageName) {
+		for (String pkg : packages) {
+			if (packageName.startsWith(pkg)) {
+				matchedPackages.add(pkg);
+				return packagesToComponents.get(pkg);
 			}
 		}
 		return null;
 	}
-	
+
+	public void validate(Set<Problem> problems) {
+		Set<String> check = new HashSet<>(packages);
+		check.removeAll(matchedPackages);
+		for (String unused : check) {
+			problems.add(new Problem("unused package " + unused + " in component " + packagesToComponents.get(unused).quotedName(), Errors.UNUSED_PACKAGE));
+		}
+	}
+
 	void dump(PrintStream ps) {
 		ps.println("Packages and components:");
-		for (String packageAndComponent : packagesAndComponents) {
-			ps.println("\t" + packageAndComponent);
+		for (String pkg : packages) {
+			ps.println("\t" + pkg + ": " + packagesToComponents.get(pkg).name());
 		}
 	}
 }

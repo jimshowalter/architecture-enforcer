@@ -51,14 +51,14 @@ Target-state specification:
 				com.jimandlisa.utils
 			classes:
 Packages and components:
-	com.jimandlisa.utils!Utils
-	com.jimandlisa.ui.two!UI Two
-	com.jimandlisa.ui.one!UI One
-	com.jimandlisa.service.one!App One
-	com.jimandlisa.service!App Two
-	com.jimandlisa.data!Data
-	com.jimandlisa.app.two!App Two
-	com.jimandlisa.app.one!App One
+	com.jimandlisa.utils: Utils
+	com.jimandlisa.ui.two: UI Two
+	com.jimandlisa.ui.one: UI One
+	com.jimandlisa.service.one: App One
+	com.jimandlisa.service: App Two
+	com.jimandlisa.data: Data
+	com.jimandlisa.app.two: App Two
+	com.jimandlisa.app.one: App One
 Total outermost types: 9
 	com.jimandlisa.app.one.App1
 		com.jimandlisa.app.two.App2
