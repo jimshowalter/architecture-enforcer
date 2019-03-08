@@ -157,7 +157,7 @@ We also provide a deliberately screwed-up target state, BrokenTarget.yaml. It is
 
 For large codebases, this tool requires lots of memory and can take a minute or more to run (the overhead is almost entirely due to pf-CDA, which has a difficult job).
 
-To support rapid iteration while developing the target state, the output from a previous run of this tool can be specified as the input to the current run, which eliminates the pf-CDA overhead, so each run takes just a few seconds.
+To support rapid iteration while developing the target state, the output from a previous run of this tool can be specified as the input to the current run, which eliminates the pf-CDA overhead, making each run take at most a few seconds. In this mode, you only need to rebuild and reanalyze the war when the codebase changes enough that the previous analysis is no longer safe to depend on, and early in a project you might only need to sync and build once a day (or even less often). Once decomposition is well underway, frequent syncs and builds are needed, but by then the target state is already defined.
 
 ## Command-line Arguments ###
 
