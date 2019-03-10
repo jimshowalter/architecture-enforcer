@@ -49,6 +49,7 @@ public class EnforcerUtils {
 				String referredToClass = segments[4];
 				Type referredToType = get(referredToClass, types);
 				referringType.referenceNames().add(referredToType.name());
+				referringType.references().add(referredToType);
 			}
 		}
 		return types;

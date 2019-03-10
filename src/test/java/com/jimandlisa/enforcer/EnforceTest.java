@@ -469,6 +469,6 @@ public class EnforceTest {
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream console = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
 			Enforce.mainImpl(new String[] { TestUtils.testClassesFile("SampleTarget2.yaml").getAbsolutePath(), TestUtils.sampleAllReferences().getAbsolutePath(), TestUtils.targetDir(subdir).getAbsolutePath(), }, console);
 		}
-		// TestUtils.compareTargetFile(subdir, ALL_REFERENCES_NAME, "TestRapidIterationCanned2.txt");
+		TestUtils.compareTargetFile(subdir, ALL_REFERENCES_NAME, "TestRapidIterationCanned2.txt");
 	}
 }
