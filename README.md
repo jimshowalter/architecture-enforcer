@@ -140,9 +140,9 @@ We're working on fixing those warnings (and welcome your help, if you know how t
 java -jar architecture-enforcer-1.0-SNAPSHOT.jar /path/to/architecture-enforcer/target/test-classes/SampleTarget2.yaml /path/to/architecture-enforcer/target/test-classes/architecture-enforcer-sample-1.0-SNAPSHOT.war /path/to/architecture-enforcer/target -i/path/to/architecture-enforcer/target/test-classes/SampleIgnores.txt
 ```
 
-4. (Optional) Run this tool from Eclipse or IntelliJ, by running the Main class.
+4. (Optional) Run this tool from Eclipse or IntelliJ, by running the Main class. This can be useful later if you need to step through this tool in a debugger.
 
-5. Using one of the provided sample yaml files as a starting point, define the target state for your project. This can take weeks for a large project, but you can start by just defining a few basic layers (for example, data, logic, and UI), then iterate.
+5. Using one of the provided sample yaml files as a starting point, define the target state for your project. This can take weeks or months for a large project, but you can start by just defining a few basic layers (for example, data, logic, and UI), then iterate.
 (It's probably better to start small anyway, instead of trying to boil the ocean in one shot.)
 
 We provide two sample yaml files:
@@ -155,17 +155,13 @@ To run this tool with SampleTarget1.yaml, just change 2 to 1 in the above comman
 
 We also provide a deliberately screwed-up target state, BrokenTarget.yaml. It is just SampleTarget2.yaml, but with the layers reversed. It is provided to show what a bunch of illegal references look like.
 
-For large codebases, this tool requires lots of memory and can take a minute or more to run (the overhead is almost entirely due to pf-CDA, which has a difficult job).
-
-To support rapid iteration while developing the target state, the output from a previous run of this tool can be specified as the input to the current run, which eliminates the pf-CDA overhead, making each run take at most a few seconds. In this mode, you only need to rebuild and reanalyze the war when the codebase changes enough that the previous analysis is no longer safe to depend on, and early in a project you might only need to sync and build once a day (or even less often). Once decomposition is well underway, frequent syncs and builds are needed, but by then the target state is already defined.
-
 ## Command-line Arguments ###
 
 The full set of args is:
 
 > /full/path/to/target/architecture/.yaml
 
-> /full/path/to/.war OR /full/path/to/all\_references.txt generated in a previous run of this tool
+> /full/path/to/.war
 
 > /full/path/to/writable/output/directory
 
@@ -177,7 +173,19 @@ The full set of args is:
 
 > -p (preserves nested types)
 
-> -s (strict, requires that all types resolve and no illegal references)
+> -s (strict, fatal if any unresolved types or illegal references)
+
+> -d (debug)
+
+OR, in rapid-iteration mode:
+
+> /full/path/to/target/architecture/.yaml
+
+> /full/path/to/all\_references.txt generated in a previous run of this tool
+
+> /full/path/to/writable/output/directory
+
+> -s (strict, fatal if any illegal references)
 
 > -d (debug)
 
@@ -230,6 +238,20 @@ for example Class.forName(someStringFromAVariable + SomeClass.someFunction(some 
 * If the target state only contains one component, there can't be any illegal references (but that's not a very useful target state).
 
 * Sample files are located in the src/test/resources directory. They start with "Sample".
+
+### Rapid Iteration ###
+
+For large codebases, this tool requires lots of memory and can take a minute or more to run (the overhead is almost entirely due to pf-CDA, which has a difficult job).
+
+To support rapid iteration while developing the target state, the output from a previous run of this tool can be specified as the input to the current run. For example:
+
+```
+java -jar architecture-enforcer-1.0-SNAPSHOT.jar /path/to/architecture-enforcer/target/test-classes/SampleTarget2.yaml /path/to/all_references.txt /path/to/architecture-enforcer/target
+```
+
+This eliminates the pf-CDA overhead, making each run take at most a few seconds.
+
+In this mode, you only need to rebuild and reanalyze the war when the codebase changes enough that the previous analysis is no longer safe to depend on, and early in a project you might only need to sync and build once a day (or even less often). Once decomposition is well underway, frequent syncs and builds are needed, but by then the target state is already defined.
 
 ## Reference Formats ##
 

@@ -59,9 +59,4 @@ public class FileUtils {
 		}
 		return newFile;
 	}
-	
-	static File clear(File file) {
-		file.delete();
-		return file;
-	}
 }

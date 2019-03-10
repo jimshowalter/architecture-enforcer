@@ -27,27 +27,34 @@ import java.util.Set;
 // Handles interactions with the user, and outputs results.
 public class Enforce {
 
-	private static final String USAGE = ": usage: /full/path/to/target/architecture/.yaml /full/path/to/(.war|" + Outputs.ALL_REFERENCES_BASE_NAME + ".txt" + ") /full/path/to/writable/output/directory " + Optionals.IGNORES
-			+ "/full/path/to/file/of/packages/and/classes/to/ignore " + Optionals.REFLECTIONS + "/full/path/to/file/of/reflection/references " + Optionals.FIX_UNRESOLVEDS + "/full/path/to/file/of/fixed/unresolveds " + Optionals.PRESERVE_NESTED_TYPES
-			+ " (preserves nested types) " + Optionals.STRICT + " (strict, requires that all types resolve and no illegal references) " + Optionals.DEBUG + " (debug) [last six args optional and unordered]";
+	private static final String ANALYZE_WAR_USAGE = ": usage: /full/path/to/target/architecture/.yaml /full/path/to/.war /full/path/to/writable/output/directory " + Optionals.IGNORES + "/full/path/to/file/of/packages/and/classes/to/ignore "
+			+ Optionals.REFLECTIONS + "/full/path/to/file/of/reflection/references " + Optionals.FIX_UNRESOLVEDS + "/full/path/to/file/of/fixed/unresolveds " + Optionals.PRESERVE_NESTED_TYPES + " (preserves nested types) " + Optionals.STRICT
+			+ " (strict, requires that all types resolve and no illegal references) " + Optionals.DEBUG + " (debug) [last six args optional and unordered]";
+
+	private static final String RAPID_ITERATION_USAGE = ": usage: /full/path/to/target/architecture/.yaml /full/path/to/" + Outputs.ALL_REFERENCES_BASE_NAME + ".txt /full/path/to/writable/output/directory " + Optionals.STRICT
+			+ " (strict, requires that all types resolve and no illegal references) " + Optionals.DEBUG + " (debug) [last two args optional and unordered]";
 
 	static void parseArg(String arg, Inputs inputs, Flags flags) {
+		boolean isWar = inputs instanceof AnalyzeWarInputs;
+		String usage = isWar ? ANALYZE_WAR_USAGE : RAPID_ITERATION_USAGE;
 		try {
-			if (arg.startsWith(Optionals.IGNORES.indicator())) {
-				inputs.setIgnores(new File(arg.replaceFirst(Optionals.IGNORES.indicator(), "")));
-				return;
-			}
-			if (arg.startsWith(Optionals.REFLECTIONS.indicator())) {
-				inputs.setReflections(new File(arg.replaceFirst(Optionals.REFLECTIONS.indicator(), "")));
-				return;
-			}
-			if (arg.startsWith(Optionals.FIX_UNRESOLVEDS.indicator())) {
-				inputs.setFixUnresolveds(new File(arg.replaceFirst(Optionals.FIX_UNRESOLVEDS.indicator(), "")));
-				return;
-			}
-			if (arg.startsWith(Optionals.PRESERVE_NESTED_TYPES.indicator())) {
-				flags.enablePreserveNestedTypes();
-				return;
+			if (isWar) {
+				if (arg.startsWith(Optionals.IGNORES.indicator())) {
+					((AnalyzeWarInputs)inputs).setIgnores(new File(arg.replaceFirst(Optionals.IGNORES.indicator(), "")));
+					return;
+				}
+				if (arg.startsWith(Optionals.REFLECTIONS.indicator())) {
+					((AnalyzeWarInputs)inputs).setReflections(new File(arg.replaceFirst(Optionals.REFLECTIONS.indicator(), "")));
+					return;
+				}
+				if (arg.startsWith(Optionals.FIX_UNRESOLVEDS.indicator())) {
+					((AnalyzeWarInputs)inputs).setFixUnresolveds(new File(arg.replaceFirst(Optionals.FIX_UNRESOLVEDS.indicator(), "")));
+					return;
+				}
+				if (arg.startsWith(Optionals.PRESERVE_NESTED_TYPES.indicator())) {
+					((AnalyzeWarFlags)flags).enablePreserveNestedTypes();
+					return;
+				}
 			}
 			if (arg.startsWith(Optionals.STRICT.indicator())) {
 				flags.enableStrict();
@@ -58,9 +65,9 @@ public class Enforce {
 				return;
 			}
 		} catch (EnforcerException e) {
-			throw new EnforcerException(e.getMessage() + USAGE, e.error());
+			throw new EnforcerException(e.getMessage() + usage, e.error());
 		}
-		throw new EnforcerException("unrecognized option " + arg + USAGE, Errors.UNRECOGNIZED_COMMAND_LINE_OPTION);
+		throw new EnforcerException("unrecognized option " + arg + usage, Errors.UNRECOGNIZED_COMMAND_LINE_OPTION);
 	}
 
 	static void debug(Target target, Map<String, Type> types, RollUp rollUp, PrintStream console, Flags flags, int max) throws Exception {
@@ -238,14 +245,29 @@ public class Enforce {
 		Flags flags = null;
 		try {
 			if (args.length < 3) {
-				throw new EnforcerException("not enough args" + USAGE, Errors.NOT_ENOUGH_ARGS);
+				throw new EnforcerException("not enough args" + ANALYZE_WAR_USAGE, Errors.NOT_ENOUGH_ARGS);
 			}
-			if (args.length > 9) {
-				throw new EnforcerException("too many args" + USAGE, Errors.TOO_MANY_ARGS);
+			File target = new File(args[0]);
+			File data = new File(args[1]);
+			File outputDirectory = new File(args[2]);
+			outputs = new Outputs(outputDirectory);
+			boolean isWar = data.getName().endsWith(".war");
+			if (isWar) {
+				if (args.length > 9) {
+					throw new EnforcerException("too many args" + ANALYZE_WAR_USAGE, Errors.TOO_MANY_ARGS);
+				}
+				inputs = new AnalyzeWarInputs(target, data);
+				flags = new AnalyzeWarFlags();
+			} else {
+				if (args.length > 5) {
+					throw new EnforcerException("too many args" + RAPID_ITERATION_USAGE, Errors.TOO_MANY_ARGS);
+				}
+				inputs = new RapidIterationInputs(target, data);
+				if (((RapidIterationInputs)inputs).allReferences().getAbsolutePath().equals(outputs.allReferences().getAbsolutePath())) {
+					throw new EnforcerException("Rapid-iteration input file " + data.getAbsolutePath() + " would be overwritten", Errors.RAPID_ITERATION_INPUT_FILE_WOULD_BE_OVERWRITTEN);
+				}
+				flags = new Flags();
 			}
-			inputs = new Inputs(new File(args[0]), new File(args[1]));
-			outputs = new Outputs(new File(args[2]));
-			flags = new Flags();
 			for (int i = 3; i < args.length; i++) {
 				parseArg(args[i], inputs, flags);
 			}

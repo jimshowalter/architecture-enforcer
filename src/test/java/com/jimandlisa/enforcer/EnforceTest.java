@@ -51,7 +51,9 @@ public class EnforceTest {
 	}
 
 	private static void compare(ByteArrayOutputStream baos, String canned) throws Exception {
-		String out = new String(baos.toByteArray(), StandardCharsets.UTF_8).trim().replaceAll("\r\n\r\n", "\r\n").replace("\\", "/").replaceAll("SEE .*/subdir_.*/", "SEE ").replaceAll("=[^=]+/architecture-enforcer/target(/test-classes)?(/subdir_[0-9]+)?", "=/architecture-enforcer/target");
+		String out = new String(baos.toByteArray(), StandardCharsets.UTF_8).trim().replaceAll("\r\n\r\n", "\r\n").replace("\\", "/").replaceAll("SEE .*/subdir_.*/", "SEE ")
+				.replaceAll("=[^=]+/architecture-enforcer/target(/test-classes)?(/subdir_[0-9]+)?", "=/architecture-enforcer/target")
+				.replaceAll("input file .*/architecture-enforcer/target/test-classes/" + ALL_REFERENCES_NAME, "input file /architecture-enforcer/target/test-classes/" + ALL_REFERENCES_NAME);
 		String cannedOut = TestUtils.readTestClassesFile(canned).trim().replaceAll("\r\n\r\n", "\r\n");
 		assertEquals(out, cannedOut);
 	}
@@ -62,48 +64,34 @@ public class EnforceTest {
 	}
 
 	@Test
-	public void testArgs() {
-		Inputs inputs = TestUtils.inputsWithWAR(false, false, false);
+	public void testRapidIterationArgs() {
+		RapidIterationInputs inputs = TestUtils.rapidIterationInputs();
 		Flags flags = new Flags();
-		Enforce.parseArg(Optionals.IGNORES.indicator() + TestUtils.testClassesFile("SampleIgnores.txt").getAbsolutePath(), inputs, flags);
-		assertEquals(normalize(TestUtils.testClassesFile("SampleIgnores.txt").toPath()), normalize(inputs.ignores().toPath()));
 		try {
-			Enforce.parseArg(Optionals.IGNORES.indicator() + "foo", TestUtils.inputsWithWAR(true, false, false), flags);
+			Enforce.parseArg(Optionals.IGNORES.indicator() + "foo", TestUtils.rapidIterationInputs(), flags);
 			Assert.fail();
 		} catch (EnforcerException e) {
-			assertEquals(Errors.IGNORES_FILE_ALREADY_SPECIFIED, e.error());
+			assertEquals(Errors.UNRECOGNIZED_COMMAND_LINE_OPTION, e.error());
 		}
-		inputs = TestUtils.inputsWithWAR(false, false, false);
-		flags = new Flags();
-		Enforce.parseArg(Optionals.REFLECTIONS.indicator() + TestUtils.testClassesFile("SampleReflections.txt").getAbsolutePath(), inputs, flags);
-		assertEquals(normalize(TestUtils.testClassesFile("SampleReflections.txt").toPath()), normalize(inputs.reflections().toPath()));
 		try {
-			Enforce.parseArg(Optionals.REFLECTIONS.indicator() + "foo", TestUtils.inputsWithWAR(false, true, false), flags);
+			Enforce.parseArg(Optionals.REFLECTIONS.indicator() + "foo", TestUtils.rapidIterationInputs(), flags);
 			Assert.fail();
 		} catch (EnforcerException e) {
-			assertEquals(Errors.REFLECTIONS_FILE_ALREADY_SPECIFIED, e.error());
+			assertEquals(Errors.UNRECOGNIZED_COMMAND_LINE_OPTION, e.error());
 		}
-		inputs = TestUtils.inputsWithWAR(false, false, false);
-		flags = new Flags();
-		Enforce.parseArg(Optionals.FIX_UNRESOLVEDS.indicator() + TestUtils.testClassesFile("SampleFixUnresolveds.txt").getAbsolutePath(), inputs, flags);
-		assertEquals(normalize(TestUtils.testClassesFile("SampleFixUnresolveds.txt").toPath()), normalize(inputs.fixUnresolveds().toPath()));
 		try {
-			Enforce.parseArg(Optionals.FIX_UNRESOLVEDS.indicator() + "foo", TestUtils.inputsWithWAR(false, false, true), flags);
+			Enforce.parseArg(Optionals.FIX_UNRESOLVEDS.indicator() + "foo", TestUtils.rapidIterationInputs(), flags);
 			Assert.fail();
 		} catch (EnforcerException e) {
-			assertEquals(Errors.FIX_UNRESOLVEDS_FILE_ALREADY_SPECIFIED, e.error());
+			assertEquals(Errors.UNRECOGNIZED_COMMAND_LINE_OPTION, e.error());
 		}
-		inputs = TestUtils.inputsWithWAR(false, false, false);
-		flags = new Flags();
-		Enforce.parseArg(Optionals.PRESERVE_NESTED_TYPES.indicator(), inputs, flags);
-		assertTrue(flags.preserveNestedTypes());
 		try {
 			Enforce.parseArg(Optionals.PRESERVE_NESTED_TYPES.indicator(), inputs, flags);
 			Assert.fail();
 		} catch (EnforcerException e) {
-			assertEquals(Errors.PRESERVE_NESTED_TYPES_ALREADY_SPECIFIED, e.error());
+			assertEquals(Errors.UNRECOGNIZED_COMMAND_LINE_OPTION, e.error());
 		}
-		inputs = TestUtils.inputsWithWAR(false, false, false);
+		inputs = TestUtils.rapidIterationInputs();
 		flags = new Flags();
 		Enforce.parseArg(Optionals.STRICT.indicator(), inputs, flags);
 		assertTrue(flags.strict());
@@ -113,7 +101,7 @@ public class EnforceTest {
 		} catch (EnforcerException e) {
 			assertEquals(Errors.STRICT_ALREADY_SPECIFIED, e.error());
 		}
-		inputs = TestUtils.inputsWithWAR(false, false, false);
+		inputs = TestUtils.rapidIterationInputs();
 		flags = new Flags();
 		Enforce.parseArg(Optionals.DEBUG.indicator(), inputs, flags);
 		assertTrue(flags.debug());
@@ -124,7 +112,77 @@ public class EnforceTest {
 			assertEquals(Errors.DEBUG_ALREADY_SPECIFIED, e.error());
 		}
 		try {
-			Enforce.parseArg("foo", TestUtils.inputsWithWAR(false, false, false), flags);
+			Enforce.parseArg("foo", TestUtils.rapidIterationInputs(), flags);
+			Assert.fail();
+		} catch (EnforcerException e) {
+			assertEquals(Errors.UNRECOGNIZED_COMMAND_LINE_OPTION, e.error());
+		}
+	}
+
+	@Test
+	public void testAnalyzeWarArgs() {
+		AnalyzeWarInputs inputs = TestUtils.analyzeWarInputs(false, false, false);
+		AnalyzeWarFlags flags = new AnalyzeWarFlags();
+		Enforce.parseArg(Optionals.IGNORES.indicator() + TestUtils.testClassesFile("SampleIgnores.txt").getAbsolutePath(), inputs, flags);
+		assertEquals(normalize(TestUtils.testClassesFile("SampleIgnores.txt").toPath()), normalize(inputs.ignores().toPath()));
+		try {
+			Enforce.parseArg(Optionals.IGNORES.indicator() + "foo", TestUtils.analyzeWarInputs(true, false, false), flags);
+			Assert.fail();
+		} catch (EnforcerException e) {
+			assertEquals(Errors.IGNORES_FILE_ALREADY_SPECIFIED, e.error());
+		}
+		inputs = TestUtils.analyzeWarInputs(false, false, false);
+		flags = new AnalyzeWarFlags();
+		Enforce.parseArg(Optionals.REFLECTIONS.indicator() + TestUtils.testClassesFile("SampleReflections.txt").getAbsolutePath(), inputs, flags);
+		assertEquals(normalize(TestUtils.testClassesFile("SampleReflections.txt").toPath()), normalize(inputs.reflections().toPath()));
+		try {
+			Enforce.parseArg(Optionals.REFLECTIONS.indicator() + "foo", TestUtils.analyzeWarInputs(false, true, false), flags);
+			Assert.fail();
+		} catch (EnforcerException e) {
+			assertEquals(Errors.REFLECTIONS_FILE_ALREADY_SPECIFIED, e.error());
+		}
+		inputs = TestUtils.analyzeWarInputs(false, false, false);
+		flags = new AnalyzeWarFlags();
+		Enforce.parseArg(Optionals.FIX_UNRESOLVEDS.indicator() + TestUtils.testClassesFile("SampleFixUnresolveds.txt").getAbsolutePath(), inputs, flags);
+		assertEquals(normalize(TestUtils.testClassesFile("SampleFixUnresolveds.txt").toPath()), normalize(inputs.fixUnresolveds().toPath()));
+		try {
+			Enforce.parseArg(Optionals.FIX_UNRESOLVEDS.indicator() + "foo", TestUtils.analyzeWarInputs(false, false, true), flags);
+			Assert.fail();
+		} catch (EnforcerException e) {
+			assertEquals(Errors.FIX_UNRESOLVEDS_FILE_ALREADY_SPECIFIED, e.error());
+		}
+		inputs = TestUtils.analyzeWarInputs(false, false, false);
+		flags = new AnalyzeWarFlags();
+		Enforce.parseArg(Optionals.PRESERVE_NESTED_TYPES.indicator(), inputs, flags);
+		assertTrue(flags.preserveNestedTypes());
+		try {
+			Enforce.parseArg(Optionals.PRESERVE_NESTED_TYPES.indicator(), inputs, flags);
+			Assert.fail();
+		} catch (EnforcerException e) {
+			assertEquals(Errors.PRESERVE_NESTED_TYPES_ALREADY_SPECIFIED, e.error());
+		}
+		inputs = TestUtils.analyzeWarInputs(false, false, false);
+		flags = new AnalyzeWarFlags();
+		Enforce.parseArg(Optionals.STRICT.indicator(), inputs, flags);
+		assertTrue(flags.strict());
+		try {
+			Enforce.parseArg(Optionals.STRICT.indicator(), inputs, flags);
+			Assert.fail();
+		} catch (EnforcerException e) {
+			assertEquals(Errors.STRICT_ALREADY_SPECIFIED, e.error());
+		}
+		inputs = TestUtils.analyzeWarInputs(false, false, false);
+		flags = new AnalyzeWarFlags();
+		Enforce.parseArg(Optionals.DEBUG.indicator(), inputs, flags);
+		assertTrue(flags.debug());
+		try {
+			Enforce.parseArg(Optionals.DEBUG.indicator(), inputs, flags);
+			Assert.fail();
+		} catch (EnforcerException e) {
+			assertEquals(Errors.DEBUG_ALREADY_SPECIFIED, e.error());
+		}
+		try {
+			Enforce.parseArg("foo", TestUtils.analyzeWarInputs(false, false, false), flags);
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertEquals(Errors.UNRECOGNIZED_COMMAND_LINE_OPTION, e.error());
@@ -362,14 +420,18 @@ public class EnforceTest {
 			TestUtils.compareTestClassesFile(baos, "TestEnforceCanned2.txt");
 		}
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream console = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
-			Enforce.mainImpl(new String[] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" }, console);
+			Enforce.mainImpl(new String[] { "a", "b.war", "c", "d", "e", "f", "g", "h", "i", "j" }, console);
 			TestUtils.compareTestClassesFile(baos, "TestEnforceCanned3.txt");
+		}
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream console = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
+			Enforce.mainImpl(new String[] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" }, console);
+			TestUtils.compareTestClassesFile(baos, "TestEnforceCanned4.txt");
 		}
 		String subdir = TestUtils.uniqueSubdir();
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream console = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
 			Enforce.mainImpl(new String[] { TestUtils.testClassesFile("SampleTarget2.yaml").getAbsolutePath(), TestUtils.sampleWar().getAbsolutePath(), TestUtils.targetDir(subdir).getAbsolutePath(),
 					Optionals.IGNORES.indicator() + TestUtils.testClassesFile("SampleIgnores.txt").getAbsolutePath() }, console);
-			compare(baos, "TestEnforceCanned4.txt");
+			compare(baos, "TestEnforceCanned5.txt");
 		}
 		TestUtils.compareTargetFile(subdir, ILLEGAL_REFERENCES_NAME, "TestIllegalReferencesOutputCanned.txt");
 		TestUtils.compareTargetFile(subdir, ILLEGAL_COMPONENT_REFERENCES_NAME, "TestIllegalComponentReferencesOutputCanned.txt");
@@ -399,5 +461,14 @@ public class EnforceTest {
 			assertTrue(e.getMessage().contains("FATAL ERROR:"));
 			assertTrue(e.getMessage().contains("UNUSED_PACKAGE: unused package com.nosuchpackage in component 'Everything'"));
 		}
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream console = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
+			Enforce.mainImpl(new String[] { TestUtils.testClassesFile("SampleTarget2.yaml").getAbsolutePath(), TestUtils.sampleAllReferences().getAbsolutePath(), TestUtils.sampleAllReferences().getParentFile().getAbsolutePath(), }, console);
+			compare(baos, "TestRapidIterationCanned1.txt");
+		}
+		subdir = TestUtils.uniqueSubdir();
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream console = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
+			Enforce.mainImpl(new String[] { TestUtils.testClassesFile("SampleTarget2.yaml").getAbsolutePath(), TestUtils.sampleAllReferences().getAbsolutePath(), TestUtils.targetDir(subdir).getAbsolutePath(), }, console);
+		}
+		// TestUtils.compareTargetFile(subdir, ALL_REFERENCES_NAME, "TestRapidIterationCanned2.txt");
 	}
 }

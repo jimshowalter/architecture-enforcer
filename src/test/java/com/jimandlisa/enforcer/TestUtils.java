@@ -62,7 +62,7 @@ public class TestUtils {
 	public static File sampleWar() {
 		return testClassesFile("architecture-enforcer-sample-1.0-SNAPSHOT.war");
 	}
-	
+
 	public static File sampleAllReferences() {
 		return testClassesFile(Outputs.ALL_REFERENCES_BASE_NAME + ".txt");
 	}
@@ -76,9 +76,9 @@ public class TestUtils {
 		String cannedOut = readTestClassesFile(canned).trim().replaceAll("\r\n\r\n", "\r\n");
 		assertEquals(out, cannedOut);
 	}
-	
-	public static Inputs inputs(File data, boolean includeIgnores, boolean includeReflections, boolean includeFixUnresolveds) {
-		Inputs inputs = new Inputs(testClassesFile("SampleTarget2.yaml"), data);
+
+	public static AnalyzeWarInputs analyzeWarInputs(File data, boolean includeIgnores, boolean includeReflections, boolean includeFixUnresolveds) {
+		AnalyzeWarInputs inputs = new AnalyzeWarInputs(testClassesFile("SampleTarget2.yaml"), data);
 		if (includeIgnores) {
 			inputs.setIgnores(testClassesFile("SampleIgnores.txt"));
 		}
@@ -91,12 +91,12 @@ public class TestUtils {
 		return inputs;
 	}
 
-	public static Inputs inputsWithWAR(boolean includeIgnores, boolean includeReflections, boolean includeFixUnresolveds) {
-		return inputs(sampleWar(), includeIgnores, includeReflections, includeFixUnresolveds);
+	public static AnalyzeWarInputs analyzeWarInputs(boolean includeIgnores, boolean includeReflections, boolean includeFixUnresolveds) {
+		return analyzeWarInputs(sampleWar(), includeIgnores, includeReflections, includeFixUnresolveds);
 	}
-	
-	public static Inputs inputsWithAllReferences(boolean includeIgnores, boolean includeReflections, boolean includeFixUnresolveds) {
-		return inputs(sampleAllReferences(), includeIgnores, includeReflections, includeFixUnresolveds);
+
+	public static RapidIterationInputs rapidIterationInputs() {
+		return new RapidIterationInputs(testClassesFile("SampleTarget2.yaml"), sampleAllReferences());
 	}
 
 	public static Outputs outputs(String subdir) {

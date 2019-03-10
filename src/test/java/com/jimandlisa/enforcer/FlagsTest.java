@@ -25,24 +25,14 @@ public class FlagsTest {
 	@Test
 	public void doTest() {
 		Flags flags = new Flags();
-		assertEquals("preserveNestedTypes=false, strict=false, debug=false", flags.toString());
-		assertFalse(flags.preserveNestedTypes());
-		flags.enablePreserveNestedTypes();
-		assertTrue(flags.preserveNestedTypes());
+		assertEquals("strict=false, debug=false", flags.toString());
 		assertFalse(flags.strict());
 		flags.enableStrict();
 		assertTrue(flags.strict());
 		assertFalse(flags.debug());
 		flags.enableDebug();
 		assertTrue(flags.debug());
-		assertEquals("preserveNestedTypes=true, strict=true, debug=true", flags.toString());
-		try {
-			flags.enablePreserveNestedTypes();
-			Assert.fail();
-		} catch (EnforcerException e) {
-			assertTrue(e.getMessage().contains("preserve nested types already set"));
-			assertEquals(Errors.PRESERVE_NESTED_TYPES_ALREADY_SPECIFIED, e.error());
-		}
+		assertEquals("strict=true, debug=true", flags.toString());
 		try {
 			flags.enableStrict();
 			Assert.fail();
@@ -56,6 +46,25 @@ public class FlagsTest {
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("debug already set"));
 			assertEquals(Errors.DEBUG_ALREADY_SPECIFIED, e.error());
+		}
+		AnalyzeWarFlags analyzeWarFlags = new AnalyzeWarFlags();
+		assertEquals("preserveNestedTypes=false, strict=false, debug=false", analyzeWarFlags.toString());
+		assertFalse(analyzeWarFlags.preserveNestedTypes());
+		analyzeWarFlags.enablePreserveNestedTypes();
+		assertTrue(analyzeWarFlags.preserveNestedTypes());
+		assertFalse(analyzeWarFlags.strict());
+		analyzeWarFlags.enableStrict();
+		assertTrue(analyzeWarFlags.strict());
+		assertFalse(analyzeWarFlags.debug());
+		analyzeWarFlags.enableDebug();
+		assertTrue(analyzeWarFlags.debug());
+		assertEquals("preserveNestedTypes=true, strict=true, debug=true", analyzeWarFlags.toString());
+		try {
+			analyzeWarFlags.enablePreserveNestedTypes();
+			Assert.fail();
+		} catch (EnforcerException e) {
+			assertTrue(e.getMessage().contains("preserve nested types already set"));
+			assertEquals(Errors.PRESERVE_NESTED_TYPES_ALREADY_SPECIFIED, e.error());
 		}
 	}
 }

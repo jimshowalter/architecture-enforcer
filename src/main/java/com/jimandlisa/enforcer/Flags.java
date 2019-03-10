@@ -15,23 +15,11 @@ package com.jimandlisa.enforcer;
 
 public class Flags {
 
-	private boolean preserveNestedTypes = false;
-	private boolean strict = false;
-	private boolean debug = false;
-	
+	protected boolean strict = false;
+	protected boolean debug = false;
+
 	public Flags() {
 		super();
-	}
-	
-	public void enablePreserveNestedTypes() {
-		if (preserveNestedTypes()) {
-			throw new EnforcerException("preserve nested types already set", Errors.PRESERVE_NESTED_TYPES_ALREADY_SPECIFIED);
-		}
-		this.preserveNestedTypes = true;
-	}
-	
-	public boolean preserveNestedTypes() {
-		return preserveNestedTypes;
 	}
 	
 	public void enableStrict() {
@@ -44,20 +32,20 @@ public class Flags {
 	public boolean strict() {
 		return strict;
 	}
-	
+
 	public void enableDebug() {
 		if (debug) {
 			throw new EnforcerException("debug already set", Errors.DEBUG_ALREADY_SPECIFIED);
 		}
 		this.debug = true;
 	}
-	
+
 	public boolean debug() {
 		return debug;
 	}
 	
 	@Override
 	public String toString() {
-		return "preserveNestedTypes=" + preserveNestedTypes + ", strict=" + strict + ", debug=" + debug;
+		return "strict=" + strict + ", debug=" + debug;
 	}
 }

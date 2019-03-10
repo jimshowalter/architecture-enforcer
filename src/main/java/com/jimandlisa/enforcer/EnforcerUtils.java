@@ -29,6 +29,31 @@ import org.pfsw.tools.cda.core.init.WorksetInitializer;
 
 public class EnforcerUtils {
 
+	static Type get(String typeName, Map<String, Type> types) {
+		Type type = types.get(typeName);
+		if (type == null) {
+			type = new Type(typeName);
+			types.put(type.name(), type);
+		}
+		return type;
+	}
+
+	static Map<String, Type> typesFromAllReferences(File allReferences) throws Exception {
+		Map<String, Type> types = new HashMap<>();
+		try (BufferedReader reader = new BufferedReader(new FileReader(allReferences))) {
+			String line = null;
+			while ((line = reader.readLine()) != null) {
+				String[] segments = line.split("!");
+				String referringClass = segments[0];
+				Type referringType = get(referringClass, types);
+				String referredToClass = segments[4];
+				Type referredToType = get(referredToClass, types);
+				referringType.referenceNames().add(referredToType.name());
+			}
+		}
+		return types;
+	}
+
 	static Set<String> ignores(File ignoresFile) throws Exception {
 		Set<String> ignores = new HashSet<>();
 		if (ignoresFile == null) {
@@ -74,18 +99,9 @@ public class EnforcerUtils {
 		return skip(referredToTypeName, ignores);
 	}
 
-	static Type get(String typeName, Map<String, Type> types) {
-		Type type = types.get(typeName);
-		if (type == null) {
-			type = new Type(typeName);
-			types.put(type.name(), type);
-		}
-		return type;
-	}
-
 	// Denesting is a lot trickier than it should be, because any number of $ signs can be used in class names, even if they aren't nested. For example, $$$Foo$$$Bar.java is a perfectly legal source file.
 	// When we have nothing structured to work with, as is the case here (where we just have a string), we can only do best-effort, and then throw up our hands if that doesn't work.
-	static String denest(String typeName, Flags flags) {
+	static String denest(String typeName, AnalyzeWarFlags flags) {
 		if (flags.preserveNestedTypes()) {
 			return typeName;
 		}
@@ -96,7 +112,7 @@ public class EnforcerUtils {
 		return typeName.replaceAll("[$].*$", "");
 	}
 
-	static void parse(File file, Map<String, Type> types, Set<String> ignores, Set<Problem> problems, String entryName, boolean requireReferredTo, Flags flags) throws Exception {
+	static void parse(File file, Map<String, Type> types, Set<String> ignores, Set<Problem> problems, String entryName, boolean requireReferredTo, AnalyzeWarFlags flags) throws Exception {
 		if (file == null) {
 			return;
 		}
@@ -141,7 +157,7 @@ public class EnforcerUtils {
 
 	// See comments on other denest method explaining why this is problematic. At least here we have some structure to work with, although pf-CDA doesn't seem to provide a getEnclosingType method, which would have been useful.
 	// Instead, we have to peel one $ sign off at a time, and see if the result comes back as a class or not. If not, we keep going. If so, we check if the class is no longer nested.
-	static String denest(ClassInformation classInfo, Workset workset, Flags flags) {
+	static String denest(ClassInformation classInfo, Workset workset, AnalyzeWarFlags flags) {
 		if (flags.preserveNestedTypes()) {
 			return classInfo.getName();
 		}
@@ -192,24 +208,6 @@ public class EnforcerUtils {
 		}
 	}
 
-	static void resolve(Map<String, Type> types, Set<Problem> problems) {
-		Set<Type> synthetics = new HashSet<>();
-		for (Type type : types.values()) {
-			for (String referenceName : type.referenceNames()) {
-				Type reference = types.get(referenceName);
-				if (reference == null) {
-					problems.add(new Problem(referenceName, Errors.UNRESOLVED_REFERENCE));
-					synthetics.add(new Type(referenceName, true));
-					continue;
-				}
-				type.references().add(reference);
-			}
-		}
-		for (Type synthetic : synthetics) {
-			types.put(synthetic.name(), synthetic);
-		}
-	}
-
 	static void release(Workset workset, Set<Problem> problems) {
 		if (workset == null) {
 			return;
@@ -220,8 +218,8 @@ public class EnforcerUtils {
 			problems.add(new Problem("unable to release workset " + workset.getName() + ": " + t.getMessage(), Errors.UNABLE_TO_RELEASE_WORKSET));
 		}
 	}
-	
-	static Map<String, Type> typesFromWar(File war, Set<String> ignores, Set<Problem> problems, Flags flags) throws Exception {
+
+	static Map<String, Type> typesFromWar(File war, Set<String> ignores, Set<Problem> problems, AnalyzeWarFlags flags) throws Exception {
 		Map<String, Type> types = new HashMap<>();
 		Workset workset = null;
 		try {
@@ -250,32 +248,45 @@ public class EnforcerUtils {
 		}
 		return types;
 	}
-	
-	static Map<String, Type> typesFromAllReferences(File allReferences, Set<String> ignores, Set<Problem> problems, Flags flags) throws Exception {
-		Map<String, Type> types = new HashMap<>();
-		try (BufferedReader reader = new BufferedReader(new FileReader(allReferences))) {
-			String line = null;
-			while ((line = reader.readLine()) != null) {
-				String[] segments = line.split("!");
-				String referringClass = denest(segments[0], flags);
-				Type referringType = get(referringClass, types);
-				String referredToClass = denest(segments[4], flags);
-				Type referredToType = get(referredToClass, types);
-				referringType.referenceNames().add(referredToType.name());
+
+	static void resolve(Map<String, Type> types, Set<Problem> problems) {
+		Set<Type> synthetics = new HashSet<>();
+		for (Type type : types.values()) {
+			for (String referenceName : type.referenceNames()) {
+				Type reference = types.get(referenceName);
+				if (reference == null) {
+					problems.add(new Problem(referenceName, Errors.UNRESOLVED_REFERENCE));
+					synthetics.add(new Type(referenceName, true));
+					continue;
+				}
+				type.references().add(reference);
 			}
 		}
-		return types;
+		for (Type synthetic : synthetics) {
+			types.put(synthetic.name(), synthetic);
+		}
 	}
 
-	public static Map<String, Type> resolve(Inputs inputs, Set<Problem> problems, Flags flags) throws Exception {
+	public static Map<String, Type> resolve(RapidIterationInputs inputs, Set<Problem> problems) throws Exception {
+		return typesFromAllReferences(inputs.allReferences());
+	}
+
+	public static Map<String, Type> resolve(AnalyzeWarInputs inputs, Set<Problem> problems, AnalyzeWarFlags flags) throws Exception {
 		Set<String> ignores = ignores(inputs.ignores());
-		Map<String, Type> types = inputs.isWar() ? typesFromWar(inputs.data(), ignores, problems, flags) : typesFromAllReferences(inputs.data(), ignores, problems, flags);
+		Map<String, Type> types = typesFromWar(inputs.war(), ignores, problems, flags);
 		parse(inputs.reflections(), types, ignores, problems, "reflection", true, flags); // Get reflection-based referring and referred-to classes from reflections file.
 		parse(inputs.fixUnresolveds(), types, ignores, problems, "fix-unresolved", false, flags); // Get referring and referred-to classes from fix-unresolveds file.
 		reportFatalErrors(problems, flags);
 		resolve(types, problems);
 		reportFatalErrors(problems, flags);
 		return types;
+	}
+
+	public static Map<String, Type> resolve(Inputs inputs, Set<Problem> problems, Flags flags) throws Exception {
+		if (inputs instanceof RapidIterationInputs) {
+			return resolve((RapidIterationInputs)inputs, problems);
+		}
+		return resolve((AnalyzeWarInputs)inputs, problems, (AnalyzeWarFlags)flags);
 	}
 
 	static void correlateComponentClassesToTypes(Map<String, Type> types, Map<String, Component> components, Set<Problem> problems) {

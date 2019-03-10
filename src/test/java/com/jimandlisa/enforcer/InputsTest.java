@@ -14,7 +14,6 @@
 package com.jimandlisa.enforcer;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -28,43 +27,44 @@ public class InputsTest {
 
 	@Test
 	public void doTest() {
-		Inputs inputs = TestUtils.inputsWithWAR(false, false, false);
-		assertNotNull(inputs.target());
-		assertNotNull(inputs.data());
-		assertTrue(inputs.isWar());
-		inputs.toString();
-		assertNull(inputs.ignores());
-		inputs.setIgnores(TestUtils.testClassesFile("SampleIgnores.txt"));
-		assertNotNull(inputs.ignores());
-		inputs.toString();
-		assertNull(inputs.reflections());
-		inputs.setReflections(TestUtils.testClassesFile("SampleReflections.txt"));
-		assertNotNull(inputs.reflections());
-		inputs.toString();
-		assertNull(inputs.fixUnresolveds());
-		inputs.setFixUnresolveds(TestUtils.testClassesFile("SampleFixUnresolveds.txt"));
-		assertNotNull(inputs.fixUnresolveds());
-		inputs.toString();
-		inputs = TestUtils.inputsWithWAR(true, true, true);
-		inputs.toString();
-		inputs = TestUtils.inputsWithAllReferences(true, true, true);
-		assertFalse(inputs.isWar());
+		AnalyzeWarInputs analyzeWarInputs = TestUtils.analyzeWarInputs(false, false, false);
+		assertNotNull(analyzeWarInputs.target());
+		assertNotNull(analyzeWarInputs.war());
+		analyzeWarInputs.toString();
+		assertNull(analyzeWarInputs.ignores());
+		analyzeWarInputs.setIgnores(TestUtils.testClassesFile("SampleIgnores.txt"));
+		assertNotNull(analyzeWarInputs.ignores());
+		analyzeWarInputs.toString();
+		assertNull(analyzeWarInputs.reflections());
+		analyzeWarInputs.setReflections(TestUtils.testClassesFile("SampleReflections.txt"));
+		assertNotNull(analyzeWarInputs.reflections());
+		analyzeWarInputs.toString();
+		assertNull(analyzeWarInputs.fixUnresolveds());
+		analyzeWarInputs.setFixUnresolveds(TestUtils.testClassesFile("SampleFixUnresolveds.txt"));
+		assertNotNull(analyzeWarInputs.fixUnresolveds());
+		analyzeWarInputs.toString();
+		analyzeWarInputs = TestUtils.analyzeWarInputs(true, true, true);
+		analyzeWarInputs.toString();
+		RapidIterationInputs rapidIterationInputs = TestUtils.rapidIterationInputs();
+		assertNotNull(rapidIterationInputs.target());
+		assertNotNull(rapidIterationInputs.allReferences());
+		rapidIterationInputs.toString();
 		try {
-			inputs.setIgnores(new File("foo"));
+			analyzeWarInputs.setIgnores(new File("foo"));
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("already set ignores file"));
 			assertEquals(Errors.IGNORES_FILE_ALREADY_SPECIFIED, e.error());
 		}
 		try {
-			inputs.setReflections(new File("foo"));
+			analyzeWarInputs.setReflections(new File("foo"));
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("already set reflections file"));
 			assertEquals(Errors.REFLECTIONS_FILE_ALREADY_SPECIFIED, e.error());
 		}
 		try {
-			inputs.setFixUnresolveds(new File("foo"));
+			analyzeWarInputs.setFixUnresolveds(new File("foo"));
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("already set fix-unresolveds file"));

@@ -59,12 +59,12 @@ public class EnforcerUtilsTest {
 
 	@Test
 	public void testDenestString() {
-		assertEquals("com.foo.Bar", EnforcerUtils.denest("com.foo.Bar$Baz", new Flags()));
-		Flags flags = new Flags();
+		assertEquals("com.foo.Bar", EnforcerUtils.denest("com.foo.Bar$Baz", new AnalyzeWarFlags()));
+		AnalyzeWarFlags flags = new AnalyzeWarFlags();
 		flags.enablePreserveNestedTypes();
 		assertEquals("com.foo.Bar$Baz", EnforcerUtils.denest("com.foo.Bar$Baz", flags));
 		try {
-			EnforcerUtils.denest("$Foo", new Flags());
+			EnforcerUtils.denest("$Foo", new AnalyzeWarFlags());
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("malformed class name"));
@@ -76,7 +76,7 @@ public class EnforcerUtilsTest {
 	public void testDenestClassInfo() {
 		ClassInformation mockClassInformation = Mockito.mock(ClassInformation.class);
 		when(mockClassInformation.getName()).thenReturn("foo");
-		Flags flags = new Flags();
+		AnalyzeWarFlags flags = new AnalyzeWarFlags();
 		flags.enablePreserveNestedTypes();
 		assertEquals("foo", EnforcerUtils.denest(mockClassInformation, null, flags));
 	}
@@ -97,7 +97,7 @@ public class EnforcerUtilsTest {
 		Set<String> ignores = new HashSet<>();
 		Map<String, Type> types = new HashMap<>();
 		Set<Problem> problems = new LinkedHashSet<>();
-		Flags flags = new Flags();
+		AnalyzeWarFlags flags = new AnalyzeWarFlags();
 		EnforcerUtils.parse(null, null, null, null, null, false, null);
 		EnforcerUtils.parse(TestUtils.testClassesFile("TestReflections.txt"), types, ignores, problems, "reflection", true, flags);
 		try {
@@ -207,13 +207,17 @@ public class EnforcerUtilsTest {
 	@Test
 	public void testResolveWithInputs() throws Exception {
 		Set<Problem> problems = new LinkedHashSet<>();
-		Map<String, Type> types = EnforcerUtils.resolve(TestUtils.inputsWithWAR(true, true, true), problems, new Flags());
+		Map<String, Type> types = EnforcerUtils.resolve(TestUtils.analyzeWarInputs(true, true, true), problems, new AnalyzeWarFlags());
 		assertTrue(problems.isEmpty());
 		assertEquals(9, types.size());
 		assertTrue(types.keySet().contains("com.jimandlisa.app.two.App2"));
-		types = EnforcerUtils.resolve(TestUtils.inputsWithAllReferences(true, true, true), problems, new Flags());
+		types = EnforcerUtils.resolve((Inputs)TestUtils.analyzeWarInputs(true, true, true), problems, (Flags)new AnalyzeWarFlags());
 		assertTrue(problems.isEmpty());
 		assertEquals(9, types.size());
+		assertTrue(types.keySet().contains("com.jimandlisa.app.two.App2"));
+		types = EnforcerUtils.resolve(TestUtils.rapidIterationInputs(), problems, new Flags());
+		assertTrue(problems.isEmpty());
+		assertEquals(8, types.size());
 		assertTrue(types.keySet().contains("com.jimandlisa.app.two.App2"));
 	}
 

@@ -13,21 +13,20 @@
 
 package com.jimandlisa.enforcer;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
+import java.io.File;
 
-import org.junit.Test;
+public class RapidIterationInputs extends Inputs {
 
-public class EnforcerTest {
+	public RapidIterationInputs(File target, File allReferences) {
+		super(target, allReferences);
+	}
 
-	@Test
-	public void doTest() throws Exception {
-		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream console = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
-			Flags flags = new AnalyzeWarFlags();
-			flags.enableDebug();
-			Enforce.mainImpl(TestUtils.analyzeWarInputs(true, true, true), TestUtils.outputs(TestUtils.uniqueSubdir()), console, flags);
-			TestUtils.compareTestClassesFile(baos, "TestEnforceCanned1.txt");
-		}
+	public File allReferences() {
+		return data;
+	}
+
+	@Override
+	public String toString() {
+		return "target=" + target + ", allReferences=" + data;
 	}
 }

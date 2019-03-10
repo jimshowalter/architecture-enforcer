@@ -13,21 +13,27 @@
 
 package com.jimandlisa.enforcer;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
+public class AnalyzeWarFlags extends Flags {
+	
+	private boolean preserveNestedTypes = false;
+	
+	public AnalyzeWarFlags() {
+		super();
+	}
 
-import org.junit.Test;
-
-public class EnforcerTest {
-
-	@Test
-	public void doTest() throws Exception {
-		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream console = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
-			Flags flags = new AnalyzeWarFlags();
-			flags.enableDebug();
-			Enforce.mainImpl(TestUtils.analyzeWarInputs(true, true, true), TestUtils.outputs(TestUtils.uniqueSubdir()), console, flags);
-			TestUtils.compareTestClassesFile(baos, "TestEnforceCanned1.txt");
+	public void enablePreserveNestedTypes() {
+		if (preserveNestedTypes()) {
+			throw new EnforcerException("preserve nested types already set", Errors.PRESERVE_NESTED_TYPES_ALREADY_SPECIFIED);
 		}
+		this.preserveNestedTypes = true;
+	}
+	
+	public boolean preserveNestedTypes() {
+		return preserveNestedTypes;
+	}
+	
+	@Override
+	public String toString() {
+		return "preserveNestedTypes=" + preserveNestedTypes + ", " + super.toString();
 	}
 }
