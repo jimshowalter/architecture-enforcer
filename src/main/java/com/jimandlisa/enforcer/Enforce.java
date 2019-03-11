@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-// Handles interactions with the user, and outputs results.
+// Handles interactions with the user, and outputs results. Delegates analysis and enforcement to EnforcerUtils.
 public class Enforce {
 
 	private static final String ANALYZE_WAR_USAGE = ": usage: /full/path/to/target/architecture/.yaml /full/path/to/.war /full/path/to/writable/output/directory " + Optionals.IGNORES + "/full/path/to/file/of/packages/and/classes/to/ignore "

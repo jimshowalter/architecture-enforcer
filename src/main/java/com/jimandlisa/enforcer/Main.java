@@ -13,6 +13,7 @@
 
 package com.jimandlisa.enforcer;
 
+// Just calls the impl, and is the only code excluded from coverage (because we don't have a way to call this line of code from JUnit).
 public class Main {
 
 	public static void main(String[] args) throws Exception {

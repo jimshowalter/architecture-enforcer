@@ -98,26 +98,26 @@ public class EnforcerUtilsTest {
 		Map<String, Type> types = new HashMap<>();
 		Set<Problem> problems = new LinkedHashSet<>();
 		AnalyzeWarFlags flags = new AnalyzeWarFlags();
-		EnforcerUtils.parse(null, null, null, null, null, false, null);
-		EnforcerUtils.parse(TestUtils.testClassesFile("TestReflections.txt"), types, ignores, problems, "reflection", true, flags);
+		EnforcerUtils.addSupplementalTypes(null, null, null, null, null, false, null);
+		EnforcerUtils.addSupplementalTypes(TestUtils.testClassesFile("TestReflections.txt"), types, ignores, problems, "reflection", true, flags);
 		try {
-			EnforcerUtils.parse(TestUtils.testClassesFile("BadReflections.txt"), types, ignores, problems, "reflection", true, flags);
+			EnforcerUtils.addSupplementalTypes(TestUtils.testClassesFile("BadReflections.txt"), types, ignores, problems, "reflection", true, flags);
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("invalid reflection entry in"));
 			assertEquals(Errors.MISSING_REFERRED_TO_CLASS, e.error());
 		}
 		try {
-			EnforcerUtils.parse(TestUtils.testClassesFile("BadFixUnresolveds.txt"), types, ignores, problems, "fix-unresolved", false, flags);
+			EnforcerUtils.addSupplementalTypes(TestUtils.testClassesFile("BadFixUnresolveds.txt"), types, ignores, problems, "fix-unresolved", false, flags);
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("invalid fix-unresolved entry in"));
 			assertEquals(Errors.MALFORMED_CLASS_TO_CLASS_REFERENCE, e.error());
 		}
-		EnforcerUtils.parse(TestUtils.testClassesFile("TestFixUnresolveds.txt"), types, ignores, problems, "fix-unresolved", false, flags);
+		EnforcerUtils.addSupplementalTypes(TestUtils.testClassesFile("TestFixUnresolveds.txt"), types, ignores, problems, "fix-unresolved", false, flags);
 		assertTrue(problems.isEmpty());
 		ignores.add("foo.");
-		EnforcerUtils.parse(TestUtils.testClassesFile("TestFixUnresolveds.txt"), types, ignores, problems, "fix-unresolved", false, flags);
+		EnforcerUtils.addSupplementalTypes(TestUtils.testClassesFile("TestFixUnresolveds.txt"), types, ignores, problems, "fix-unresolved", false, flags);
 		assertEquals(1, problems.size());
 		assertTrue(problems.iterator().next().description().contains("class is listed as referring but also listed in ignores:"));
 		assertEquals(Errors.CLASS_BOTH_REFERRING_AND_IGNORED, problems.iterator().next().error());
@@ -125,7 +125,7 @@ public class EnforcerUtilsTest {
 		ignores.clear();
 		problems.clear();
 		ignores.add("com.x.");
-		EnforcerUtils.parse(TestUtils.testClassesFile("TestFixUnresolveds.txt"), types, ignores, problems, "fix-unresolved", false, flags);
+		EnforcerUtils.addSupplementalTypes(TestUtils.testClassesFile("TestFixUnresolveds.txt"), types, ignores, problems, "fix-unresolved", false, flags);
 		assertEquals(1, problems.size());
 		assertTrue(problems.iterator().next().description().contains("class is listed as referred-to but also listed in ignores:"));
 		assertEquals(Errors.CLASS_BOTH_REFERRED_TO_AND_IGNORED, problems.iterator().next().error());
