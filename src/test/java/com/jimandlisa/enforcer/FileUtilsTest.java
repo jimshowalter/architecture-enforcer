@@ -73,7 +73,7 @@ public class FileUtilsTest {
 			assertEquals(Errors.CANNOT_WRITE_TO_DIRECTORY, e.error());
 		}
 		try {
-			FileUtils.checkWriteDir(new File("< > ##$#%SFS&*@#$#@ SDF []{}||"));
+			FileUtils.checkWriteDir(new File("//< > ##$#%SFS&*@#$#@ SDF []{}||"));
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("error validating directory"));
