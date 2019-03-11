@@ -113,7 +113,7 @@ public class EnforcerUtils {
 		return typeName.replaceAll("[$].*$", "");
 	}
 
-	static void parse(File file, Map<String, Type> types, Set<String> ignores, Set<Problem> problems, String entryName, boolean requireReferredTo, AnalyzeWarFlags flags) throws Exception {
+	static void addSupplementalTypes(File file, Map<String, Type> types, Set<String> ignores, Set<Problem> problems, String entryName, boolean requireReferredTo, AnalyzeWarFlags flags) throws Exception {
 		if (file == null) {
 			return;
 		}
@@ -275,8 +275,8 @@ public class EnforcerUtils {
 	public static Map<String, Type> resolve(AnalyzeWarInputs inputs, Set<Problem> problems, AnalyzeWarFlags flags) throws Exception {
 		Set<String> ignores = ignores(inputs.ignores());
 		Map<String, Type> types = typesFromWar(inputs.war(), ignores, problems, flags);
-		parse(inputs.reflections(), types, ignores, problems, "reflection", true, flags); // Get reflection-based referring and referred-to classes from reflections file.
-		parse(inputs.fixUnresolveds(), types, ignores, problems, "fix-unresolved", false, flags); // Get referring and referred-to classes from fix-unresolveds file.
+		addSupplementalTypes(inputs.reflections(), types, ignores, problems, "reflection", true, flags); // Add reflection-based referring and referred-to classes from reflections file.
+		addSupplementalTypes(inputs.fixUnresolveds(), types, ignores, problems, "fix-unresolved", false, flags); // Add referring and referred-to classes from fix-unresolveds file.
 		reportFatalErrors(problems, flags);
 		resolve(types, problems);
 		reportFatalErrors(problems, flags);
