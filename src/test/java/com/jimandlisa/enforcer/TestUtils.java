@@ -77,8 +77,8 @@ public class TestUtils {
 		assertEquals(out, cannedOut);
 	}
 
-	public static AnalyzeWarInputs analyzeWarInputs(File data, boolean includeIgnores, boolean includeReflections, boolean includeFixUnresolveds) {
-		AnalyzeWarInputs inputs = new AnalyzeWarInputs(testClassesFile("SampleTarget2.yaml"), data);
+	public static AnalyzeBinaryInputs analyzeWarInputs(File data, boolean includeIgnores, boolean includeReflections, boolean includeFixUnresolveds) {
+		AnalyzeBinaryInputs inputs = new AnalyzeBinaryInputs(testClassesFile("SampleTarget2.yaml"), data);
 		if (includeIgnores) {
 			inputs.setIgnores(testClassesFile("SampleIgnores.txt"));
 		}
@@ -91,7 +91,7 @@ public class TestUtils {
 		return inputs;
 	}
 
-	public static AnalyzeWarInputs analyzeWarInputs(boolean includeIgnores, boolean includeReflections, boolean includeFixUnresolveds) {
+	public static AnalyzeBinaryInputs analyzeWarInputs(boolean includeIgnores, boolean includeReflections, boolean includeFixUnresolveds) {
 		return analyzeWarInputs(sampleWar(), includeIgnores, includeReflections, includeFixUnresolveds);
 	}
 

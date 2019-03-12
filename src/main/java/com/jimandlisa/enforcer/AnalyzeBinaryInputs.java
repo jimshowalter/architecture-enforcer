@@ -15,17 +15,17 @@ package com.jimandlisa.enforcer;
 
 import java.io.File;
 
-public class AnalyzeWarInputs extends Inputs {
+public class AnalyzeBinaryInputs extends Inputs {
 	
 	private File ignores = null;
 	private File reflections = null;
 	private File fixUnresolveds = null;
 
-	public AnalyzeWarInputs(File target, File data) {
-		super(target, data);
+	public AnalyzeBinaryInputs(File target, File binary) {
+		super(target, binary);
 	}
 	
-	public File war() {
+	public File binary() {
 		return data;
 	}
 	
@@ -64,6 +64,6 @@ public class AnalyzeWarInputs extends Inputs {
 	
 	@Override
 	public String toString() {
-		return "target=" + target + ", war=" + data + ", ignores=" + ignores + ", reflections=" + reflections + ", fix-unresolveds=" + fixUnresolveds;
+		return "target=" + target + ", binary=" + data + ", ignores=" + ignores + ", reflections=" + reflections + ", fix-unresolveds=" + fixUnresolveds;
 	}
 }

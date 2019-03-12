@@ -15,6 +15,8 @@ package com.jimandlisa.enforcer;
 
 public class Reference implements Comparable<Reference> {
 
+	public static final String SEPARATOR = Separators.REFERENCE_SEPARATOR.value();
+
 	private final Type referringType;
 	private final Type referredToType;
 	private final ReferenceKinds kind;
@@ -87,9 +89,9 @@ public class Reference implements Comparable<Reference> {
 	}
 
 	public String parseableDescription(boolean includeClasses, boolean includeKind) {
-		return (includeClasses ? referringType.name() + "!" : "") + referringType.component().name() + "!" + referringType.component().layer().name() + "!" + referringType.component().layer().depth() + "!"
-				+ (includeClasses ? referredToType.name() + "!" : "") + referredToType.component().name() + "!" + referredToType.component().layer().name() + "!" + referredToType.component().layer().depth()
-				+ (includeKind ? "!" + kind() + "!" + (kind.isLegal() ? "LEGAL" : "ILLEGAL") : "");
+		return (includeClasses ? referringType.name() + SEPARATOR : "") + referringType.component().name() + SEPARATOR + referringType.component().layer().name() + SEPARATOR + referringType.component().layer().depth() + SEPARATOR
+				+ (includeClasses ? referredToType.name() + SEPARATOR : "") + referredToType.component().name() + SEPARATOR + referredToType.component().layer().name() + SEPARATOR + referredToType.component().layer().depth()
+				+ (includeKind ? SEPARATOR + kind() + SEPARATOR + (kind.isLegal() ? "LEGAL" : "ILLEGAL") : "");
 	}
 
 	public String humanReadableDescription(boolean includeClasses, boolean includeKind) {

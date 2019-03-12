@@ -27,44 +27,44 @@ public class InputsTest {
 
 	@Test
 	public void doTest() {
-		AnalyzeWarInputs analyzeWarInputs = TestUtils.analyzeWarInputs(false, false, false);
-		assertNotNull(analyzeWarInputs.target());
-		assertNotNull(analyzeWarInputs.war());
-		analyzeWarInputs.toString();
-		assertNull(analyzeWarInputs.ignores());
-		analyzeWarInputs.setIgnores(TestUtils.testClassesFile("SampleIgnores.txt"));
-		assertNotNull(analyzeWarInputs.ignores());
-		analyzeWarInputs.toString();
-		assertNull(analyzeWarInputs.reflections());
-		analyzeWarInputs.setReflections(TestUtils.testClassesFile("SampleReflections.txt"));
-		assertNotNull(analyzeWarInputs.reflections());
-		analyzeWarInputs.toString();
-		assertNull(analyzeWarInputs.fixUnresolveds());
-		analyzeWarInputs.setFixUnresolveds(TestUtils.testClassesFile("SampleFixUnresolveds.txt"));
-		assertNotNull(analyzeWarInputs.fixUnresolveds());
-		analyzeWarInputs.toString();
-		analyzeWarInputs = TestUtils.analyzeWarInputs(true, true, true);
-		analyzeWarInputs.toString();
+		AnalyzeBinaryInputs analyzeBinaryInputs = TestUtils.analyzeWarInputs(false, false, false);
+		assertNotNull(analyzeBinaryInputs.target());
+		assertNotNull(analyzeBinaryInputs.binary());
+		analyzeBinaryInputs.toString();
+		assertNull(analyzeBinaryInputs.ignores());
+		analyzeBinaryInputs.setIgnores(TestUtils.testClassesFile("SampleIgnores.txt"));
+		assertNotNull(analyzeBinaryInputs.ignores());
+		analyzeBinaryInputs.toString();
+		assertNull(analyzeBinaryInputs.reflections());
+		analyzeBinaryInputs.setReflections(TestUtils.testClassesFile("SampleReflections.txt"));
+		assertNotNull(analyzeBinaryInputs.reflections());
+		analyzeBinaryInputs.toString();
+		assertNull(analyzeBinaryInputs.fixUnresolveds());
+		analyzeBinaryInputs.setFixUnresolveds(TestUtils.testClassesFile("SampleFixUnresolveds.txt"));
+		assertNotNull(analyzeBinaryInputs.fixUnresolveds());
+		analyzeBinaryInputs.toString();
+		analyzeBinaryInputs = TestUtils.analyzeWarInputs(true, true, true);
+		analyzeBinaryInputs.toString();
 		RapidIterationInputs rapidIterationInputs = TestUtils.rapidIterationInputs();
 		assertNotNull(rapidIterationInputs.target());
 		assertNotNull(rapidIterationInputs.allReferences());
 		rapidIterationInputs.toString();
 		try {
-			analyzeWarInputs.setIgnores(new File("foo"));
+			analyzeBinaryInputs.setIgnores(new File("foo"));
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("already set ignores file"));
 			assertEquals(Errors.IGNORES_FILE_ALREADY_SPECIFIED, e.error());
 		}
 		try {
-			analyzeWarInputs.setReflections(new File("foo"));
+			analyzeBinaryInputs.setReflections(new File("foo"));
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("already set reflections file"));
 			assertEquals(Errors.REFLECTIONS_FILE_ALREADY_SPECIFIED, e.error());
 		}
 		try {
-			analyzeWarInputs.setFixUnresolveds(new File("foo"));
+			analyzeBinaryInputs.setFixUnresolveds(new File("foo"));
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("already set fix-unresolveds file"));

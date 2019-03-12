@@ -23,7 +23,7 @@ public class Type implements Comparable<Type> {
 	private final Set<String> referenceNames = new HashSet<>();
 	private final Set<Type> references = new HashSet<>();
 	private Component component = null;
-	
+
 	public Type(final String name, final boolean isSynthesized) {
 		super();
 		this.name = ArgUtils.check(name, "name");
@@ -37,7 +37,7 @@ public class Type implements Comparable<Type> {
 	public String name() {
 		return name;
 	}
-	
+
 	public boolean isSynthesized() {
 		return isSynthesized;
 	}
@@ -46,8 +46,20 @@ public class Type implements Comparable<Type> {
 		return referenceNames;
 	}
 
+	public void addReferenceName(String referenceName) {
+		if (!referenceNames.add(referenceName)) {
+			throw new EnforcerException("duplicate reference name " + referenceName, Errors.DUPLICATE_REFERENCE_NAME);
+		}
+	}
+
 	public Set<Type> references() {
 		return references;
+	}
+	
+	public void addReference(Type reference) {
+		if (!references.add(reference)) {
+			throw new EnforcerException("duplicate reference " + reference.name(), Errors.DUPLICATE_REFERENCE);
+		}
 	}
 
 	public void setComponent(final Component component) {

@@ -51,10 +51,10 @@ public class TypeTest {
 		Component comp1 = new Component("Comp1", layer, null, null);
 		type1.setComponent(comp1);
 		assertEquals(comp1, type1.component());
-		type1.referenceNames().add("bar");
+		type1.addReferenceName("bar");
 		assertEquals(1, type1.referenceNames().size());
 		assertEquals("bar", type1.referenceNames().iterator().next());
-		type1.references().add(type2);
+		type1.addReference(type2);
 		assertEquals(1, type1.references().size());
 		assertEquals(type2, type1.references().iterator().next());
 		Set<Type> types = new HashSet<>();
@@ -90,6 +90,26 @@ public class TypeTest {
 		} catch (EnforcerException e) {
 			assertEquals("component already set", e.getMessage());
 			assertEquals(Errors.COMPONENT_ALREADY_SPECIFIED, e.error());
+		}
+		try {
+			type1 = new Type("foo");
+			type1.addReferenceName("bar");
+			type1.addReferenceName("bar");
+			Assert.fail();
+		} catch (EnforcerException e) {
+			assertEquals("duplicate reference name bar", e.getMessage());
+			assertEquals(Errors.DUPLICATE_REFERENCE_NAME, e.error());
+		}
+		try {
+			type1 = new Type("foo");
+			type1.addReferenceName("bar");
+			type2 = new Type("bar");
+			type1.addReference(type2);
+			type1.addReference(type2);
+			Assert.fail();
+		} catch (EnforcerException e) {
+			assertEquals("duplicate reference bar", e.getMessage());
+			assertEquals(Errors.DUPLICATE_REFERENCE, e.error());
 		}
 	}
 }

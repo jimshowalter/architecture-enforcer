@@ -43,16 +43,22 @@ public class EnforcerUtils {
 		try (BufferedReader reader = new BufferedReader(new FileReader(allReferences))) {
 			String line = null;
 			while ((line = reader.readLine()) != null) {
-				String[] segments = line.split("!");
+				String[] segments = line.split(Separators.REFERENCE_SEPARATOR.value());
 				String referringClass = segments[0];
 				Type referringType = get(referringClass, types);
 				String referredToClass = segments[4];
 				Type referredToType = get(referredToClass, types);
-				referringType.referenceNames().add(referredToType.name());
-				referringType.references().add(referredToType);
+				referringType.addReferenceName(referredToType.name());
+				referringType.addReference(referredToType);
 			}
 		}
 		return types;
+	}
+
+	static void add(String ignore, Set<String> ignores) {
+		if (!ignores.add(ignore)) {
+			throw new EnforcerException("duplicate ignore " + ignore, Errors.DUPLICATE_IGNORE);
+		}
 	}
 
 	static Set<String> ignores(File ignoresFile) throws Exception {
@@ -67,15 +73,15 @@ public class EnforcerUtils {
 				if (ignore.startsWith("#")) {
 					continue;
 				}
-				if (ignore.endsWith("!")) {
-					ignores.add(ignore.replaceAll("[!]+$", ""));
+				if (ignore.endsWith(Separators.IGNORES_VERBATIM_INDICATOR.value())) {
+					add(ignore.replaceAll("[" + Separators.IGNORES_VERBATIM_INDICATOR.value() + "]+$", ""), ignores);
 					continue;
 				}
 				if (ignore.endsWith(".")) {
-					ignores.add(ignore.replaceAll("[.]+$", "."));
+					add(ignore.replaceAll("[.]+$", "."), ignores);
 					continue;
 				}
-				ignores.add(ignore + ".");
+				add(ignore + ".", ignores);
 			}
 		}
 		return ignores;
@@ -112,11 +118,26 @@ public class EnforcerUtils {
 		}
 		return typeName.replaceAll("[$].*$", "");
 	}
+	
+	static Type get(String referringClass, Map<String, Type> types, boolean errorIfExists) {
+		Type type = types.get(referringClass);
+		if (type == null) {
+			type = new Type(referringClass);
+			types.put(type.name(), type);
+		} else {
+			if (errorIfExists) {
+				throw new EnforcerException("fix-unresolveds class " + referringClass + " is already resolved from binary", Errors.SUPPLEMENTAL_TYPE_NOT_NEEDED);
+			}
+		}
+		return type;
+	}
 
-	static void addSupplementalTypes(File file, Map<String, Type> types, Set<String> ignores, Set<Problem> problems, String entryName, boolean requireReferredTo, AnalyzeWarFlags flags) throws Exception {
+	static void addSupplementalTypes(File file, Map<String, Type> types, Set<String> ignores, Set<Problem> problems, boolean reflection, AnalyzeWarFlags flags) throws Exception {
 		if (file == null) {
 			return;
 		}
+		String entryName = reflection ? "reflection" : "fix-unresolved";
+		boolean requireReferredTo = reflection;
 		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 			String line = null;
 			Type type = null;
@@ -128,7 +149,7 @@ public class EnforcerUtils {
 				if (trimmed.startsWith("#")) {
 					continue;
 				}
-				String[] segments = trimmed.replaceAll("[ \t]+", "").split(":");
+				String[] segments = trimmed.replaceAll("[ \t]+", "").split(Separators.SUPPLEMENTAL_TYPES_FROM_TO_SEPARATOR.value());
 				if (segments.length > 2) {
 					throw new EnforcerException("invalid " + entryName + " entry in " + file + ": " + line, Errors.MALFORMED_CLASS_TO_CLASS_REFERENCE);
 				}
@@ -139,19 +160,27 @@ public class EnforcerUtils {
 				}
 				String referringClass = denest(segments[0], flags);
 				if (skip(referringClass, ignores)) {
-					problems.add(new Problem(entryName.toUpperCase() + " class is listed as referring but also listed in ignores: " + referringClass, Errors.CLASS_BOTH_REFERRING_AND_IGNORED));
+					problems.add(new Problem(entryName + " class is listed as referring but also listed in ignores: " + referringClass, Errors.CLASS_BOTH_REFERRING_AND_IGNORED));
 					continue;
 				}
-				type = get(referringClass, types);
-				String[] segments2 = segments[1].split(",");
+				type = get(referringClass, types, !reflection);
+				String[] segments2 = segments[1].split(Separators.SUPPLEMENTAL_TYPES_TO_LIST_SEPARATOR.value());
 				for (String segment : segments2) {
 					String referredToClass = denest(segment, flags);
 					if (skip(referredToClass, ignores)) {
-						problems.add(new Problem(entryName.toUpperCase() + " class is listed as referred-to but also listed in ignores: " + referringClass, Errors.CLASS_BOTH_REFERRED_TO_AND_IGNORED));
+						problems.add(new Problem(entryName + " class is listed as referred-to but also listed in ignores: " + referringClass, Errors.CLASS_BOTH_REFERRED_TO_AND_IGNORED));
 						continue;
 					}
-					type.referenceNames().add(referredToClass);
+					type.addReferenceName(referredToClass);
 				}
+			}
+		}
+	}
+	
+	static void checkSeparators(String className) {
+		for (Separators separator : Separators.values()) {
+			if (className.contains(separator.value())) {
+				throw new EnforcerException("class " + className + " contains reserved separator '" + separator.value() + "', see comments in Separators class", Errors.RESERVED_SEPARATOR_IN_CLASS_NAME);
 			}
 		}
 	}
@@ -230,12 +259,14 @@ public class EnforcerUtils {
 			WorksetInitializer wsInitializer = new WorksetInitializer(workset);
 			wsInitializer.initializeWorksetAndWait(null);
 			for (ClassInformation classInfo : workset.getAllContainedClasses()) {
+				checkSeparators(classInfo.getName());
 				String referringClass = denest(classInfo, workset, flags);
 				if (skip(referringClass, ignores)) {
 					continue;
 				}
 				Type type = get(referringClass, types);
 				for (IType dependency : classInfo.getDirectReferredTypes()) {
+					checkSeparators(dependency.getName());
 					ClassInformation dependencyClassInfo = workset.getClassInfo(dependency.getName());
 					String referredToClass = denest(dependencyClassInfo, workset, flags);
 					if (skip(type.name(), referredToClass, ignores)) {
@@ -260,7 +291,7 @@ public class EnforcerUtils {
 					synthetics.add(new Type(referenceName, true));
 					continue;
 				}
-				type.references().add(reference);
+				type.addReference(reference);
 			}
 		}
 		for (Type synthetic : synthetics) {
@@ -272,11 +303,11 @@ public class EnforcerUtils {
 		return typesFromAllReferences(inputs.allReferences());
 	}
 
-	public static Map<String, Type> resolve(AnalyzeWarInputs inputs, Set<Problem> problems, AnalyzeWarFlags flags) throws Exception {
+	public static Map<String, Type> resolve(AnalyzeBinaryInputs inputs, Set<Problem> problems, AnalyzeWarFlags flags) throws Exception {
 		Set<String> ignores = ignores(inputs.ignores());
-		Map<String, Type> types = typesFromWar(inputs.war(), ignores, problems, flags);
-		addSupplementalTypes(inputs.reflections(), types, ignores, problems, "reflection", true, flags); // Add reflection-based referring and referred-to classes from reflections file.
-		addSupplementalTypes(inputs.fixUnresolveds(), types, ignores, problems, "fix-unresolved", false, flags); // Add referring and referred-to classes from fix-unresolveds file.
+		Map<String, Type> types = typesFromWar(inputs.binary(), ignores, problems, flags);
+		addSupplementalTypes(inputs.reflections(), types, ignores, problems, true, flags); // Add reflection-based referring and referred-to classes from reflections file.
+		addSupplementalTypes(inputs.fixUnresolveds(), types, ignores, problems, false, flags); // Add referring and referred-to classes from fix-unresolveds file.
 		reportFatalErrors(problems, flags);
 		resolve(types, problems);
 		reportFatalErrors(problems, flags);
@@ -287,7 +318,7 @@ public class EnforcerUtils {
 		if (inputs instanceof RapidIterationInputs) {
 			return resolve((RapidIterationInputs)inputs, problems);
 		}
-		return resolve((AnalyzeWarInputs)inputs, problems, (AnalyzeWarFlags)flags);
+		return resolve((AnalyzeBinaryInputs)inputs, problems, (AnalyzeWarFlags)flags);
 	}
 
 	static void correlateComponentClassesToTypes(Map<String, Type> types, Map<String, Component> components, Set<Problem> problems) {

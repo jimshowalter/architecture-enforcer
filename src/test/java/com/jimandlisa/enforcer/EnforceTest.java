@@ -18,6 +18,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -121,7 +122,7 @@ public class EnforceTest {
 
 	@Test
 	public void testAnalyzeWarArgs() {
-		AnalyzeWarInputs inputs = TestUtils.analyzeWarInputs(false, false, false);
+		AnalyzeBinaryInputs inputs = TestUtils.analyzeWarInputs(false, false, false);
 		AnalyzeWarFlags flags = new AnalyzeWarFlags();
 		Enforce.parseArg(Optionals.IGNORES.indicator() + TestUtils.testClassesFile("SampleIgnores.txt").getAbsolutePath(), inputs, flags);
 		assertEquals(normalize(TestUtils.testClassesFile("SampleIgnores.txt").toPath()), normalize(inputs.ignores().toPath()));
@@ -214,7 +215,7 @@ public class EnforceTest {
 			flags.enableDebug();
 			Map<String, Type> types = new HashMap<>();
 			Type type = new Type("foo");
-			type.referenceNames().add("bar");
+			type.addReferenceName("bar");
 			types.put(type.name(), type);
 			Enforce.debug(target, types, new RollUp(), console, flags, 100);
 			Enforce.debug(target, types, new RollUp(), console, flags, 0);
@@ -411,6 +412,14 @@ public class EnforceTest {
 		TestUtils.compareTargetFile(subdir, Outputs.ALL_COMPONENT_REFERENCES_BASE_NAME + Outputs.GEPHI_NODES_SUFFIX, "CannedAllComponentReferences3" + Outputs.GEPHI_NODES_SUFFIX);
 		TestUtils.compareTargetFile(subdir, Outputs.ALL_COMPONENT_REFERENCES_BASE_NAME + Outputs.GEPHI_EDGES_SUFFIX, "CannedAllComponentReferences3" + Outputs.GEPHI_EDGES_SUFFIX);
 		TestUtils.compareTargetFile(subdir, Outputs.ALL_COMPONENT_REFERENCES_BASE_NAME + Outputs.YED_SUFFIX, "CannedAllComponentReferences3" + Outputs.YED_SUFFIX);
+	}
+	
+	@Test
+	public void testIsBinary() {
+		assertTrue(Enforce.isBinary(new File("foo.jar")));
+		assertTrue(Enforce.isBinary(new File("foo.war")));
+		assertTrue(Enforce.isBinary(new File("foo.ear")));
+		assertFalse(Enforce.isBinary(new File("foo.txt")));
 	}
 
 	@Test

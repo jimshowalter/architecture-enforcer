@@ -58,13 +58,15 @@ This tool imposes a number of consistency checks, and fails with errors if any a
 
 * The target state must be consistent: Layers, domains, packages, and classes referred to by a component must be defined.
 
-* The target state must be completely specified: All classes in the war that are not ignored must match to a component.
+* The target state must be completely specified: All classes in the binary that are not ignored must match to a component.
 
-* The target state cannot be ambiguous: All classes in the war that are not ignored cannot match to more than one component.
+* The target state cannot be ambiguous: All classes in the binary that are not ignored cannot match to more than one component.
 
 * The target state cannot be contradictory: Classes cannot be both referring and ignored, and cannot be both referred-to and ignored.
 
-* All classes and packages in the target state must be matched to non-ignored classes and packages in the war: The target state must be kept up to date, including when classes and packages are renamed or deleted during refactoring.
+* All classes and packages in the target state must be matched to non-ignored classes and packages in the binary: The target state must be kept up to date, including when classes and packages are renamed or deleted during refactoring.
+
+* Types listed in fix-unresolveds files (documented later) must not be resolvable from the binary.
 
 Note: Components are somewhat analogous to Java 9 modules. We chose not to make them be modules, because large Java codebases tend to be legacy codebases, which tend to be on earlier versions of Java that don't support modules.
 
@@ -129,7 +131,7 @@ code into projects, this tool should continue to be run in CI/CD.
 
 ## Getting Started ##
 
-1. Create a war file for your project. This is necessary even if your project isn't deployed as a war, because pf-CDA, which we use to analyze bytecode, requires a war (or at least seems to work best when pointed at a war).
+1. Create a binary file for your project (jar, war, or ear). This is necessary even if your project isn't deployed as a single binary, because pf-CDA, which we use to analyze bytecode, seems to work best when pointed at a consolidated file instead of a classes directory.
 
 1. Sync and build this project. Ignore "[WARNING] The POM for org.apache.bcel:bcel:jar:6.3.PR1 is missing, no dependency information available" and "[WARNING] Classes in bundle 'Architecture Enforcer' do no [sic] match with execution data. For report generation the same class files must be used as at runtime".
 We're working on fixing those warnings (and welcome your help, if you know how to make them go away).
@@ -161,7 +163,7 @@ The full set of args is:
 
 > /full/path/to/target/architecture/.yaml
 
-> /full/path/to/.war
+> /full/path/to/binary (.jar, .war, or .ear)
 
 > /full/path/to/writable/output/directory
 
@@ -219,7 +221,7 @@ In other cases, you need to ignore a class in the default package (that is, no p
 where the referred-to classes are classes to which the referring class refers by reflection. At least one referred-to class is required. If there are too many referred-to classes to fit cleanly on one line, you can start multiple lines with the referring class.
 If you preserve nested types in your analysis, and you have instances of reflection references from or to nested types, include $TheNestedType in the names.
 
-* Sometimes pf-CDA misses classes that are referred to by other classes in the war. To fix these, you should add the missing classes to a file you specify with the -f command-line argument.
+* Sometimes pf-CDA misses classes that are referred to by other classes in the binary. To fix these, you should add the missing classes to a file you specify with the -f command-line argument.
 The syntax is: full.name.of.missing.class.Foo:full.name.of.referred.to.class.Bar,full.name.of.referred.to.class.Baz..., where the referred-to classes are classes to which the missing class refers.
 If there are too many referred-to classes to fit cleanly on one line, you can start multiple lines with the referring class. If the unresolved class you are adding does not refer to other classes in your project,
 you don't need to add any referred-to classes (and you don't need a colon after the referring class on the line). If you preserve nested types in your analysis, and you have instances of unresolved types from or to nested types,
@@ -227,7 +229,9 @@ include $TheNestedType in the names.
 
 * Adding a referred-to class to the reflections or fix-unresolveds files can introduce new unresolved classes. When that happens, you need to keep entering classes until all classes are defined.
 
-* If you get an error about "malformed class name", you have a class in one of the input files that starts with a $ sign. In that case, see the comments on EnforcerUtils.denest.
+* If you get an error about "malformed class name", you have a class in one of the input files that starts with a $ sign. In that case, see the comments on the denest methods in EnforcerUtils.java.
+
+* If you get an error about "contains reserved separator", you have a class in your binary that contains a reserved separator used for parsing/splitting/replacing. In that case, see the comments in Separators.java.
 
 * This tool creates placeholders for unresolved types and adds them to the type-lookup map, so downstream analysis doesn't blow up. This is just a band-aid, because whatever types a missing type refers to are not included in the analysis (because they aren't known).
 Ideally the full transitive closure of types in your project is specified.
@@ -235,7 +239,7 @@ Ideally the full transitive closure of types in your project is specified.
 * pf-CDA is smart enough to add references on its own for simple Class.forName calls where the string name of the class is directly specified, as in Class.forName("com.foo.bar.Baz"), but it can't follow complicated string concatenations, strings returned by functions, etc.,
 for example Class.forName(someStringFromAVariable + SomeClass.someFunction(some args from somewhere) + SOME\_STRING\_CONSTANT + ".Foo"). That's why you have to add them manually. Also, pf-CDA doesn't parse reflection references in JSP files, Spring, etc.
 
-* If the target state only contains one component, there can't be any illegal references (but that's not a very useful target state).
+* If the target state only contains one component, by definition there can't be any illegal references (but that's not a very useful target state).
 
 * Sample files are located in the src/test/resources directory. They start with "Sample".
 
@@ -251,7 +255,9 @@ java -jar architecture-enforcer-1.0-SNAPSHOT.jar /path/to/architecture-enforcer/
 
 This eliminates the pf-CDA overhead, making each run take at most a few seconds.
 
-In this mode, you only need to rebuild and reanalyze the war when the codebase changes enough that the previous analysis is no longer safe to depend on, and early in a project you might only need to sync and build once a day (or even less often). Once decomposition is well underway, frequent syncs and builds are needed, but by then the target state is already defined.
+In this mode, you only need to rebuild and reanalyze the  when the codebase changes enough that the previous analysis is no longer safe to depend on, and early in a project you might only need to sync and build once a day (or even less often). Once decomposition is well underway, frequent syncs and builds are needed, but by then the target state is already defined.
+
+Note: Because the all_references.txt file is generated only when this tool runs successfully to completion, only minimal sanity checks are performed while reading the file.
 
 ## Reference Formats ##
 
@@ -346,7 +352,7 @@ Errors are either always fatal, or fatal only if strict is specified.
 
 All but two errors are always fatal:
 
-* Unresolved references are permitted when not in strict mode because sometimes pf-CDA misses classes that are referred to by other classes in the war. This allows a grace period while the missing types are added to the fix-unresolveds file.
+* Unresolved references are permitted when not in strict mode because sometimes pf-CDA misses classes that are referred to by other classes in the . This allows a grace period while the missing types are added to the fix-unresolveds file.
 
 * Illegal references are permitted when not in strict mode, so the team working on decomposition can see the report of illegal references without blocking other development.
 
@@ -422,7 +428,7 @@ The following table summarizes differences between the two tools:
 |Prescriptive (kinds of components, etc.)|Unrestricted|
 |Can't split packages across components|Can specify individual classes per component (in addition to packages, or instead of packages)|
 |Can't handle classes in default package (that is, no package), requires special-casing in code|Can specify individual classes per component, even without any package|
-|Thousands of lines|Fewer than 1k lines|
+|Thousands of lines|Barely 1k lines|
 |Complex|Simple|
 |Incompletely unit tested|100% statement and branch coverage|
 |Requires Maven to run it|Can run as jar with main, or as Maven mojo|

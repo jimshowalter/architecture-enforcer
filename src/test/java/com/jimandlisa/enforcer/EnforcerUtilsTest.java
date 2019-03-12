@@ -39,6 +39,21 @@ public class EnforcerUtilsTest {
 	}
 
 	@Test
+	public void testAddIgnore() {
+		Set<String> ignores = new HashSet<>();
+		EnforcerUtils.add("foo", ignores);
+		assertEquals(1, ignores.size());
+		assertEquals("foo", ignores.iterator().next());
+		try {
+			EnforcerUtils.add("foo", ignores);
+			Assert.fail();
+		} catch (EnforcerException e) {
+			assertEquals("duplicate ignore foo", e.getMessage());
+			assertEquals(Errors.DUPLICATE_IGNORE, e.error());
+		}
+	}
+
+	@Test
 	public void testIgnores() throws Exception {
 		Set<String> ignores = EnforcerUtils.ignores(null);
 		assertTrue(ignores.isEmpty());
@@ -71,7 +86,19 @@ public class EnforcerUtilsTest {
 			assertEquals(Errors.MALFORMED_CLASS_NAME, e.error());
 		}
 	}
-	
+
+	@Test
+	public void testCheckSeparators() {
+		EnforcerUtils.checkSeparators("com.foo.Bar");
+		try {
+			EnforcerUtils.checkSeparators("com.foo!Bar");
+			Assert.fail();
+		} catch (EnforcerException e) {
+			assertTrue(e.getMessage().contains("contains reserved separator"));
+			assertEquals(Errors.RESERVED_SEPARATOR_IN_CLASS_NAME, e.error());
+		}
+	}
+
 	@Test
 	public void testDenestClassInfo() {
 		ClassInformation mockClassInformation = Mockito.mock(ClassInformation.class);
@@ -93,39 +120,70 @@ public class EnforcerUtilsTest {
 	}
 
 	@Test
-	public void testParser() throws Exception {
+	public void testGetTypeToggled() {
+		Map<String, Type> types = new HashMap<>();
+		Type type0 = EnforcerUtils.get("foo", types, true);
+		assertEquals("foo", type0.name());
+		assertEquals(1, types.size());
+		type0 = EnforcerUtils.get("foo", types, false);
+		assertEquals("foo", type0.name());
+		assertEquals(1, types.size());
+		type0 = EnforcerUtils.get("foo", types, false);
+		assertEquals("foo", type0.name());
+		assertEquals(1, types.size());
+		types.clear();
+		type0 = EnforcerUtils.get("foo", types, false);
+		assertEquals("foo", type0.name());
+		assertEquals(1, types.size());
+		try {
+			EnforcerUtils.get("foo", types, true);
+			Assert.fail();
+		} catch (EnforcerException e) {
+			assertEquals("fix-unresolveds class foo is already resolved from binary", e.getMessage());
+			assertEquals(Errors.SUPPLEMENTAL_TYPE_NOT_NEEDED, e.error());
+		}
+	}
+
+	@Test
+	public void testSupplementalTypes() throws Exception {
 		Set<String> ignores = new HashSet<>();
 		Map<String, Type> types = new HashMap<>();
 		Set<Problem> problems = new LinkedHashSet<>();
 		AnalyzeWarFlags flags = new AnalyzeWarFlags();
-		EnforcerUtils.addSupplementalTypes(null, null, null, null, null, false, null);
-		EnforcerUtils.addSupplementalTypes(TestUtils.testClassesFile("TestReflections.txt"), types, ignores, problems, "reflection", true, flags);
+		EnforcerUtils.addSupplementalTypes(null, null, null, null, false, null);
+		EnforcerUtils.addSupplementalTypes(TestUtils.testClassesFile("TestReflections.txt"), types, ignores, problems, true, flags);
 		try {
-			EnforcerUtils.addSupplementalTypes(TestUtils.testClassesFile("BadReflections.txt"), types, ignores, problems, "reflection", true, flags);
+			EnforcerUtils.addSupplementalTypes(TestUtils.testClassesFile("BadReflections.txt"), types, ignores, problems, true, flags);
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("invalid reflection entry in"));
 			assertEquals(Errors.MISSING_REFERRED_TO_CLASS, e.error());
 		}
 		try {
-			EnforcerUtils.addSupplementalTypes(TestUtils.testClassesFile("BadFixUnresolveds.txt"), types, ignores, problems, "fix-unresolved", false, flags);
+			EnforcerUtils.addSupplementalTypes(TestUtils.testClassesFile("BadFixUnresolveds.txt"), types, ignores, problems, false, flags);
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("invalid fix-unresolved entry in"));
 			assertEquals(Errors.MALFORMED_CLASS_TO_CLASS_REFERENCE, e.error());
 		}
-		EnforcerUtils.addSupplementalTypes(TestUtils.testClassesFile("TestFixUnresolveds.txt"), types, ignores, problems, "fix-unresolved", false, flags);
+		ignores.clear();
+		types.clear();
+		problems.clear();
+		EnforcerUtils.addSupplementalTypes(TestUtils.testClassesFile("TestFixUnresolveds.txt"), types, ignores, problems, false, flags);
 		assertTrue(problems.isEmpty());
+		ignores.clear();
+		types.clear();
+		problems.clear();
 		ignores.add("foo.");
-		EnforcerUtils.addSupplementalTypes(TestUtils.testClassesFile("TestFixUnresolveds.txt"), types, ignores, problems, "fix-unresolved", false, flags);
+		EnforcerUtils.addSupplementalTypes(TestUtils.testClassesFile("TestFixUnresolveds.txt"), types, ignores, problems, false, flags);
 		assertEquals(1, problems.size());
 		assertTrue(problems.iterator().next().description().contains("class is listed as referring but also listed in ignores:"));
 		assertEquals(Errors.CLASS_BOTH_REFERRING_AND_IGNORED, problems.iterator().next().error());
-		types.clear();
 		ignores.clear();
+		types.clear();
 		problems.clear();
 		ignores.add("com.x.");
-		EnforcerUtils.addSupplementalTypes(TestUtils.testClassesFile("TestFixUnresolveds.txt"), types, ignores, problems, "fix-unresolved", false, flags);
+		EnforcerUtils.addSupplementalTypes(TestUtils.testClassesFile("TestFixUnresolveds.txt"), types, ignores, problems, false, flags);
 		assertEquals(1, problems.size());
 		assertTrue(problems.iterator().next().description().contains("class is listed as referred-to but also listed in ignores:"));
 		assertEquals(Errors.CLASS_BOTH_REFERRED_TO_AND_IGNORED, problems.iterator().next().error());
@@ -192,7 +250,7 @@ public class EnforcerUtilsTest {
 		Map<String, Type> types = new HashMap<>();
 		Set<Problem> problems = new LinkedHashSet<>();
 		Type type0 = new Type("foo");
-		type0.referenceNames().add("bar");
+		type0.addReferenceName("bar");
 		types.put(type0.name(), type0);
 		EnforcerUtils.resolve(types, problems);
 		assertEquals(1, problems.size());
@@ -231,8 +289,8 @@ public class EnforcerUtilsTest {
 		types.put(type1.name(), type1);
 		Type type2 = new Type("com.foo.bar.Baz2");
 		types.put(type2.name(), type2);
-		type1.referenceNames().add(type2.name());
-		type1.references().add(type2);
+		type1.addReferenceName(type2.name());
+		type1.addReference(type2);
 		Layer layer1 = new Layer("L1", 1, null);
 		Map<String, Component> components = new HashMap<>();
 		Component component1 = new Component("Comp1", layer1, null, null);
@@ -254,8 +312,8 @@ public class EnforcerUtilsTest {
 		types.put(type1.name(), type1);
 		Type type2 = new Type("com.foo.bar.Baz2");
 		types.put(type2.name(), type2);
-		type1.referenceNames().add(type2.name());
-		type1.references().add(type2);
+		type1.addReferenceName(type2.name());
+		type1.addReference(type2);
 		Type type3 = new Type("NoPackage");
 		types.put(type3.name(), type3);
 		Type type4 = new Type("com.other.Foo");
@@ -287,8 +345,8 @@ public class EnforcerUtilsTest {
 		types.put(type1.name(), type1);
 		Type type2 = new Type("com.foo.bar.Baz2");
 		types.put(type2.name(), type2);
-		type1.referenceNames().add(type2.name());
-		type1.references().add(type2);
+		type1.addReferenceName(type2.name());
+		type1.addReference(type2);
 		Layer layer1 = new Layer("L1", 1, null);
 		Layer layer2 = new Layer("L2", 2, null);
 		Map<String, Component> components = new HashMap<>();
@@ -318,8 +376,8 @@ public class EnforcerUtilsTest {
 		types.put(type1.name(), type1);
 		Type type2 = new Type("com.foo.bar.Baz2");
 		types.put(type2.name(), type2);
-		type1.referenceNames().add(type2.name());
-		type1.references().add(type2);
+		type1.addReferenceName(type2.name());
+		type1.addReference(type2);
 		Type type3 = new Type("com.bar.Baz3");
 		types.put(type3.name(), type3);
 		Layer layer1 = new Layer("L1", 1, null);
@@ -346,8 +404,8 @@ public class EnforcerUtilsTest {
 		types.put(type1.name(), type1);
 		Type type2 = new Type("com.foo.bar.Baz2");
 		types.put(type2.name(), type2);
-		type1.referenceNames().add(type2.name());
-		type1.references().add(type2);
+		type1.addReferenceName(type2.name());
+		type1.addReference(type2);
 		Type type3 = new Type("com.bar.Baz3");
 		types.put(type3.name(), type3);
 		Layer layer1 = new Layer("L1", 1, null);
@@ -359,12 +417,11 @@ public class EnforcerUtilsTest {
 		Component component2 = new Component("Comp0", layer0, null, null);
 		component2.packages().add("com.bar");
 		components.put(component2.name(), component2);
-		type3.referenceNames().add("com.foo.bar.Baz");
-		type3.references().add(type1);
+		type3.addReferenceName("com.foo.bar.Baz");
+		type3.addReference(type1);
 		EnforcerUtils.correlate(types, components, new RollUp(), references, problems, flags);
 		assertTrue(problems.iterator().next().description().contains("com.bar.Baz3!Comp0!L0!0!com.foo.bar.Baz!Comp1!L1!1"));
-		assertTrue(
-				problems.iterator().next().detail().contains("type com.bar.Baz3 in component 'Comp0' in layer 'L0' depth 0 refers to type com.foo.bar.Baz in component 'Comp1' in layer 'L1' depth 1"));
+		assertTrue(problems.iterator().next().detail().contains("type com.bar.Baz3 in component 'Comp0' in layer 'L0' depth 0 refers to type com.foo.bar.Baz in component 'Comp1' in layer 'L1' depth 1"));
 		assertEquals(Errors.ILLEGAL_REFERENCE, problems.iterator().next().error());
 	}
 }
