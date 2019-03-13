@@ -276,7 +276,7 @@ public class Enforce {
 				}
 				inputs = new RapidIterationInputs(target, data);
 				if (((RapidIterationInputs)inputs).allReferences().getAbsolutePath().equals(outputs.allReferences().getAbsolutePath())) {
-					throw new EnforcerException("Rapid-iteration input file " + data.getAbsolutePath() + " would be overwritten", Errors.RAPID_ITERATION_INPUT_FILE_WOULD_BE_OVERWRITTEN);
+					throw new EnforcerException("Rapid-iteration input file " + data.getAbsolutePath() + " would be overwritten, rename or move it, or specify different output directory", Errors.RAPID_ITERATION_INPUT_FILE_WOULD_BE_OVERWRITTEN);
 				}
 				flags = new Flags();
 			}
