@@ -82,7 +82,7 @@ public class EnforcerUtilsTest {
 			EnforcerUtils.denest("$Foo", new AnalyzeBinaryFlags());
 			Assert.fail();
 		} catch (EnforcerException e) {
-			assertTrue(e.getMessage().contains("malformed class name"));
+			assertTrue(e.getMessage().contains("class name '$Foo' starts with $ sign, which breaks inner-class removal, see comments on denest methods in EnforcerUtils.java"));
 			assertEquals(Errors.MALFORMED_CLASS_NAME, e.error());
 		}
 	}
@@ -94,7 +94,7 @@ public class EnforcerUtilsTest {
 			EnforcerUtils.checkSeparators("com.foo!Bar");
 			Assert.fail();
 		} catch (EnforcerException e) {
-			assertTrue(e.getMessage().contains("contains reserved separator"));
+			assertTrue(e.getMessage().contains("class com.foo!Bar contains reserved separator '!', which breaks parsing/splitting/replacing, see comments in Separators.java"));
 			assertEquals(Errors.RESERVED_SEPARATOR_IN_CLASS_NAME, e.error());
 		}
 	}
