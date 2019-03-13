@@ -108,7 +108,7 @@ public class EnforcerUtils {
 
 	// Denesting is a lot trickier than it should be, because any number of $ signs can be used in class names, even if they aren't nested. For example, $$$Foo$$$Bar.java is a perfectly legal source file.
 	// When we have nothing structured to work with, as is the case here (where we just have a string), we can only do best-effort, and then throw up our hands if that doesn't work.
-	static String denest(String typeName, AnalyzeWarFlags flags) {
+	static String denest(String typeName, AnalyzeBinaryFlags flags) {
 		if (flags.preserveNestedTypes()) {
 			return typeName;
 		}
@@ -132,7 +132,7 @@ public class EnforcerUtils {
 		return type;
 	}
 
-	static void addSupplementalTypes(File file, Map<String, Type> types, Set<String> ignores, Set<Problem> problems, boolean reflection, AnalyzeWarFlags flags) throws Exception {
+	static void addSupplementalTypes(File file, Map<String, Type> types, Set<String> ignores, Set<Problem> problems, boolean reflection, AnalyzeBinaryFlags flags) throws Exception {
 		if (file == null) {
 			return;
 		}
@@ -187,7 +187,7 @@ public class EnforcerUtils {
 
 	// See comments on other denest method explaining why this is problematic. At least here we have some structure to work with, although pf-CDA doesn't seem to provide a getEnclosingType method, which would have been useful.
 	// Instead, we have to peel one $ sign off at a time, and see if the result comes back as a class or not. If not, we keep going. If so, we check if the class is no longer nested.
-	static String denest(ClassInformation classInfo, Workset workset, AnalyzeWarFlags flags) {
+	static String denest(ClassInformation classInfo, Workset workset, AnalyzeBinaryFlags flags) {
 		if (flags.preserveNestedTypes()) {
 			return classInfo.getName();
 		}
@@ -249,7 +249,7 @@ public class EnforcerUtils {
 		}
 	}
 
-	static Map<String, Type> typesFromWar(File war, Set<String> ignores, Set<Problem> problems, AnalyzeWarFlags flags) throws Exception {
+	static Map<String, Type> typesFromWar(File war, Set<String> ignores, Set<Problem> problems, AnalyzeBinaryFlags flags) throws Exception {
 		Map<String, Type> types = new HashMap<>();
 		Workset workset = null;
 		try {
@@ -303,7 +303,7 @@ public class EnforcerUtils {
 		return typesFromAllReferences(inputs.allReferences());
 	}
 
-	public static Map<String, Type> resolve(AnalyzeBinaryInputs inputs, Set<Problem> problems, AnalyzeWarFlags flags) throws Exception {
+	public static Map<String, Type> resolve(AnalyzeBinaryInputs inputs, Set<Problem> problems, AnalyzeBinaryFlags flags) throws Exception {
 		Set<String> ignores = ignores(inputs.ignores());
 		Map<String, Type> types = typesFromWar(inputs.binary(), ignores, problems, flags);
 		addSupplementalTypes(inputs.reflections(), types, ignores, problems, true, flags); // Add reflection-based referring and referred-to classes from reflections file.
@@ -318,7 +318,7 @@ public class EnforcerUtils {
 		if (inputs instanceof RapidIterationInputs) {
 			return resolve((RapidIterationInputs)inputs, problems);
 		}
-		return resolve((AnalyzeBinaryInputs)inputs, problems, (AnalyzeWarFlags)flags);
+		return resolve((AnalyzeBinaryInputs)inputs, problems, (AnalyzeBinaryFlags)flags);
 	}
 
 	static void correlateComponentClassesToTypes(Map<String, Type> types, Map<String, Component> components, Set<Problem> problems) {

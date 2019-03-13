@@ -121,9 +121,9 @@ public class EnforceTest {
 	}
 
 	@Test
-	public void testAnalyzeWarArgs() {
+	public void testAnalyzeBinaryArgs() {
 		AnalyzeBinaryInputs inputs = TestUtils.analyzeWarInputs(false, false, false);
-		AnalyzeWarFlags flags = new AnalyzeWarFlags();
+		AnalyzeBinaryFlags flags = new AnalyzeBinaryFlags();
 		Enforce.parseArg(Optionals.IGNORES.indicator() + TestUtils.testClassesFile("SampleIgnores.txt").getAbsolutePath(), inputs, flags);
 		assertEquals(normalize(TestUtils.testClassesFile("SampleIgnores.txt").toPath()), normalize(inputs.ignores().toPath()));
 		try {
@@ -133,7 +133,7 @@ public class EnforceTest {
 			assertEquals(Errors.IGNORES_FILE_ALREADY_SPECIFIED, e.error());
 		}
 		inputs = TestUtils.analyzeWarInputs(false, false, false);
-		flags = new AnalyzeWarFlags();
+		flags = new AnalyzeBinaryFlags();
 		Enforce.parseArg(Optionals.REFLECTIONS.indicator() + TestUtils.testClassesFile("SampleReflections.txt").getAbsolutePath(), inputs, flags);
 		assertEquals(normalize(TestUtils.testClassesFile("SampleReflections.txt").toPath()), normalize(inputs.reflections().toPath()));
 		try {
@@ -143,7 +143,7 @@ public class EnforceTest {
 			assertEquals(Errors.REFLECTIONS_FILE_ALREADY_SPECIFIED, e.error());
 		}
 		inputs = TestUtils.analyzeWarInputs(false, false, false);
-		flags = new AnalyzeWarFlags();
+		flags = new AnalyzeBinaryFlags();
 		Enforce.parseArg(Optionals.FIX_UNRESOLVEDS.indicator() + TestUtils.testClassesFile("SampleFixUnresolveds.txt").getAbsolutePath(), inputs, flags);
 		assertEquals(normalize(TestUtils.testClassesFile("SampleFixUnresolveds.txt").toPath()), normalize(inputs.fixUnresolveds().toPath()));
 		try {
@@ -153,7 +153,7 @@ public class EnforceTest {
 			assertEquals(Errors.FIX_UNRESOLVEDS_FILE_ALREADY_SPECIFIED, e.error());
 		}
 		inputs = TestUtils.analyzeWarInputs(false, false, false);
-		flags = new AnalyzeWarFlags();
+		flags = new AnalyzeBinaryFlags();
 		Enforce.parseArg(Optionals.PRESERVE_NESTED_TYPES.indicator(), inputs, flags);
 		assertTrue(flags.preserveNestedTypes());
 		try {
@@ -163,7 +163,7 @@ public class EnforceTest {
 			assertEquals(Errors.PRESERVE_NESTED_TYPES_ALREADY_SPECIFIED, e.error());
 		}
 		inputs = TestUtils.analyzeWarInputs(false, false, false);
-		flags = new AnalyzeWarFlags();
+		flags = new AnalyzeBinaryFlags();
 		Enforce.parseArg(Optionals.STRICT.indicator(), inputs, flags);
 		assertTrue(flags.strict());
 		try {
@@ -173,7 +173,7 @@ public class EnforceTest {
 			assertEquals(Errors.STRICT_ALREADY_SPECIFIED, e.error());
 		}
 		inputs = TestUtils.analyzeWarInputs(false, false, false);
-		flags = new AnalyzeWarFlags();
+		flags = new AnalyzeBinaryFlags();
 		Enforce.parseArg(Optionals.DEBUG.indicator(), inputs, flags);
 		assertTrue(flags.debug());
 		try {
@@ -428,15 +428,17 @@ public class EnforceTest {
 			Enforce.mainImpl(new String[0], console);
 			TestUtils.compareTestClassesFile(baos, "TestEnforceCanned2.txt");
 		}
+		String subdir = TestUtils.uniqueSubdir();
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream console = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
-			Enforce.mainImpl(new String[] { "a", "b.war", "c", "d", "e", "f", "g", "h", "i", "j" }, console);
+			Enforce.mainImpl(new String[] { "a", "b.war", TestUtils.targetDir(subdir).getAbsolutePath(), "d", "e", "f", "g", "h", "i", "j" }, console);
 			TestUtils.compareTestClassesFile(baos, "TestEnforceCanned3.txt");
 		}
+		subdir = TestUtils.uniqueSubdir();
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream console = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
-			Enforce.mainImpl(new String[] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" }, console);
+			Enforce.mainImpl(new String[] { "a", "b", TestUtils.targetDir(subdir).getAbsolutePath(), "d", "e", "f", "g", "h", "i", "j" }, console);
 			TestUtils.compareTestClassesFile(baos, "TestEnforceCanned4.txt");
 		}
-		String subdir = TestUtils.uniqueSubdir();
+		subdir = TestUtils.uniqueSubdir();
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(); PrintStream console = new PrintStream(baos, true, StandardCharsets.UTF_8.name())) {
 			Enforce.mainImpl(new String[] { TestUtils.testClassesFile("SampleTarget2.yaml").getAbsolutePath(), TestUtils.sampleWar().getAbsolutePath(), TestUtils.targetDir(subdir).getAbsolutePath(),
 					Optionals.IGNORES.indicator() + TestUtils.testClassesFile("SampleIgnores.txt").getAbsolutePath() }, console);

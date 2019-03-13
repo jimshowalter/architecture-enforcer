@@ -52,7 +52,7 @@ public class Enforce {
 					return;
 				}
 				if (arg.startsWith(Optionals.PRESERVE_NESTED_TYPES.indicator())) {
-					((AnalyzeWarFlags)flags).enablePreserveNestedTypes();
+					((AnalyzeBinaryFlags)flags).enablePreserveNestedTypes();
 					return;
 				}
 			}
@@ -270,7 +270,7 @@ public class Enforce {
 					throw new EnforcerException("too many args" + ANALYZE_BINARY_USAGE, Errors.TOO_MANY_ARGS);
 				}
 				inputs = new AnalyzeBinaryInputs(target, data);
-				flags = new AnalyzeWarFlags();
+				flags = new AnalyzeBinaryFlags();
 			} else {
 				if (args.length > 5) {
 					throw new EnforcerException("too many args" + RAPID_ITERATION_USAGE, Errors.TOO_MANY_ARGS);

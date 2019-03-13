@@ -13,11 +13,11 @@
 
 package com.jimandlisa.enforcer;
 
-public class AnalyzeWarFlags extends Flags {
+public class AnalyzeBinaryFlags extends Flags {
 	
 	private boolean preserveNestedTypes = false;
 	
-	public AnalyzeWarFlags() {
+	public AnalyzeBinaryFlags() {
 		super();
 	}
 

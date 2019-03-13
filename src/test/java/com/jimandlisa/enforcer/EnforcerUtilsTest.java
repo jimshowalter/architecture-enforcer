@@ -74,12 +74,12 @@ public class EnforcerUtilsTest {
 
 	@Test
 	public void testDenestString() {
-		assertEquals("com.foo.Bar", EnforcerUtils.denest("com.foo.Bar$Baz", new AnalyzeWarFlags()));
-		AnalyzeWarFlags flags = new AnalyzeWarFlags();
+		assertEquals("com.foo.Bar", EnforcerUtils.denest("com.foo.Bar$Baz", new AnalyzeBinaryFlags()));
+		AnalyzeBinaryFlags flags = new AnalyzeBinaryFlags();
 		flags.enablePreserveNestedTypes();
 		assertEquals("com.foo.Bar$Baz", EnforcerUtils.denest("com.foo.Bar$Baz", flags));
 		try {
-			EnforcerUtils.denest("$Foo", new AnalyzeWarFlags());
+			EnforcerUtils.denest("$Foo", new AnalyzeBinaryFlags());
 			Assert.fail();
 		} catch (EnforcerException e) {
 			assertTrue(e.getMessage().contains("malformed class name"));
@@ -103,7 +103,7 @@ public class EnforcerUtilsTest {
 	public void testDenestClassInfo() {
 		ClassInformation mockClassInformation = Mockito.mock(ClassInformation.class);
 		when(mockClassInformation.getName()).thenReturn("foo");
-		AnalyzeWarFlags flags = new AnalyzeWarFlags();
+		AnalyzeBinaryFlags flags = new AnalyzeBinaryFlags();
 		flags.enablePreserveNestedTypes();
 		assertEquals("foo", EnforcerUtils.denest(mockClassInformation, null, flags));
 	}
@@ -149,7 +149,7 @@ public class EnforcerUtilsTest {
 		Set<String> ignores = new HashSet<>();
 		Map<String, Type> types = new HashMap<>();
 		Set<Problem> problems = new LinkedHashSet<>();
-		AnalyzeWarFlags flags = new AnalyzeWarFlags();
+		AnalyzeBinaryFlags flags = new AnalyzeBinaryFlags();
 		EnforcerUtils.addSupplementalTypes(null, null, null, null, false, null);
 		EnforcerUtils.addSupplementalTypes(TestUtils.testClassesFile("TestReflections.txt"), types, ignores, problems, true, flags);
 		try {
@@ -265,11 +265,11 @@ public class EnforcerUtilsTest {
 	@Test
 	public void testResolveWithInputs() throws Exception {
 		Set<Problem> problems = new LinkedHashSet<>();
-		Map<String, Type> types = EnforcerUtils.resolve(TestUtils.analyzeWarInputs(true, true, true), problems, new AnalyzeWarFlags());
+		Map<String, Type> types = EnforcerUtils.resolve(TestUtils.analyzeWarInputs(true, true, true), problems, new AnalyzeBinaryFlags());
 		assertTrue(problems.isEmpty());
 		assertEquals(9, types.size());
 		assertTrue(types.keySet().contains("com.jimandlisa.app.two.App2"));
-		types = EnforcerUtils.resolve((Inputs)TestUtils.analyzeWarInputs(true, true, true), problems, (Flags)new AnalyzeWarFlags());
+		types = EnforcerUtils.resolve((Inputs)TestUtils.analyzeWarInputs(true, true, true), problems, (Flags)new AnalyzeBinaryFlags());
 		assertTrue(problems.isEmpty());
 		assertEquals(9, types.size());
 		assertTrue(types.keySet().contains("com.jimandlisa.app.two.App2"));

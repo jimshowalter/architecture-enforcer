@@ -47,7 +47,7 @@ public class FlagsTest {
 			assertTrue(e.getMessage().contains("debug already set"));
 			assertEquals(Errors.DEBUG_ALREADY_SPECIFIED, e.error());
 		}
-		AnalyzeWarFlags analyzeWarFlags = new AnalyzeWarFlags();
+		AnalyzeBinaryFlags analyzeWarFlags = new AnalyzeBinaryFlags();
 		assertEquals("preserveNestedTypes=false, strict=false, debug=false", analyzeWarFlags.toString());
 		assertFalse(analyzeWarFlags.preserveNestedTypes());
 		analyzeWarFlags.enablePreserveNestedTypes();
