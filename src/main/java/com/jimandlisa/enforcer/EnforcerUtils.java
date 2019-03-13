@@ -114,7 +114,7 @@ public class EnforcerUtils {
 		}
 		if (typeName.startsWith("$")) {
 			// If you get this exception, you need to add special-casing to this method for your types that have weird names. Or maybe rename them.
-			throw new EnforcerException("malformed class name '" + typeName + "'", Errors.MALFORMED_CLASS_NAME);
+			throw new EnforcerException("malformed class name '" + typeName + "' starts with $ sign, see comments on denest denest methods in EnforcerUtils.java", Errors.MALFORMED_CLASS_NAME);
 		}
 		return typeName.replaceAll("[$].*$", "");
 	}
@@ -180,7 +180,7 @@ public class EnforcerUtils {
 	static void checkSeparators(String className) {
 		for (Separators separator : Separators.values()) {
 			if (className.contains(separator.value())) {
-				throw new EnforcerException("class " + className + " contains reserved separator '" + separator.value() + "', see comments in Separators class", Errors.RESERVED_SEPARATOR_IN_CLASS_NAME);
+				throw new EnforcerException("class " + className + " contains reserved separator '" + separator.value() + "' that will break parsing/splitting/replacing, see comments in Separators.java", Errors.RESERVED_SEPARATOR_IN_CLASS_NAME);
 			}
 		}
 	}

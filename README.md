@@ -229,10 +229,6 @@ include $TheNestedType in the names.
 
 * Adding a referred-to class to the reflections or fix-unresolveds files can introduce new unresolved classes. When that happens, you need to keep entering classes until all classes are defined.
 
-* If you get an error about "malformed class name", you have a class in one of the input files that starts with a $ sign. In that case, see the comments on the denest methods in EnforcerUtils.java.
-
-* If you get an error about "contains reserved separator", you have a class in your binary that contains a reserved separator used for parsing/splitting/replacing. In that case, see the comments in Separators.java.
-
 * This tool creates placeholders for unresolved types and adds them to the type-lookup map, so downstream analysis doesn't blow up. This is just a band-aid, because whatever types a missing type refers to are not included in the analysis (because they aren't known).
 Ideally the full transitive closure of types in your project is specified.
 
