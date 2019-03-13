@@ -264,8 +264,7 @@ public class Enforce {
 			File data = new File(args[1]);
 			File outputDirectory = new File(args[2]);
 			outputs = new Outputs(outputDirectory);
-			boolean isBinary = data.getName().endsWith(".war");
-			if (isBinary) {
+			if (isBinary(data)) {
 				if (args.length > 9) {
 					throw new EnforcerException("too many args" + ANALYZE_BINARY_USAGE, Errors.TOO_MANY_ARGS);
 				}
