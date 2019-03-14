@@ -7,6 +7,8 @@ Compares a codebase's current state to a desired target state, identifying and r
 
 A companion project, https://github.com/jimshowalter/architecture-enforcer-sample, provides a sample war used by this project's tests, and in this documentation.
 
+Note: This project is focused on Java, partly because that's the author's area of expertise, and partly because a lot of legacy codebases these days are written in Java&mdash;but most or all of the concepts and much of the implementation could be forked and modified to support other languages.
+
 ## Defining Target State ##
 
 A target state is defined in terms of layers, domains, and components, all of which are logical groupings that exist "virtually" on top of whatever snarl constitutes the current codebase.
@@ -449,6 +451,10 @@ http://www.dependency-analyzer.org (pf-CDA)
 We are grateful to the author of pf-CDA!
 
 And we're very grateful to Steve Hartman for his clear vision of how a target architecture should be articulated.
+
+## Recommendations ##
+
+While developing this tool, we found a static-analysis tool that scales and works very well: https://www.codemr.co.uk.
 
 ## Shameless Plug ##
 
