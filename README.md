@@ -9,6 +9,8 @@ A companion project, https://github.com/jimshowalter/architecture-enforcer-sampl
 
 Note: This project is focused on Java, partly because that's the author's area of expertise, and partly because a lot of legacy codebases these days are written in Java&mdash;but most or all of the concepts and much of the implementation could be forked and modified to support other languages.
 
+Note: You might also be interested in https://www.archunit.org/.
+
 ## Defining Target State ##
 
 A target state is defined in terms of layers, domains, and components, all of which are logical groupings that exist "virtually" on top of whatever snarl constitutes the current codebase.
